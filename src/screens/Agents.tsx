@@ -11,6 +11,9 @@ import {
   type Objectif,
 } from '../domain/types'
 import { niveauBatiment } from '../domain/progression'
+import { COULEUR } from '../domain/couleurs'
+import { Robot } from '../island/Robot'
+import { energieAgent, JaugeEnergie } from '../ui/JaugeEnergie'
 import { BatimentIcone } from '../ui/BatimentIcone'
 import { Bouton } from '../ui/Boutons'
 import './agents.css'
@@ -108,7 +111,7 @@ function CarteCatalogue({ t, recrute, onRecruter }: { t: AgentTemplate; recrute:
 }
 
 function Equipe() {
-  const { agents } = useJeu()
+  const { agents, ouvrirFiche } = useJeu()
   const navigate = useNavigate()
   if (agents.length === 0) {
     return <p className="equipe-vide">Ton équipe est vide. Recrute un agent dans le catalogue.</p>
@@ -122,12 +125,19 @@ function Equipe() {
             <h2 className={`cat-titre cat-${d}`}>{DOMAINE_LABEL[d]}</h2>
             <ul className="equipe-liste">
               {liste.map((a) => (
-                <li key={a.id} className="equipe-item">
-                  <div>
-                    <strong>{a.nom}</strong>
-                    <span className="equipe-sous">niveau {niveauBatiment(a.validations)} · {AUTONOMIE_LABEL[a.autonomie]}</span>
-                  </div>
-                  <span className={`etat${a.actif ? ' etat-actif' : ''}`}>{a.actif ? 'Actif' : 'En repos'}</span>
+                <li key={a.id}>
+                  <button className="equipe-item" onClick={() => ouvrirFiche(a.id)}>
+                    <svg width={40} height={40} viewBox="-20 -42 40 46" aria-hidden className="equipe-avatar">
+                      <ellipse cx={0} cy={0} rx={16} ry={6} fill={`var(--${d}-teinte)`} />
+                      <Robot domaine={d} couleur={COULEUR[d]} />
+                    </svg>
+                    <div className="equipe-txt">
+                      <strong>{a.nom}</strong>
+                      <span className="equipe-sous">niveau {niveauBatiment(a.validations)} · {AUTONOMIE_LABEL[a.autonomie]}</span>
+                      <JaugeEnergie valeur={energieAgent(a.validations, a.actif)} domaine={d} />
+                    </div>
+                    <span className={`etat${a.actif ? ' etat-actif' : ''}`}>{a.actif ? 'Actif' : 'En repos'}</span>
+                  </button>
                 </li>
               ))}
             </ul>

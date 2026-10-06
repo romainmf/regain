@@ -78,10 +78,13 @@
 .equipe-vide { margin-top: 32px; text-align: center; color: var(--texte-2); }
 .equipe-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .equipe-item {
-  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; text-align: left; cursor: pointer;
+  display: flex; align-items: center; gap: 12px;
   background: var(--surface); border: 1px solid var(--ligne);
   border-radius: var(--r-m); padding: 12px 14px;
 }
+.equipe-avatar { flex: 0 0 auto; }
+.equipe-txt { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .equipe-item strong { display: block; font-size: 16px; }
 .equipe-sous { font-size: 13px; color: var(--texte-2); }
 .etat { font-size: 13px; font-weight: 700; color: var(--texte-2); padding: 4px 10px; border-radius: 999px; background: var(--fond); }

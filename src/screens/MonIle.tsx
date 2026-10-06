@@ -5,7 +5,6 @@ import { Island } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
 import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
-import { FicheRapide } from '../ui/FicheRapide'
 import './monile.css'
 
 const CLE_BRIN = 'regain.brin.vu'
@@ -19,10 +18,9 @@ function dejaVu(): boolean {
 }
 
 export function MonIle() {
-  const { pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose } = useJeu()
+  const { pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose, ouvrirFiche } = useJeu()
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
-  const [ficheId, setFicheId] = useState<string | null>(null)
 
   const ouvrirBrin = () => {
     setBrinOuvert(true)
@@ -62,7 +60,7 @@ export function MonIle() {
             poseEnCours={poseEnCours}
             onPoser={poser}
             onDeplacerDemande={demarrerDeplacement}
-            onBatimentTap={setFicheId}
+            onBatimentTap={ouvrirFiche}
           />
         </div>
       </div>
@@ -78,14 +76,6 @@ export function MonIle() {
       {!pret && <p className="mon-ile-chargement">Ton île se réveille…</p>}
 
       <BrinChat ouvert={brinOuvert} onFermer={fermerBrin} />
-      <FicheRapide
-        agentId={ficheId}
-        onFermer={() => setFicheId(null)}
-        onDeplacer={(id) => {
-          setFicheId(null)
-          demarrerDeplacement(id)
-        }}
-      />
     </div>
   )
 }

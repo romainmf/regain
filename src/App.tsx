@@ -5,6 +5,7 @@ import { MonIle } from './screens/MonIle'
 import { Placeholder } from './screens/Placeholder'
 import { BottomNav } from './ui/BottomNav'
 import { JeuProvider } from './data/jeu'
+import { FicheAgent } from './ui/FicheAgent'
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
           </Routes>
         </main>
         <BottomNav />
+        <FicheAgent />
       </div>
     </BrowserRouter>
     </JeuProvider>

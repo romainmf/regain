@@ -21,11 +21,18 @@ interface JeuCtx {
   /** Agents déjà recrutés, par templateId (pour griser « Recruter »). */
   templatesRecrutes: Set<string>
   poseEnCours: PoseEnCours | null
+  /** Fiche d'agent ouverte (feuille), ou null. */
+  ficheId: string | null
   recruter: (t: AgentTemplate) => Promise<string>
   creerAgent: (a: Omit<AgentDB, 'id' | 'createdAt'>) => Promise<string>
   demarrerDeplacement: (agentId: string) => void
   poser: (x: number, y: number) => Promise<void>
   annulerPose: () => void
+  ouvrirFiche: (agentId: string) => void
+  fermerFiche: () => void
+  definirAutonomie: (agentId: string, autonomie: Autonomie) => Promise<void>
+  basculerActif: (agentId: string) => Promise<void>
+  definirMissions: (agentId: string, missions: string[]) => Promise<void>
 }
 
 const Ctx = createContext<JeuCtx | null>(null)
@@ -60,6 +67,7 @@ function versVue(agents: AgentDB[]): (p: { refId: string; x: number; y: number }
 export function JeuProvider({ children }: { children: React.ReactNode }) {
   const [pret, setPret] = useState(false)
   const [poseEnCours, setPoseEnCours] = useState<PoseEnCours | null>(null)
+  const [ficheId, setFicheId] = useState<string | null>(null)
 
   useEffect(() => {
     amorcerSiNecessaire().then(() => setPret(true))
@@ -119,17 +127,37 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
 
   const annulerPose = useCallback(() => setPoseEnCours(null), [])
 
+  const ouvrirFiche = useCallback((agentId: string) => setFicheId(agentId), [])
+  const fermerFiche = useCallback(() => setFicheId(null), [])
+
+  const definirAutonomie = useCallback(async (agentId: string, autonomie: Autonomie) => {
+    await db.agents.update(agentId, { autonomie })
+  }, [])
+  const basculerActif = useCallback(async (agentId: string) => {
+    const a = await db.agents.get(agentId)
+    if (a) await db.agents.update(agentId, { actif: !a.actif })
+  }, [])
+  const definirMissions = useCallback(async (agentId: string, missions: string[]) => {
+    await db.agents.update(agentId, { missions })
+  }, [])
+
   const value: JeuCtx = {
     pret,
     agents,
     placements,
     templatesRecrutes,
     poseEnCours,
+    ficheId,
     recruter,
     creerAgent,
     demarrerDeplacement,
     poser,
     annulerPose,
+    ouvrirFiche,
+    fermerFiche,
+    definirAutonomie,
+    basculerActif,
+    definirMissions,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
