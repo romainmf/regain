@@ -3,7 +3,8 @@ import type { BatimentId, Domaine, Tuile } from '../domain/types'
 import { COULEUR } from '../domain/couleurs'
 import { Batiment } from './buildings/Batiment'
 import { Coeur } from './Coeur'
-import { DecorZone, Fanion } from './DecorZones'
+import { Fanion } from './Fanion'
+import { CascadesRiviere, Riviere } from './Riviere'
 import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
 import './island.css'
@@ -40,7 +41,6 @@ const MOUSSE_FONCEE = '#5E9B62'
 type Objet =
   | (PlacementVue & { type: 'bat' })
   | { type: 'coeur'; id: string; x: number; y: number }
-  | { type: 'flore'; id: string; x: number; y: number; h: number; zone: Domaine }
   | { type: 'fanion'; id: string; x: number; y: number; zone: Domaine }
 
 /** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
@@ -55,12 +55,6 @@ const ECHELLE_COEUR = 1.6
 
 export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
-  const zoneDe = useMemo(() => {
-    const m = new Map<string, Tuile['zone']>()
-    tuiles.forEach((t) => m.set(cle(t.x, t.y), t.zone))
-    return m
-  }, [tuiles])
-
   // Cadre de la scène : l'île en bas, du ciel au-dessus pour les bâtiments.
   const b = bornes(tuiles)
   const marge = 24
@@ -81,9 +75,6 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
     ...placements.map((p) => ({ ...p, type: 'bat' as const })),
     ...tuiles.filter((t) => t.zone === 'coeur').map((t) => ({ type: 'coeur' as const, id: 'coeur', x: t.x, y: t.y })),
     ...fanions.map((f) => ({ type: 'fanion' as const, id: `fanion-${f.zone}`, ...f })),
-    ...tuiles
-      .filter((t) => t.zone !== 'coeur' && !occupees.has(cle(t.x, t.y)) && hache(t.x, t.y) % 10 < 7)
-      .map((t) => ({ type: 'flore' as const, id: `f${t.x},${t.y}`, x: t.x, y: t.y, h: hache(t.x, t.y), zone: t.zone as Domaine })),
   ].sort((a, c) => a.x + a.y - (c.x + c.y) || a.x - c.x)
 
   // Faces de bord du socle (gauche = vers y+1, droite = vers x+1)
@@ -93,10 +84,6 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
     if (!index.has(cle(t.x + 1, t.y))) out.push({ t, cote: 'd' })
     return out
   })
-
-  // Cascade : sur la face droite du bord le plus à droite, au milieu.
-  const facesDroites = bords.filter((f) => f.cote === 'd')
-  const cascade = facesDroites[Math.floor(facesDroites.length / 2)]?.t
 
   const nenuphars: [number, number][] = [
     [b.minX + 40, b.maxY - 70],
@@ -144,22 +131,7 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
         })}
       </g>
 
-      {/* Cascade */}
-      {cascade && (() => {
-        const { sx, sy } = iso(cascade.x, cascade.y)
-        const x1 = sx + TW * 0.35, y1 = sy + TH * 0.65
-        const x2 = sx + TW * 0.6, y2 = sy + TH * 0.4
-        return (
-          <g aria-hidden>
-            <polygon points={`${x1},${y1} ${x2},${y2} ${x2},${y2 + SOCLE + 10} ${x1},${y1 + SOCLE + 10}`} fill="#CFE6EC" />
-            <g className="cascade" stroke="#FBF8F1" strokeWidth={1} strokeDasharray="3 4" opacity={0.9}>
-              <line x1={x1 + 3} y1={y1 - 1} x2={x1 + 3} y2={y1 + SOCLE + 8} />
-              <line x1={x2 - 4} y1={y2 + 1} x2={x2 - 4} y2={y2 + SOCLE + 10} />
-            </g>
-            <ellipse cx={(x1 + x2) / 2} cy={(y1 + y2) / 2 + SOCLE + 11} rx={12} ry={3.5} fill="#F5F8F2" opacity={0.9} />
-          </g>
-        )
-      })()}
+      <CascadesRiviere />
 
       {/* Sol */}
       <g>
@@ -175,49 +147,12 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
         ))}
       </g>
 
-      {/* Ruisseau de la cascade */}
-      {cascade && (() => {
-        const a = iso(cascade.x, cascade.y)
-        const d = iso(cascade.x - 1, cascade.y)
-        return (
-          <path
-            aria-hidden
-            d={`M ${d.sx} ${d.sy} Q ${(a.sx + d.sx) / 2 + 4} ${(a.sy + d.sy) / 2 + 4} ${a.sx + TW * 0.48} ${a.sy + TH * 0.52}`}
-            stroke="#BFDCE0"
-            strokeWidth={4}
-            fill="none"
-            strokeLinecap="round"
-          />
-        )
-      })()}
+      <Riviere />
 
-      {/* Lisières entre zones */}
-      <g stroke="rgba(34,48,31,.18)" strokeWidth={1.2} strokeLinecap="round">
-        {tuiles.flatMap((t) => {
-          const { sx, sy } = iso(t.x, t.y)
-          const lignes = []
-          const droite = zoneDe.get(cle(t.x + 1, t.y))
-          const bas = zoneDe.get(cle(t.x, t.y + 1))
-          if (droite && droite !== t.zone)
-            lignes.push(<line key={`${t.x},${t.y}d`} x1={sx + TW} y1={sy} x2={sx} y2={sy + TH} />)
-          if (bas && bas !== t.zone)
-            lignes.push(<line key={`${t.x},${t.y}b`} x1={sx - TW} y1={sy} x2={sx} y2={sy + TH} />)
-          return lignes
-        })}
-      </g>
-
-      {/* Bâtiments, Cœur et végétation, de l'arrière vers l'avant */}
+      {/* Bâtiments, Cœur et fanions, de l'arrière vers l'avant */}
       <g>
         {objets.map((o) => {
           const { sx, sy } = iso(o.x, o.y)
-          if (o.type === 'flore') {
-            const decal = ((o.h >>> 8) % 12) - 6
-            return (
-              <g key={o.id} transform={`translate(${sx + decal} ${sy + decal / 4}) scale(1.2)`} aria-hidden>
-                <DecorZone zone={o.zone} h={o.h} />
-              </g>
-            )
-          }
           if (o.type === 'fanion') {
             return (
               <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>

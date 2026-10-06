@@ -61,22 +61,19 @@
   100% { opacity: 0; transform: translate(-4px, 36px) rotate(260deg); }
 }
 
-/* Petites vies des décors */
-.vapeur { animation: vapeur 3s ease-in-out infinite; }
-@keyframes vapeur { 0%, 100% { opacity: .2; transform: translateY(1px) } 50% { opacity: .9; transform: translateY(-2px) } }
-.abeilles circle { animation: butine 2.2s ease-in-out infinite alternate; }
-.abeilles circle:nth-child(2) { animation-delay: .7s; }
-@keyframes butine { to { transform: translate(-3px, 3px); } }
-.hamac-toile { transform-box: fill-box; transform-origin: 50% 0; animation: berce 4s ease-in-out infinite alternate; }
-@keyframes berce { from { transform: rotate(-2deg) } to { transform: rotate(2deg) } }
+/* La rivière coule de l'arbre vers la mer */
+.courant { animation: courant 2.4s linear infinite; }
+@keyframes courant { to { stroke-dashoffset: -28; } }
+.source-ride { transform-box: fill-box; transform-origin: center; animation: ride 2.6s ease-out infinite; }
+@keyframes ride { from { transform: scale(.4); opacity: 1 } to { transform: scale(1.6); opacity: 0 } }
+
+/* Fanions au vent */
 .fanion-tissu { transform-box: fill-box; transform-origin: 0 50%; animation: flotte-fanion 3.2s ease-in-out infinite alternate; }
 @keyframes flotte-fanion { from { transform: skewY(-3deg) scaleX(.97) } to { transform: skewY(3deg) scaleX(1) } }
-.lueur { animation: lueur 3s ease-in-out infinite; }
-@keyframes lueur { 50% { opacity: .05 } }
 
 @media (prefers-reduced-motion: reduce) {
   .feuille { display: none; }
-  .coeur-couronne, .coeur-yeux, .vapeur, .abeilles circle, .hamac-toile, .fanion-tissu, .lueur,
+  .courant, .source-ride, .coeur-couronne, .coeur-yeux, .fanion-tissu,
   .coeur-halo, .coeur-bulle,
   .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
 }
