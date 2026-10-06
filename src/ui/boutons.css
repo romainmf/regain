@@ -1,0 +1,29 @@
+.btn {
+  min-height: var(--cible);
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1.5px solid transparent;
+  font: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .12s ease;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: default; }
+
+.btn-plein { background: var(--encre); color: var(--surface); }
+.btn-contour { background: transparent; border-color: var(--ligne); color: var(--encre); }
+.btn-doux { background: var(--fond); color: var(--encre); }
+
+/* Teinté par domaine */
+.btn-plein.btn-boite { background: var(--boite); }
+.btn-plein.btn-peau { background: var(--peau); }
+.btn-plein.btn-planete { background: var(--planete); }
+.btn-contour.btn-boite { color: var(--boite-fonce); border-color: var(--boite); }
+.btn-contour.btn-peau { color: var(--peau-fonce); border-color: var(--peau); }
+.btn-contour.btn-planete { color: var(--planete-fonce); border-color: var(--planete); }

@@ -76,6 +76,13 @@
 .robot-bras { transform-box: fill-box; transform-origin: 100% 100%; animation: robot-salue 2.8s ease-in-out infinite; animation-delay: var(--phase, 0s); }
 @keyframes robot-salue { 0%, 70%, 100% { transform: rotate(0) } 80%, 90% { transform: rotate(-16deg) } }
 
+/* Pose et déplacement : tuiles libres qui respirent */
+.pose-tuile { cursor: pointer; opacity: .55; animation: pose-pulse 1.6s ease-in-out infinite; }
+.pose-tuile:hover, .pose-tuile:focus-visible { opacity: .8; outline: none; }
+@keyframes pose-pulse { 0%, 100% { opacity: .4 } 50% { opacity: .7 } }
+.batiment { cursor: pointer; }
+.batiment-deplace { opacity: .4; }
+
 /* Fanions au vent */
 .fanion-tissu { transform-box: fill-box; transform-origin: 0 50%; animation: flotte-fanion 3.2s ease-in-out infinite alternate; }
 @keyframes flotte-fanion { from { transform: skewY(-3deg) scaleX(.97) } to { transform: skewY(3deg) scaleX(1) } }
@@ -83,7 +90,7 @@
 @media (prefers-reduced-motion: reduce) {
   .feuille { display: none; }
   .courant, .source-ride, .coeur-couronne, .coeur-yeux, .fanion-tissu,
-  .robot-corps, .robot-yeux, .robot-antenne, .robot-coeur, .robot-bras,
+  .robot-corps, .robot-yeux, .robot-antenne, .robot-coeur, .robot-bras, .pose-tuile,
   .coeur-halo, .coeur-bulle,
   .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
 }

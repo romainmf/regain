@@ -1,0 +1,102 @@
+.agents-ecran { padding: 0 16px 24px; }
+.agents-tete { padding: max(12px, env(safe-area-inset-top)) 0 4px; }
+.agents-tete h1 { font-size: 28px; margin-bottom: 12px; }
+
+.segment {
+  display: flex;
+  gap: 4px;
+  background: var(--fond);
+  border: 1px solid var(--ligne);
+  border-radius: 999px;
+  padding: 4px;
+}
+.segment button {
+  flex: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--texte-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.segment button.actif { background: var(--surface); color: var(--encre); box-shadow: var(--ombre); }
+.segment-nombre {
+  background: var(--planete); color: var(--surface);
+  min-width: 20px; height: 20px; padding: 0 5px;
+  border-radius: 10px; font-size: 12px;
+  display: inline-grid; place-items: center;
+}
+
+.filtres { display: flex; gap: 8px; overflow-x: auto; padding: 14px 0 4px; margin: 0 -16px; padding-left: 16px; padding-right: 16px; scrollbar-width: none; }
+.filtres::-webkit-scrollbar { display: none; }
+.puce {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ligne);
+  background: var(--surface);
+  color: var(--texte-2);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.puce-on { background: var(--encre); color: var(--surface); border-color: var(--encre); }
+
+.cat-section { margin-top: 18px; }
+.cat-titre { font-size: 20px; margin-bottom: 10px; }
+.cat-boite { color: var(--boite-fonce); }
+.cat-peau { color: var(--peau-fonce); }
+.cat-planete { color: var(--planete-fonce); }
+
+.cartes { display: flex; flex-direction: column; gap: 12px; }
+.carte {
+  background: var(--surface);
+  border: 1px solid var(--ligne);
+  border-radius: var(--r-m);
+  padding: 14px;
+  box-shadow: var(--ombre);
+}
+.carte-haut { display: flex; gap: 12px; align-items: flex-start; }
+.carte-haut svg { flex: 0 0 auto; }
+.carte-titre h3 { font-size: 18px; }
+.carte-mission { margin: 2px 0 0; font-size: 14px; color: var(--texte-2); }
+.carte-prepare { margin: 12px 0; padding-left: 18px; display: flex; flex-direction: column; gap: 3px; }
+.carte-prepare li { font-size: 14px; }
+.carte-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 13px; color: var(--texte-2); margin-bottom: 8px; }
+.carte-bat { font-weight: 700; color: var(--encre); }
+.carte-relie { font-size: 13px; color: var(--texte-2); background: var(--fond); border-radius: var(--r-s); padding: 8px 10px; margin: 0 0 12px; }
+
+.equipe { margin-top: 16px; }
+.equipe-vide { margin-top: 32px; text-align: center; color: var(--texte-2); }
+.equipe-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.equipe-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface); border: 1px solid var(--ligne);
+  border-radius: var(--r-m); padding: 12px 14px;
+}
+.equipe-item strong { display: block; font-size: 16px; }
+.equipe-sous { font-size: 13px; color: var(--texte-2); }
+.etat { font-size: 13px; font-weight: 700; color: var(--texte-2); padding: 4px 10px; border-radius: 999px; background: var(--fond); }
+.etat-actif { color: var(--planete-fonce); background: var(--planete-teinte); }
+
+.fiche-pastille, .pastille-boite, .pastille-peau, .pastille-planete {
+  display: inline-block; font-size: 13px; font-weight: 700;
+  padding: 4px 12px; border-radius: 999px;
+}
+.pastille-boite { background: var(--boite-teinte); color: var(--boite-fonce); }
+.pastille-peau { background: var(--peau-teinte); color: var(--peau-fonce); }
+.pastille-planete { background: var(--planete-teinte); color: var(--planete-fonce); }
+.fiche-mission { font-size: 16px; margin: 12px 0; }
+.fiche-infos { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.fiche-infos div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--ligne); padding-bottom: 8px; }
+.fiche-infos dt { color: var(--texte-2); font-size: 14px; }
+.fiche-infos dd { margin: 0; font-weight: 500; font-size: 14px; text-align: right; }
+.fiche-note { font-size: 13px; color: var(--texte-2); margin: 14px 0 0; }

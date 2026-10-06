@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import type { BatimentId, Domaine, Tuile } from '../domain/types'
 import { COULEUR } from '../domain/couleurs'
 import { Batiment } from './buildings/Batiment'
@@ -20,6 +20,12 @@ export interface PlacementVue {
   libelle: string
 }
 
+export interface PoseVue {
+  agentId: string
+  domaine: Domaine
+  mode: 'pose' | 'deplacement'
+}
+
 interface Props {
   tuiles: Tuile[]
   placements: PlacementVue[]
@@ -27,6 +33,14 @@ interface Props {
   onCoeur?: () => void
   /** Bulle d'invitation au-dessus de l'arbre. */
   bulleCoeur?: string | null
+  /** Pose ou déplacement en cours : surligne les tuiles libres de la zone. */
+  poseEnCours?: PoseVue | null
+  /** Tap sur une tuile libre surlignée. */
+  onPoser?: (x: number, y: number) => void
+  /** Appui long sur un bâtiment : demande à le déplacer. */
+  onDeplacerDemande?: (agentId: string) => void
+  /** Tap bref sur un bâtiment : ouvre la fiche de son agent. */
+  onBatimentTap?: (agentId: string) => void
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -54,8 +68,39 @@ const FANIONS: { x: number; y: number; zone: Domaine }[] = [
 /** Au fond de l'île, l'arbre peut être plus grand sans rien cacher. */
 const ECHELLE_COEUR = 1.6
 
-export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
+export function Island({
+  tuiles,
+  placements,
+  onCoeur,
+  bulleCoeur,
+  poseEnCours,
+  onPoser,
+  onDeplacerDemande,
+  onBatimentTap,
+}: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
+  // Appui long sur un bâtiment pour le déplacer ; tap bref pour ouvrir la fiche.
+  const appui = useRef<{ agentId: string; long: boolean } | null>(null)
+  const minuteur = useRef<number | undefined>(undefined)
+  const demarrerAppui = (agentId: string) => {
+    if (poseEnCours) return
+    appui.current = { agentId, long: false }
+    minuteur.current = window.setTimeout(() => {
+      if (appui.current) {
+        appui.current.long = true
+        onDeplacerDemande?.(agentId)
+      }
+    }, 420)
+  }
+  const finirAppui = () => {
+    clearTimeout(minuteur.current)
+    if (appui.current && !appui.current.long) onBatimentTap?.(appui.current.agentId)
+    appui.current = null
+  }
+  const annulerAppui = () => {
+    clearTimeout(minuteur.current)
+    appui.current = null
+  }
   // Cadre de la scène : l'île en bas, du ciel au-dessus pour les bâtiments.
   const b = bornes(tuiles)
   const marge = 24
@@ -69,6 +114,16 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
 
   const triees = [...tuiles].sort((a, c) => a.x + a.y - (c.x + c.y))
   const occupees = new Set(placements.map((p) => cle(p.x, p.y)))
+
+  // Tuiles libres de la zone pendant une pose ou un déplacement.
+  // Lors d'un déplacement, la tuile actuelle du bâtiment déplacé redevient libre.
+  const occupeesPose = new Set(
+    placements.filter((p) => p.id !== poseEnCours?.agentId).map((p) => cle(p.x, p.y)),
+  )
+  const libres = poseEnCours
+    ? tuiles.filter((t) => t.zone === poseEnCours.domaine && !occupeesPose.has(cle(t.x, t.y)))
+    : []
+
   const fanions = FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
   fanions.forEach((f) => occupees.add(cle(f.x, f.y)))
 
@@ -150,6 +205,32 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
 
       <Riviere />
 
+      {/* Tuiles libres surlignées pendant une pose ou un déplacement */}
+      {poseEnCours && (
+        <g className="pose-libres">
+          {libres.map((t) => (
+            <polygon
+              key={cle(t.x, t.y)}
+              className="pose-tuile"
+              points={losange(t.x, t.y)}
+              fill={`var(--${t.zone})`}
+              stroke="var(--surface)"
+              strokeWidth={1.5}
+              role="button"
+              tabIndex={0}
+              aria-label={`Poser ici, en ${t.zone}`}
+              onClick={() => onPoser?.(t.x, t.y)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onPoser?.(t.x, t.y)
+                }
+              }}
+            />
+          ))}
+        </g>
+      )}
+
       {/* Bâtiments, Cœur et fanions, de l'arrière vers l'avant */}
       <g>
         {objets.map((o) => {
@@ -194,7 +275,21 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
                   )}
                 </g>
               ) : (
-                <g aria-label={o.libelle}>
+                <g
+                  className={`batiment${poseEnCours?.agentId === o.id ? ' batiment-deplace' : ''}`}
+                  aria-label={poseEnCours ? o.libelle : `${o.libelle} — appui long pour déplacer`}
+                  role={poseEnCours ? undefined : 'button'}
+                  tabIndex={poseEnCours ? undefined : 0}
+                  onPointerDown={() => demarrerAppui(o.id)}
+                  onPointerUp={finirAppui}
+                  onPointerLeave={annulerAppui}
+                  onPointerCancel={annulerAppui}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') onBatimentTap?.(o.id)
+                  }}
+                >
+                  {/* Cible de toucher sous le bâtiment */}
+                  <polygon points={losange(0, 0)} fill="transparent" />
                   <g transform="scale(1.25)">
                     <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
                   </g>

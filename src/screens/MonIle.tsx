@@ -1,18 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
-import { getTemplate } from '../domain/catalog'
+import { useJeu } from '../data/jeu'
 import { DOMAINES, DOMAINE_LABEL } from '../domain/types'
-import { Island, type PlacementVue } from '../island/Island'
+import { Island } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
 import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
+import { FicheRapide } from '../ui/FicheRapide'
 import './monile.css'
-
-/** Jalon 1 : île statique avec les trois agents offerts. */
-const POSES_DEPART: Record<string, { x: number; y: number }> = {
-  plume: { x: 1, y: 3 },
-  source: { x: 4, y: 1 },
-  racine: { x: 5, y: 4 },
-}
 
 const CLE_BRIN = 'regain.brin.vu'
 
@@ -25,8 +19,11 @@ function dejaVu(): boolean {
 }
 
 export function MonIle() {
+  const { pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose } = useJeu()
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
+  const [ficheId, setFicheId] = useState<string | null>(null)
+
   const ouvrirBrin = () => {
     setBrinOuvert(true)
     setTeaser(false)
@@ -38,24 +35,38 @@ export function MonIle() {
   }
   const fermerBrin = useCallback(() => setBrinOuvert(false), [])
   const tuiles = useMemo(tuilesDeDepart, [])
-  const placements: PlacementVue[] = Object.entries(POSES_DEPART).map(([id, pos]) => {
-    const t = getTemplate(id)!
-    return { id, ...pos, batiment: t.batiment, domaine: t.domaine, niveau: 1, libelle: `${t.batimentNom} de ${t.nom}` }
-  })
+
+  const agentPose = poseEnCours ? agents.find((a) => a.id === poseEnCours.agentId) : undefined
 
   return (
     <div className="ecran mon-ile">
       <EnTete graines={0} elan={1} />
+
+      {poseEnCours && (
+        <div className="pose-bandeau" role="status">
+          <span>
+            {poseEnCours.mode === 'pose' ? 'Pose' : 'Déplace'} {agentPose ? `le bâtiment de ${agentPose.nom}` : 'le bâtiment'}
+            {' '}: touche une tuile surlignée.
+          </span>
+          <button className="pose-annuler" onClick={annulerPose}>Annuler</button>
+        </div>
+      )}
+
       <div className="mon-ile-cadre">
         <div className="mon-ile-scene">
           <Island
             tuiles={tuiles}
             placements={placements}
             onCoeur={ouvrirBrin}
-            bulleCoeur={teaser ? 'Je te fais visiter ?' : null}
+            bulleCoeur={!poseEnCours && teaser ? 'Je te fais visiter ?' : null}
+            poseEnCours={poseEnCours}
+            onPoser={poser}
+            onDeplacerDemande={demarrerDeplacement}
+            onBatimentTap={setFicheId}
           />
         </div>
       </div>
+
       <ul className="legende" aria-label="Les trois domaines">
         {DOMAINES.map((d) => (
           <li key={d} className={`legende-item legende-${d}`}>
@@ -63,7 +74,18 @@ export function MonIle() {
           </li>
         ))}
       </ul>
+
+      {!pret && <p className="mon-ile-chargement">Ton île se réveille…</p>}
+
       <BrinChat ouvert={brinOuvert} onFermer={fermerBrin} />
+      <FicheRapide
+        agentId={ficheId}
+        onFermer={() => setFicheId(null)}
+        onDeplacer={(id) => {
+          setFicheId(null)
+          demarrerDeplacement(id)
+        }}
+      />
     </div>
   )
 }

@@ -30,3 +30,17 @@
 .legende-boite { background: var(--boite-teinte); color: var(--boite-fonce); }
 .legende-peau { background: var(--peau-teinte); color: var(--peau-fonce); }
 .legende-planete { background: var(--planete-teinte); color: var(--planete-fonce); }
+
+.mon-ile-chargement { text-align: center; color: var(--texte-2); padding: 8px; }
+.pose-bandeau {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 12px 4px; padding: 10px 14px;
+  background: var(--soleil-teinte); color: var(--soleil-fonce);
+  border-radius: var(--r-m); font-size: 14px; font-weight: 500;
+}
+.pose-bandeau span { flex: 1; }
+.pose-annuler {
+  border: 0; background: var(--surface); color: var(--encre);
+  font-weight: 700; font-size: 14px; padding: 8px 14px;
+  border-radius: 999px; cursor: pointer; min-height: 38px;
+}
