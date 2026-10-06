@@ -6,7 +6,7 @@ export function BrinAvatar({ taille = 40 }: { taille?: number }) {
     <svg width={taille} height={taille} viewBox="-40 -76 80 80" aria-hidden>
       <circle cx={0} cy={-36} r={40} fill="#F6E6C2" />
       <g transform="translate(0 -4)">
-        <Coeur />
+        <Coeur feuilles={false} />
       </g>
     </svg>
   )

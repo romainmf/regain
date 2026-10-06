@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import type { BatimentId, Domaine, Tuile } from '../domain/types'
 import { COULEUR } from '../domain/couleurs'
 import { Batiment } from './buildings/Batiment'
-import { Flore } from './buildings/primitives'
 import { Coeur } from './Coeur'
+import { DecorZone, Fanion } from './DecorZones'
 import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
 import './island.css'
@@ -40,7 +40,15 @@ const MOUSSE_FONCEE = '#5E9B62'
 type Objet =
   | (PlacementVue & { type: 'bat' })
   | { type: 'coeur'; id: string; x: number; y: number }
-  | { type: 'flore'; id: string; x: number; y: number; h: number }
+  | { type: 'flore'; id: string; x: number; y: number; h: number; zone: Domaine }
+  | { type: 'fanion'; id: string; x: number; y: number; zone: Domaine }
+
+/** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
+const FANIONS: { x: number; y: number; zone: Domaine }[] = [
+  { x: 0, y: 0, zone: 'boite' },
+  { x: 6, y: 0, zone: 'peau' },
+  { x: 0, y: 6, zone: 'planete' },
+]
 
 export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
@@ -63,13 +71,16 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
 
   const triees = [...tuiles].sort((a, c) => a.x + a.y - (c.x + c.y))
   const occupees = new Set(placements.map((p) => cle(p.x, p.y)))
+  const fanions = FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
+  fanions.forEach((f) => occupees.add(cle(f.x, f.y)))
 
   const objets: Objet[] = [
     ...placements.map((p) => ({ ...p, type: 'bat' as const })),
     ...tuiles.filter((t) => t.zone === 'coeur').map((t) => ({ type: 'coeur' as const, id: 'coeur', x: t.x, y: t.y })),
+    ...fanions.map((f) => ({ type: 'fanion' as const, id: `fanion-${f.zone}`, ...f })),
     ...tuiles
-      .filter((t) => t.zone !== 'coeur' && !occupees.has(cle(t.x, t.y)) && hache(t.x, t.y) % 10 < 6)
-      .map((t) => ({ type: 'flore' as const, id: `f${t.x},${t.y}`, x: t.x, y: t.y, h: hache(t.x, t.y) })),
+      .filter((t) => t.zone !== 'coeur' && !occupees.has(cle(t.x, t.y)) && hache(t.x, t.y) % 10 < 7)
+      .map((t) => ({ type: 'flore' as const, id: `f${t.x},${t.y}`, x: t.x, y: t.y, h: hache(t.x, t.y), zone: t.zone as Domaine })),
   ].sort((a, c) => a.x + a.y - (c.x + c.y) || a.x - c.x)
 
   // Faces de bord du socle (gauche = vers y+1, droite = vers x+1)
@@ -197,10 +208,17 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
         {objets.map((o) => {
           const { sx, sy } = iso(o.x, o.y)
           if (o.type === 'flore') {
-            const decal = ((o.h >>> 8) % 30) / 100 - 0.15
+            const decal = ((o.h >>> 8) % 12) - 6
+            return (
+              <g key={o.id} transform={`translate(${sx + decal} ${sy + decal / 4}) scale(1.2)`} aria-hidden>
+                <DecorZone zone={o.zone} h={o.h} />
+              </g>
+            )
+          }
+          if (o.type === 'fanion') {
             return (
               <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
-                <Flore type={o.h >>> 3} dx={decal} dy={-decal / 2} />
+                <Fanion zone={o.zone} />
               </g>
             )
           }

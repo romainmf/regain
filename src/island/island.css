@@ -40,7 +40,43 @@
 .coeur-bulle { animation: bulle-ile .5s ease .5s both; }
 @keyframes bulle-ile { from { opacity: 0; transform: translateY(4px) } }
 
+/* Brin respire, se balance et cligne des yeux */
+.coeur-couronne { transform-box: fill-box; transform-origin: 50% 100%; animation: respire 5s ease-in-out infinite; }
+@keyframes respire {
+  0%, 100% { transform: rotate(-1.6deg) scale(1); }
+  50% { transform: rotate(1.6deg) scale(1.03); }
+}
+.coeur-yeux { transform-box: fill-box; transform-origin: center; animation: cligne 4.6s infinite; }
+@keyframes cligne { 0%, 92%, 100% { transform: scaleY(1) } 95% { transform: scaleY(.1) } }
+.coeur-brin:hover .coeur-couronne, .coeur-brin:focus-visible .coeur-couronne { animation-duration: 1.2s; }
+
+.feuille { transform-box: fill-box; transform-origin: center; animation: tombe 7s ease-in infinite; opacity: 0; }
+.feuille.f2 { animation-delay: 2.4s; }
+.feuille.f3 { animation-delay: 4.8s; }
+@keyframes tombe {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0); }
+  10% { opacity: 1; }
+  50% { transform: translate(6px, 18px) rotate(120deg); }
+  85% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-4px, 36px) rotate(260deg); }
+}
+
+/* Petites vies des décors */
+.vapeur { animation: vapeur 3s ease-in-out infinite; }
+@keyframes vapeur { 0%, 100% { opacity: .2; transform: translateY(1px) } 50% { opacity: .9; transform: translateY(-2px) } }
+.abeilles circle { animation: butine 2.2s ease-in-out infinite alternate; }
+.abeilles circle:nth-child(2) { animation-delay: .7s; }
+@keyframes butine { to { transform: translate(-3px, 3px); } }
+.hamac-toile { transform-box: fill-box; transform-origin: 50% 0; animation: berce 4s ease-in-out infinite alternate; }
+@keyframes berce { from { transform: rotate(-2deg) } to { transform: rotate(2deg) } }
+.fanion-tissu { transform-box: fill-box; transform-origin: 0 50%; animation: flotte-fanion 3.2s ease-in-out infinite alternate; }
+@keyframes flotte-fanion { from { transform: skewY(-3deg) scaleX(.97) } to { transform: skewY(3deg) scaleX(1) } }
+.lueur { animation: lueur 3s ease-in-out infinite; }
+@keyframes lueur { 50% { opacity: .05 } }
+
 @media (prefers-reduced-motion: reduce) {
+  .feuille { display: none; }
+  .coeur-couronne, .coeur-yeux, .vapeur, .abeilles circle, .hamac-toile, .fanion-tissu, .lueur,
   .coeur-halo, .coeur-bulle,
   .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
 }
