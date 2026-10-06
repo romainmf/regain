@@ -6,20 +6,22 @@ export const TH = 16
 /** Épaisseur visible du socle de l'île. */
 export const SOCLE = 14
 
-export const COEUR = { x: 3, y: 3 }
+export const COEUR = { x: 0, y: 0 }
 
 /**
- * Répartition de départ 7×7 : 16 tuiles par domaine, le Cœur au centre.
+ * Répartition de départ 7×7 : 16 tuiles par domaine, le Cœur au fond de l'île
+ * (coin arrière, d'où l'arbre veille sur tout). Ma boîte à gauche, Ma peau à
+ * droite, Ma planète devant.
  * Lignes = y, colonnes = x. B = boîte, P = peau, V = planète, C = Cœur.
  */
 const CARTE_DEPART = [
-  'BBBBPPP',
-  'BBBBPPP',
-  'BBBBPPP',
-  'BBBCPPP',
-  'BVVVPPP',
-  'VVVVVVP',
-  'VVVVVVV',
+  'CPPPPPP',
+  'BPPPPPV',
+  'BBPPPVV',
+  'BBBPPVV',
+  'BBBBVVV',
+  'BBBVVVV',
+  'BBBVVVV',
 ]
 
 const LETTRE: Record<string, Tuile['zone']> = { B: 'boite', P: 'peau', V: 'planete', C: 'coeur' }

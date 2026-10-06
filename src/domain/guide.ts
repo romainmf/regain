@@ -139,7 +139,7 @@ export const SUJETS: Sujet[] = [
     reponse: [
       'Oui ! Chaque agent recruté apporte son bâtiment, que tu poses dans sa zone. Un appui long permet de le déplacer.',
       'Tu peux ajouter du décor et agrandir l’île avec tes graines. Les couleurs des domaines, elles, restent fixes : on personnalise l’ambiance, jamais le sens.',
-      'Au centre, c’est moi : un arbre dont le pied est un petit serveur. Je rappelle que tes données vivent chez toi.',
+      'Au fond de l’île, c’est moi : un arbre dont le pied est un petit serveur. Je rappelle que tes données vivent chez toi.',
     ],
     suites: ['donnees', 'creer'],
   },

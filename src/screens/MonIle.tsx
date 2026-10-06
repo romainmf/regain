@@ -9,9 +9,9 @@ import './monile.css'
 
 /** Jalon 1 : île statique avec les trois agents offerts. */
 const POSES_DEPART: Record<string, { x: number; y: number }> = {
-  plume: { x: 0, y: 1 },
-  source: { x: 5, y: 2 },
-  racine: { x: 2, y: 5 },
+  plume: { x: 1, y: 3 },
+  source: { x: 4, y: 1 },
+  racine: { x: 5, y: 4 },
 }
 
 const CLE_BRIN = 'regain.brin.vu'

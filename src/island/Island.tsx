@@ -45,10 +45,13 @@ type Objet =
 
 /** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
 const FANIONS: { x: number; y: number; zone: Domaine }[] = [
-  { x: 0, y: 0, zone: 'boite' },
+  { x: 0, y: 6, zone: 'boite' },
   { x: 6, y: 0, zone: 'peau' },
-  { x: 0, y: 6, zone: 'planete' },
+  { x: 6, y: 6, zone: 'planete' },
 ]
+
+/** Au fond de l'île, l'arbre peut être plus grand sans rien cacher. */
+const ECHELLE_COEUR = 1.6
 
 export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
@@ -238,17 +241,17 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
                     }
                   }}
                 >
-                  <ellipse className="coeur-halo" cx={0} cy={2} rx={38} ry={19} fill="none" stroke="#E7B04A" strokeWidth={2} />
-                  <g transform="scale(1.3)">
+                  <g transform={`scale(${ECHELLE_COEUR})`}>
+                    <ellipse className="coeur-halo" cx={0} cy={2} rx={30} ry={15} fill="none" stroke="#E7B04A" strokeWidth={1.5} />
                     <Coeur />
+                    {/* Zone de toucher élargie (≥ 44 px à l'écran) */}
+                    <rect x={-32} y={-80} width={64} height={92} fill="transparent" />
                   </g>
-                  {/* Zone de toucher élargie (≥ 44 px à l'écran) */}
-                  <rect x={-40} y={-104} width={80} height={118} fill="transparent" />
                   {bulleCoeur && (
                     <g className="coeur-bulle" aria-hidden>
-                      <rect x={34} y={-96} width={150} height={32} rx={16} fill="#FBF8F1" stroke="#E2DACA" />
-                      <path d="M 35 -84 L 24 -74 L 42 -72 Z" fill="#FBF8F1" />
-                      <text x={109} y={-75} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={15} fontWeight={500} fill="#22301F">
+                      <rect x={48} y={-122} width={150} height={32} rx={16} fill="#FBF8F1" stroke="#E2DACA" />
+                      <path d="M 49 -110 L 36 -100 L 56 -98 Z" fill="#FBF8F1" />
+                      <text x={123} y={-101} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={15} fontWeight={500} fill="#22301F">
                         {bulleCoeur}
                       </text>
                     </g>
