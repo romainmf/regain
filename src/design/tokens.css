@@ -1,0 +1,86 @@
+@import '@fontsource/fraunces/500.css';
+@import '@fontsource/fraunces/600.css';
+@import '@fontsource/dm-sans/400.css';
+@import '@fontsource/dm-sans/500.css';
+@import '@fontsource/dm-sans/700.css';
+
+:root {
+  --fond: #F3EEE2;
+  --surface: #FBF8F1;
+  --ligne: #E2DACA;
+  --encre: #22301F;
+  --texte-2: #4F5A49;
+
+  --boite: #B0512A;
+  --peau: #9C5B7F;
+  --planete: #2F7A5C;
+  --soleil: #E7B04A;
+
+  --boite-teinte: #F2DDD1;
+  --peau-teinte: #EEDDE7;
+  --planete-teinte: #D6E9DD;
+  --soleil-teinte: #F6E6C2;
+
+  /* Texte de domaine sur fond teinté : variantes foncées pour le contraste AA */
+  --boite-fonce: #8E3F1F;
+  --peau-fonce: #7D4566;
+  --planete-fonce: #23604A;
+  --soleil-fonce: #7A5410;
+
+  /* Variantes d'île (dérivées, jamais modifiables par l'utilisateur) */
+  --boite-sol: #E9C9B6;
+  --peau-sol: #E4C9D8;
+  --planete-sol: #BFDCCB;
+  --coeur-sol: #EFE3C4;
+  --socle: #C9B795;
+  --socle-ombre: #B09E7B;
+  --eau: #DCE9E4;
+
+  --titre: 'Fraunces', Georgia, serif;
+  --texte: 'DM Sans', system-ui, sans-serif;
+
+  --r-s: 10px;
+  --r-m: 16px;
+  --r-l: 24px;
+  --cible: 44px;
+  --nav-h: 72px;
+  --ombre: 0 2px 10px rgba(34, 48, 31, 0.08);
+  --safe-bas: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: var(--texte);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+h1, h2, h3 { font-family: var(--titre); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+
+button { font: inherit; color: inherit; }
+
+:focus-visible { outline: 3px solid var(--soleil); outline-offset: 2px; border-radius: 6px; }
+
+.visuellement-cache {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

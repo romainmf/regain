@@ -1,0 +1,21 @@
+.entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(12px, env(safe-area-inset-top)) 16px 8px;
+}
+.entete-titre { font-size: 24px; }
+.entete-compteurs { display: flex; gap: 8px; }
+.pastille {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 12px 4px 8px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.pastille-graines { background: var(--planete-teinte); color: var(--planete-fonce); }
+.pastille-elan { background: var(--soleil-teinte); color: var(--soleil-fonce); }

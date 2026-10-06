@@ -1,0 +1,31 @@
+.atelier { display: flex; flex-direction: column; }
+.atelier-ile {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+}
+.legende {
+  list-style: none;
+  margin: 0;
+  padding: 8px 16px 16px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.legende-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.legende-point { width: 10px; height: 10px; border-radius: 50%; background: currentColor; }
+.legende-boite { background: var(--boite-teinte); color: var(--boite-fonce); }
+.legende-peau { background: var(--peau-teinte); color: var(--peau-fonce); }
+.legende-planete { background: var(--planete-teinte); color: var(--planete-fonce); }

@@ -1,0 +1,13 @@
+.ile {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.coeur-diodes circle { animation: diode 2.4s ease-in-out infinite; }
+.coeur-diodes circle:nth-child(2) { animation-delay: .8s; }
+.coeur-diodes circle:nth-child(3) { animation-delay: 1.6s; }
+@keyframes diode { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }

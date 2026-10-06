@@ -1,0 +1,7 @@
+.app {
+  min-height: 100%;
+  padding-bottom: calc(var(--nav-h) + var(--safe-bas));
+  max-width: 560px;
+  margin: 0 auto;
+}
+.ecran { min-height: calc(100dvh - var(--nav-h) - var(--safe-bas)); }
