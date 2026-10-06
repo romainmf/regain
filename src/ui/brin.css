@@ -123,34 +123,3 @@
 }
 .brin-saisie button:disabled { background: var(--ligne); color: var(--texte-2); cursor: default; }
 
-/* Bouton flottant sur l'île */
-.brin-appel {
-  position: absolute;
-  right: 10px;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 0;
-  padding: 0;
-  background: none;
-  cursor: pointer;
-}
-.brin-appel-avatar {
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(34, 48, 31, .2), 0 0 0 3px var(--surface);
-  display: grid;
-  transition: transform .15s ease;
-}
-.brin-appel:active .brin-appel-avatar { transform: scale(.93); }
-.brin-teaser {
-  position: relative;
-  background: var(--surface);
-  color: var(--encre);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 8px 12px;
-  border-radius: 14px 14px 4px 14px;
-  box-shadow: var(--ombre);
-  animation: bulle .4s ease .6s both;
-}

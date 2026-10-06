@@ -3,7 +3,7 @@ import { Pave, BOIS, nuance } from './buildings/primitives'
 /** Le Cœur : un arbre dont le pied est un petit serveur. Symbole du local-first. */
 export function Coeur() {
   return (
-    <g aria-label="Le Cœur de l’île">
+    <g>
       <ellipse cx={0} cy={2} rx={26} ry={13} fill="rgba(34,48,31,.12)" />
       <Pave w={0.2} d={0.16} h={14} couleur="#3A4636" />
       {/* Diodes du serveur */}

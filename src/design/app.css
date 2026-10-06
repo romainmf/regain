@@ -1,7 +1,36 @@
-.app {
-  min-height: 100%;
-  padding-bottom: calc(var(--nav-h) + var(--safe-bas));
-  max-width: 560px;
+/*
+ * Cadre « téléphone » : l'app vit dans une colonne de 430 px max.
+ * Le transform fait du cadre le repère des éléments position: fixed
+ * (navigation, feuilles), qui restent ainsi dans le téléphone sur grand écran.
+ */
+.telephone {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100dvh;
   margin: 0 auto;
+  overflow: hidden;
+  background: var(--fond);
+  transform: translateZ(0);
 }
-.ecran { min-height: calc(100dvh - var(--nav-h) - var(--safe-bas)); }
+
+.app {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: calc(var(--nav-h) + var(--safe-bas));
+}
+
+.ecran { min-height: 100%; }
+
+/* Sur ordinateur ou tablette : un vrai téléphone posé sur la table. */
+@media (min-width: 600px) {
+  body { background: #E6DFCF; }
+  .telephone {
+    height: min(900px, calc(100dvh - 48px));
+    margin: 24px auto;
+    border-radius: 40px;
+    border: 10px solid #22301F;
+    box-shadow: 0 24px 60px rgba(34, 48, 31, .25);
+  }
+}

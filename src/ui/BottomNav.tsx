@@ -1,13 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { IconeAgents, IconeAtelier, IconePlus } from './icons'
+import { IconeAgents, IconeIle, IconePlus } from './icons'
 import './bottomnav.css'
 
 export function BottomNav() {
   return (
     <nav className="nav-bas" aria-label="Navigation principale">
       <NavLink to="/" end className="nav-onglet">
-        <IconeAtelier />
-        <span>Atelier</span>
+        <IconeIle />
+        <span>Mon île</span>
       </NavLink>
       <NavLink to="/creer" className="nav-plus" aria-label="Créer un agent">
         <IconePlus />

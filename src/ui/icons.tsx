@@ -1,6 +1,6 @@
 const base = { width: 24, height: 24, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true }
 
-export const IconeAtelier = () => (
+export const IconeIle = () => (
   <svg {...base}><path d="M3 15l9 5 9-5-9-5-9 5z" /><path d="M12 10V4" /><circle cx="12" cy="5" r="2.2" /></svg>
 )
 export const IconeAgents = () => (

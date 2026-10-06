@@ -21,7 +21,7 @@ export const SUJETS: Sujet[] = [
     question: 'Bonjour Brin',
     motsCles: ['bonjour', 'salut', 'hello', 'coucou', 'hey'],
     reponse: [
-      'Bonjour ! Moi c’est Brin, la petite pousse qui fait visiter l’île.',
+      'Bonjour ! Moi c’est Brin, l’arbre au cœur de ton île. Touche-moi quand tu veux me parler.',
       'Je peux te présenter Regain en deux minutes, ou répondre à une question précise. Comme tu préfères.',
     ],
     suites: ['visite', 'domaines', 'donnees'],
@@ -139,7 +139,7 @@ export const SUJETS: Sujet[] = [
     reponse: [
       'Oui ! Chaque agent recruté apporte son bâtiment, que tu poses dans sa zone. Un appui long permet de le déplacer.',
       'Tu peux ajouter du décor et agrandir l’île avec tes graines. Les couleurs des domaines, elles, restent fixes : on personnalise l’ambiance, jamais le sens.',
-      'Au centre, il y a le Cœur : un arbre dont le pied est un petit serveur. Il rappelle que tes données vivent chez toi.',
+      'Au centre, c’est moi : un arbre dont le pied est un petit serveur. Je rappelle que tes données vivent chez toi.',
     ],
     suites: ['donnees', 'creer'],
   },
@@ -188,7 +188,7 @@ export const SUJET_INCONNU: Sujet = {
   question: '',
   motsCles: [],
   reponse: [
-    'Hmm, je ne suis qu’une jeune pousse : je n’ai pas bien saisi.',
+    'Hmm, je ne suis qu’un arbre : je n’ai pas bien saisi.',
     'Je connais bien l’île, les agents, les graines et tes données. Essaie l’une de ces pistes :',
   ],
   suites: ['visite', 'graines', 'donnees'],

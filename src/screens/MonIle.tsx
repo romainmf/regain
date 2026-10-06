@@ -3,10 +3,9 @@ import { getTemplate } from '../domain/catalog'
 import { DOMAINES, DOMAINE_LABEL } from '../domain/types'
 import { Island, type PlacementVue } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
-import { BrinAvatar } from '../ui/BrinAvatar'
 import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
-import './atelier.css'
+import './monile.css'
 
 /** Jalon 1 : île statique avec les trois agents offerts. */
 const POSES_DEPART: Record<string, { x: number; y: number }> = {
@@ -25,7 +24,7 @@ function dejaVu(): boolean {
   }
 }
 
-export function Atelier() {
+export function MonIle() {
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
   const ouvrirBrin = () => {
@@ -45,15 +44,16 @@ export function Atelier() {
   })
 
   return (
-    <div className="ecran atelier">
+    <div className="ecran mon-ile">
       <EnTete graines={0} elan={1} />
-      <div className="atelier-ile">
-        <div className="atelier-scene">
-          <Island tuiles={tuiles} placements={placements} />
-          <button className="brin-appel" onClick={ouvrirBrin} aria-label="Parler à Brin, ton guide">
-            {teaser && <span className="brin-teaser">Je te fais visiter ?</span>}
-            <span className="brin-appel-avatar"><BrinAvatar taille={52} /></span>
-          </button>
+      <div className="mon-ile-cadre">
+        <div className="mon-ile-scene">
+          <Island
+            tuiles={tuiles}
+            placements={placements}
+            onCoeur={ouvrirBrin}
+            bulleCoeur={teaser ? 'Je te fais visiter ?' : null}
+          />
         </div>
       </div>
       <ul className="legende" aria-label="Les trois domaines">

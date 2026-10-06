@@ -21,6 +21,10 @@ export interface PlacementVue {
 interface Props {
   tuiles: Tuile[]
   placements: PlacementVue[]
+  /** Toucher l'arbre du Cœur ouvre Brin, le guide. */
+  onCoeur?: () => void
+  /** Bulle d'invitation au-dessus de l'arbre. */
+  bulleCoeur?: string | null
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -38,7 +42,7 @@ type Objet =
   | { type: 'coeur'; id: string; x: number; y: number }
   | { type: 'flore'; id: string; x: number; y: number; h: number }
 
-export function Island({ tuiles, placements }: Props) {
+export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
   const zoneDe = useMemo(() => {
     const m = new Map<string, Tuile['zone']>()
@@ -203,7 +207,35 @@ export function Island({ tuiles, placements }: Props) {
           return (
             <g key={o.id} transform={`translate(${sx} ${sy})`}>
               {o.type === 'coeur' ? (
-                <Coeur />
+                <g
+                  className="coeur-brin"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Parler à Brin, l’arbre au cœur de ton île"
+                  onClick={onCoeur}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onCoeur?.()
+                    }
+                  }}
+                >
+                  <ellipse className="coeur-halo" cx={0} cy={2} rx={38} ry={19} fill="none" stroke="#E7B04A" strokeWidth={2} />
+                  <g transform="scale(1.3)">
+                    <Coeur />
+                  </g>
+                  {/* Zone de toucher élargie (≥ 44 px à l'écran) */}
+                  <rect x={-40} y={-104} width={80} height={118} fill="transparent" />
+                  {bulleCoeur && (
+                    <g className="coeur-bulle" aria-hidden>
+                      <rect x={34} y={-96} width={150} height={32} rx={16} fill="#FBF8F1" stroke="#E2DACA" />
+                      <path d="M 35 -84 L 24 -74 L 42 -72 Z" fill="#FBF8F1" />
+                      <text x={109} y={-75} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={15} fontWeight={500} fill="#22301F">
+                        {bulleCoeur}
+                      </text>
+                    </g>
+                  )}
+                </g>
               ) : (
                 <g aria-label={o.libelle} transform="scale(1.25)">
                   <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
