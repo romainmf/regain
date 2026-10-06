@@ -67,20 +67,29 @@ function Cascade({ x, y, pente }: { x: number; y: number; pente: number }) {
   )
 }
 
-/** La cascade de l'embouchure se dessine avec le socle, avant le sol. */
+/** Les cascades se dessinent avec le socle, avant le sol. */
 export function CascadesRiviere() {
-  const [x, y] = ecran(RIVIERE.cours[RIVIERE.cours.length - 1])
-  // Pointe avant de l'île : la cascade tombe droit au centre.
-  return <Cascade x={x} y={y} pente={0} />
+  return (
+    <g>
+      {RIVIERE.bras.map((b, i) => {
+        const [x, y] = ecran(b[b.length - 1])
+        // Bras gauche : face avant-gauche (pente +0,5) ; bras droit : face avant-droite (−0,5)
+        return <Cascade key={i} x={x} y={y} pente={i === 0 ? 0.5 : -0.5} />
+      })}
+    </g>
+  )
 }
 
 /** Le lit de la rivière, dessiné sur le sol. */
 export function Riviere() {
-  const cours = meandre(RIVIERE.cours.map(ecran), 5)
+  const tronc = meandre(RIVIERE.tronc.map(ecran), 3)
   const [sx, sy] = ecran(RIVIERE.source)
   return (
     <g aria-hidden>
-      <Lit d={courbe(cours)} largeur={9} />
+      <Lit d={courbe(tronc)} largeur={8} />
+      {RIVIERE.bras.map((b, i) => (
+        <Lit key={i} d={courbe(meandre(b.map(ecran), 4))} largeur={7} />
+      ))}
       {/* Source au pied de l'arbre */}
       <ellipse cx={sx} cy={sy} rx={10} ry={5} fill="#A9CFC6" />
       <ellipse cx={sx} cy={sy} rx={8} ry={3.8} fill="#CFE6EC" />
