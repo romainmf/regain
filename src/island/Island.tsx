@@ -4,6 +4,7 @@ import { COULEUR } from '../domain/couleurs'
 import { Batiment } from './buildings/Batiment'
 import { Coeur } from './Coeur'
 import { Fanion } from './Fanion'
+import { Robot } from './Robot'
 import { CascadesRiviere, Riviere } from './Riviere'
 import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
@@ -193,8 +194,14 @@ export function Island({ tuiles, placements, onCoeur, bulleCoeur }: Props) {
                   )}
                 </g>
               ) : (
-                <g aria-label={o.libelle} transform="scale(1.25)">
-                  <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
+                <g aria-label={o.libelle}>
+                  <g transform="scale(1.25)">
+                    <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
+                  </g>
+                  {/* Le robot compagnon de l'agent, posé devant son bâtiment */}
+                  <g transform="translate(-13 10)">
+                    <Robot domaine={o.domaine} couleur={COULEUR[o.domaine]} phase={(hache(o.x, o.y) % 20) / 10} />
+                  </g>
                 </g>
               )}
             </g>

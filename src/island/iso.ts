@@ -11,31 +11,37 @@ export const COEUR = { x: 0, y: 0 }
 /**
  * Répartition de départ 7×7 : 16 tuiles par domaine, le Cœur au fond de l'île
  * (coin arrière, d'où l'arbre veille sur tout). Ma boîte à gauche, Ma peau à
- * droite, Ma planète devant, entre les deux bras de la rivière.
+ * droite, Ma planète devant. La rivière descend droit au centre et sépare
+ * Ma boîte de Ma peau avant de traverser Ma planète jusqu'à la mer.
  * Lignes = y, colonnes = x. B = boîte, P = peau, V = planète, C = Cœur.
  */
 const CARTE_DEPART = [
   'CPPPPPP',
   'BBPPPPP',
-  'BBPPPPP',
+  'BBBPPPV',
+  'BBBPPVV',
   'BBBVVVV',
   'BBBVVVV',
-  'BBBVVVV',
-  'BBBVVVV',
+  'BBVVVVV',
 ]
 
 /**
- * La rivière naît au pied de l'arbre et suit les lisières des zones :
- * un tronc entre Ma boîte et Ma peau, puis deux bras qui encadrent Ma planète
- * et se jettent dans la mer en cascade. Coordonnées en coins de tuiles (x ± 0,5).
+ * Une seule rivière : elle naît d'une source au pied de l'arbre et descend
+ * tout droit au centre de l'île (axe vertical à l'écran, x = y), serpentant
+ * un peu, jusqu'à se jeter dans la mer en cascade à la pointe avant.
+ * Coordonnées en coins de tuiles (x ± 0,5).
  */
 export const RIVIERE = {
   source: [0.5, 0.5] as [number, number],
-  tronc: [[0.5, 0.5], [1.5, 0.5], [1.5, 2.5], [2.5, 2.5]] as [number, number][],
-  bras: [
-    [[2.5, 2.5], [2.5, 6.5]],
-    [[2.5, 2.5], [6.5, 2.5]],
-  ] as [number, number][][],
+  cours: [
+    [0.5, 0.5],
+    [1.5, 1.5],
+    [2.5, 2.5],
+    [3.5, 3.5],
+    [4.5, 4.5],
+    [5.5, 5.5],
+    [6.5, 6.5],
+  ] as [number, number][],
 }
 
 const LETTRE: Record<string, Tuile['zone']> = { B: 'boite', P: 'peau', V: 'planete', C: 'coeur' }
