@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { getTemplate } from '../domain/catalog'
 import { DOMAINES, DOMAINE_LABEL } from '../domain/types'
 import { Island, type PlacementVue } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
+import { BrinAvatar } from '../ui/BrinAvatar'
+import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
 import './atelier.css'
 
@@ -13,7 +15,29 @@ const POSES_DEPART: Record<string, { x: number; y: number }> = {
   racine: { x: 2, y: 5 },
 }
 
+const CLE_BRIN = 'regain.brin.vu'
+
+function dejaVu(): boolean {
+  try {
+    return localStorage.getItem(CLE_BRIN) === '1'
+  } catch {
+    return false
+  }
+}
+
 export function Atelier() {
+  const [brinOuvert, setBrinOuvert] = useState(false)
+  const [teaser, setTeaser] = useState(() => !dejaVu())
+  const ouvrirBrin = () => {
+    setBrinOuvert(true)
+    setTeaser(false)
+    try {
+      localStorage.setItem(CLE_BRIN, '1')
+    } catch {
+      /* stockage indisponible : le teaser reviendra, ce n'est pas grave */
+    }
+  }
+  const fermerBrin = useCallback(() => setBrinOuvert(false), [])
   const tuiles = useMemo(tuilesDeDepart, [])
   const placements: PlacementVue[] = Object.entries(POSES_DEPART).map(([id, pos]) => {
     const t = getTemplate(id)!
@@ -24,7 +48,13 @@ export function Atelier() {
     <div className="ecran atelier">
       <EnTete graines={0} elan={1} />
       <div className="atelier-ile">
-        <Island tuiles={tuiles} placements={placements} />
+        <div className="atelier-scene">
+          <Island tuiles={tuiles} placements={placements} />
+          <button className="brin-appel" onClick={ouvrirBrin} aria-label="Parler à Brin, ton guide">
+            {teaser && <span className="brin-teaser">Je te fais visiter ?</span>}
+            <span className="brin-appel-avatar"><BrinAvatar taille={52} /></span>
+          </button>
+        </div>
       </div>
       <ul className="legende" aria-label="Les trois domaines">
         {DOMAINES.map((d) => (
@@ -33,6 +63,7 @@ export function Atelier() {
           </li>
         ))}
       </ul>
+      <BrinChat ouvert={brinOuvert} onFermer={fermerBrin} />
     </div>
   )
 }

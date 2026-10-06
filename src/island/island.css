@@ -3,6 +3,7 @@
   width: 100%;
   height: auto;
   max-height: 100%;
+  border-radius: var(--r-l);
   touch-action: manipulation;
   user-select: none;
 }
@@ -11,3 +12,25 @@
 .coeur-diodes circle:nth-child(2) { animation-delay: .8s; }
 .coeur-diodes circle:nth-child(3) { animation-delay: 1.6s; }
 @keyframes diode { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
+
+.pales { animation: tourne 7s linear infinite; }
+@keyframes tourne { to { transform: rotate(360deg); } }
+
+.pollen circle { animation: flotte 9s ease-in-out infinite; opacity: .7; }
+@keyframes flotte {
+  0%, 100% { transform: translate(0, 0); opacity: .2; }
+  50% { transform: translate(6px, -14px); opacity: .8; }
+}
+
+.oiseaux { animation: plane 26s ease-in-out infinite alternate; }
+@keyframes plane { to { transform: translate(-30px, 6px); } }
+
+.voilier { animation: tangue 5s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes tangue { from { rotate: -3deg; } to { rotate: 3deg; } }
+
+.cascade { animation: ruisselle 1.1s linear infinite; }
+@keyframes ruisselle { to { stroke-dashoffset: -14; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
+}

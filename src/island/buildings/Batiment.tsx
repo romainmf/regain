@@ -20,7 +20,9 @@ export function Batiment({ id, couleur, niveau }: Props) {
         <g>
           <Ombre />
           <Pave w={0.26} d={0.22} h={16} couleur={CREME} />
-          <Toit w={0.3} d={0.26} z={16} h={12} couleur={couleur} faitage={0.12} />
+          <Toit w={0.3} d={0.26} z={16} h={12} couleur={couleur} faitage={0.12} solaire />
+          {/* Lierre sur la façade */}
+          <path d="M -16 -1 q 2 -6 0 -12 M -14 0 q 3 -4 1 -9" stroke={FEUILLE} strokeWidth={2.2} fill="none" strokeLinecap="round" />
           {/* Porte sur la face avant, fenêtre sur la face droite */}
           <polygon points="-9,2.6 -5.1,4.5 -5.1,-4.5 -9,-6.4" fill={BOIS} />
           <polygon points="5,1.5 10,-1 10,-6 5,-3.5" fill={n2 ? '#F6E6C2' : VERRE} />
@@ -44,7 +46,7 @@ export function Batiment({ id, couleur, niveau }: Props) {
         <g>
           <Ombre w={0.26} />
           <Pave w={0.14} h={n3 ? 34 : n2 ? 28 : 22} couleur={CREME} />
-          <Toit w={0.18} z={n3 ? 34 : n2 ? 28 : 22} h={12} couleur={couleur} />
+          <Toit w={0.18} z={n3 ? 34 : n2 ? 28 : 22} h={12} couleur={couleur} vegetal />
           <circle cx={0} cy={n3 ? -26 : n2 ? -20 : -14} r={2.5} fill="#E7B04A" />
         </g>
       )
@@ -201,7 +203,7 @@ export function Batiment({ id, couleur, niveau }: Props) {
         <g>
           <Ombre w={0.3} />
           <Pave w={0.22} d={0.18} h={14} couleur={CREME} />
-          <Toit w={0.27} d={0.24} z={14} h={8} couleur={couleur} faitage={0.15} />
+          <Toit w={0.27} d={0.24} z={14} h={8} couleur={couleur} faitage={0.15} vegetal />
           <Pave dx={0.05} dy={0.26} w={0.12} d={0.04} h={5} couleur={BOIS} />
           {n2 && <circle cx={10} cy={4} r={2.5} fill="#E7B04A" />}
           {n3 && <Arbre dx={-0.32} dy={0.25} r={5} tronc={3} />}
