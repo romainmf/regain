@@ -1,5 +1,6 @@
 import { JOUR_MS, elanCible, elanLisse, grainesPourValidation } from '../domain/economy'
 import { RuleEngine } from '../domain/engine/RuleEngine'
+import { LlmEngine } from '../domain/engine/LlmEngine'
 import type { AgentLite } from '../domain/engine/AgentEngine'
 import { chainesDepuisValidation, type Chaine } from '../domain/chains'
 import { optionParLabel } from '../domain/missions'
@@ -27,7 +28,9 @@ export async function saisir(kind: SaisieKind, data: SaisieData): Promise<number
   const grossesJourneesRecentes =
     (kind === 'grosse_journee' ? 1 : 0) +
     saisies.filter((s) => s.kind === 'grosse_journee' && now - s.date <= 7 * JOUR_MS).length
-  const brouillons = RuleEngine.propose(saisie, { agents: agents.map(lite), grossesJourneesRecentes, maintenant: now })
+  const moteur = await getMeta<'rule' | 'llm'>('moteur', 'rule')
+  const engine = moteur === 'llm' ? LlmEngine : RuleEngine
+  const brouillons = await engine.propose(saisie, { agents: agents.map(lite), grossesJourneesRecentes, maintenant: now })
   // Les agents personnalisés (sans template) préparent selon leurs missions cochées.
   const persos = brouillonsPersonnalises(saisie, agents)
   const tous = [...brouillons, ...persos]

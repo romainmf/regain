@@ -1,5 +1,5 @@
 import type { Brouillon, Saisie } from '../propositions'
-import type { AgentEngine, ContexteMoteur } from './AgentEngine'
+import type { ContexteMoteur } from './AgentEngine'
 import { choisirAgent, euro } from './AgentEngine'
 
 /** Part mise de côté pour les cotisations (ordre de grandeur micro-entreprise). */
@@ -9,7 +9,7 @@ const TAUX_COUSSIN = 0.24
  * Moteur déterministe, sans réseau. À partir d'une saisie, il fait préparer
  * des propositions par les agents actifs concernés.
  */
-export const RuleEngine: AgentEngine = {
+export const RuleEngine = {
   propose(saisie: Saisie, ctx: ContexteMoteur): Brouillon[] {
     const { agents } = ctx
     const out: Brouillon[] = []

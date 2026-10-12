@@ -19,7 +19,7 @@ export interface ContexteMoteur {
 
 /** Interface du moteur : à partir d'une saisie et du contexte, des propositions. */
 export interface AgentEngine {
-  propose(saisie: Saisie, ctx: ContexteMoteur): Brouillon[]
+  propose(saisie: Saisie, ctx: ContexteMoteur): Brouillon[] | Promise<Brouillon[]>
 }
 
 const STARTER: Record<Domaine, string> = { boite: 'plume', peau: 'source', planete: 'racine' }

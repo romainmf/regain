@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useJeu } from '../data/jeu'
 import { importerDepuisFichier, telechargerExport, toutEffacer } from '../data/exportImport'
+import { getMeta, setMeta } from '../data/db'
 import { Bouton } from './Boutons'
 import { Sheet } from './Sheet'
 import './reglages.css'
@@ -10,6 +12,7 @@ export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
   const fichier = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<{ ton: 'ok' | 'err'; texte: string } | null>(null)
   const [confirmer, setConfirmer] = useState(false)
+  const moteur = useLiveQuery(() => getMeta<'rule' | 'llm'>('moteur', 'rule'), [], 'rule')
 
   const dire = (ton: 'ok' | 'err', texte: string) => {
     setMsg({ ton, texte })
@@ -67,6 +70,15 @@ export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
           </Bouton>
         </section>
       )}
+
+      <section className="reg-bloc">
+        <h3>Moteur des agents</h3>
+        <p className="reg-aide">Par défaut, tes agents raisonnent avec des règles simples, hors ligne. Le mode IA les fait préparer avec Claude (nécessite la version en ligne ; la clé reste côté serveur). En cas de souci, le mode règles prend le relais.</p>
+        <div className="auto-choix" role="radiogroup" aria-label="Moteur">
+          <button role="radio" aria-checked={moteur === 'rule'} className={`auto-option${moteur === 'rule' ? ' auto-on' : ''}`} onClick={() => setMeta('moteur', 'rule')}>Règles (hors ligne)</button>
+          <button role="radio" aria-checked={moteur === 'llm'} className={`auto-option${moteur === 'llm' ? ' auto-on' : ''}`} onClick={() => setMeta('moteur', 'llm')}>IA (Claude)</button>
+        </div>
+      </section>
 
       <section className="reg-bloc reg-danger">
         <h3>Recommencer</h3>
