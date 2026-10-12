@@ -52,7 +52,7 @@ export function Maquette() {
     <div style={{ background: 'var(--fond)', minHeight: '100vh', padding: 20, fontFamily: 'var(--texte)', color: 'var(--encre)' }}>
       <h1 style={{ ...h2, fontSize: 24, marginBottom: 4 }}>Maquette : un lieu par domaine, murs et sols personnalisables</h1>
       <p style={{ ...sous, marginBottom: 14 }}>
-        Façon mode Construction des Sims : murs abaissés côté caméra pour voir l’intérieur, façade haute au fond, revêtements au choix par lieu. Les couleurs de domaine ne changent jamais.
+        Façon mode Construction des Sims : murs abaissés côté caméra pour voir l’intérieur, façade haute au fond avec auvent, portes avec arche entre les lieux, mobilier propre à chaque lieu. Les couleurs de domaine ne changent jamais.
       </p>
 
       {/* Palette façon Sims */}

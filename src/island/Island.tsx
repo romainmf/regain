@@ -13,6 +13,7 @@ import type { Chaine } from '../domain/chains'
 import { getAmbiance, type AmbianceId, type DecorId } from '../domain/boutique'
 import { Decor } from './Decor'
 import { LieuxHaut, LieuxSol, type StyleMur, type StyleSol } from './LieuxZones'
+import { MEUBLES_LIEUX, Meuble, type MeubleId } from './Meubles'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
 
@@ -101,6 +102,7 @@ type Objet =
   | { type: 'coeur'; id: string; x: number; y: number }
   | { type: 'fanion'; id: string; x: number; y: number; zone: Domaine }
   | { type: 'decor'; id: string; x: number; y: number; decorId: DecorId }
+  | { type: 'meuble'; id: string; x: number; y: number; meuble: MeubleId }
 
 /** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
 const FANIONS: { x: number; y: number; zone: Domaine }[] = [
@@ -188,9 +190,13 @@ export function Island({
 
   const fanions = FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
   fanions.forEach((f) => occupees.add(cle(f.x, f.y)))
+  // Mobilier des lieux : sur des tuiles réservées, comme les fanions.
+  const meubles = lieux ? MEUBLES_LIEUX.filter((m) => index.has(cle(m.x, m.y)) && !occupees.has(cle(m.x, m.y))) : []
+  meubles.forEach((m) => occupees.add(cle(m.x, m.y)))
 
   const objets: Objet[] = [
     ...placements.map((p) => ({ ...p, type: 'bat' as const })),
+    ...meubles.map((m) => ({ type: 'meuble' as const, id: `meuble-${m.x}-${m.y}`, x: m.x, y: m.y, meuble: m.meuble })),
     ...decors.map((d) => ({ type: 'decor' as const, id: d.id, x: d.x, y: d.y, decorId: d.decorId })),
     ...tuiles.filter((t) => t.zone === 'coeur').map((t) => ({ type: 'coeur' as const, id: 'coeur', x: t.x, y: t.y })),
     ...fanions.map((f) => ({ type: 'fanion' as const, id: `fanion-${f.zone}`, ...f })),
@@ -275,7 +281,8 @@ export function Island({
         })}
       </g>
 
-      <CascadesRiviere />
+      {/* La rivière n'a plus lieu d'être quand les lieux délimitent déjà les domaines */}
+      {!lieux && <CascadesRiviere />}
 
       {/* Sol */}
       <g>
@@ -299,7 +306,7 @@ export function Island({
       {/* Lumière chaude du soleil sur l'île : plus l'élan est fort, plus elle réchauffe */}
       <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" opacity={amb.astre === 'lune' ? 0 : lumiereDepuisElan(elan ?? 1)} pointerEvents="none" />
 
-      <Riviere />
+      {!lieux && <Riviere />}
 
       {/* Ombres portées douces et directionnelles, sous les bâtiments et l'arbre */}
       <g pointerEvents="none">
@@ -343,6 +350,13 @@ export function Island({
             return (
               <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
                 <Fanion zone={o.zone} />
+              </g>
+            )
+          }
+          if (o.type === 'meuble') {
+            return (
+              <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
+                <Meuble id={o.meuble} />
               </g>
             )
           }
