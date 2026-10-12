@@ -33,8 +33,14 @@
 }
 .brin-entete h2 { font-size: 20px; }
 .brin-entete p { margin: 0; font-size: 14px; color: var(--texte-2); }
-.brin-fermer {
+.brin-visite {
   margin-left: auto;
+  width: var(--cible); height: var(--cible);
+  border: 0; border-radius: 50%; background: transparent;
+  display: grid; place-items: center; cursor: pointer; color: var(--texte-2);
+}
+.brin-visite:hover { background: var(--fond); color: var(--planete-fonce); }
+.brin-fermer {
   width: var(--cible);
   height: var(--cible);
   border: 0;

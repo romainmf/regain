@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { repondre, sujet, type Sujet } from '../domain/guide'
+import { useJeu } from '../data/jeu'
 import { BrinAvatar } from './BrinAvatar'
 import './brin.css'
 
@@ -17,6 +18,7 @@ interface Props {
 const DELAI_BULLE = 550
 
 export function BrinChat({ ouvert, onFermer }: Props) {
+  const { lancerVisite } = useJeu()
   const [messages, setMessages] = useState<Message[]>([])
   const [suites, setSuites] = useState<string[]>([])
   const [ecrit, setEcrit] = useState(false)
@@ -98,6 +100,17 @@ export function BrinChat({ ouvert, onFermer }: Props) {
             <h2 id={titreId}>Brin</h2>
             <p>Ton guide sur l’île</p>
           </div>
+          <button
+            className="brin-visite"
+            onClick={() => {
+              onFermer()
+              lancerVisite()
+            }}
+            aria-label="Refaire la visite guidée"
+            title="Refaire la visite guidée"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
           <button className="brin-fermer" onClick={onFermer} aria-label="Fermer la discussion">
             <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
           </button>

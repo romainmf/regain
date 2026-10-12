@@ -6,24 +6,35 @@ import { MonIle } from './screens/MonIle'
 import { BottomNav } from './ui/BottomNav'
 import { JeuProvider } from './data/jeu'
 import { FicheAgent } from './ui/FicheAgent'
+import { Onboarding } from './ui/Onboarding'
+import { GuideTour } from './ui/GuideTour'
+import { useJeu } from './data/jeu'
+
+function Intro() {
+  const { phaseIntro } = useJeu()
+  if (phaseIntro === 'onboarding') return <Onboarding />
+  if (phaseIntro === 'tour') return <GuideTour />
+  return null
+}
 
 export function App() {
   return (
     <JeuProvider>
-    <BrowserRouter>
-      <div className="telephone">
-        <main className="app">
-          <Routes>
-            <Route path="/" element={<MonIle />} />
-            <Route path="/agents" element={<Agents />} />
-            <Route path="/creer" element={<CreerAgent />} />
-            {import.meta.env.DEV && <Route path="/galerie" element={<Galerie />} />}
-          </Routes>
-        </main>
-        <BottomNav />
-        <FicheAgent />
-      </div>
-    </BrowserRouter>
+      <BrowserRouter>
+        <div className="telephone">
+          <main className="app">
+            <Routes>
+              <Route path="/" element={<MonIle />} />
+              <Route path="/agents" element={<Agents />} />
+              <Route path="/creer" element={<CreerAgent />} />
+              {import.meta.env.DEV && <Route path="/galerie" element={<Galerie />} />}
+            </Routes>
+          </main>
+          <BottomNav />
+          <FicheAgent />
+          <Intro />
+        </div>
+      </BrowserRouter>
     </JeuProvider>
   )
 }

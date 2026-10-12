@@ -40,6 +40,11 @@ interface JeuCtx {
   annulerPose: () => void
   ouvrirFiche: (agentId: string) => void
   fermerFiche: () => void
+  // ——— Accueil et visite guidée ———
+  phaseIntro: 'onboarding' | 'tour' | null
+  finirOnboarding: (lancerTour: boolean) => void
+  finirTour: () => void
+  lancerVisite: () => void
   definirAutonomie: (agentId: string, autonomie: Autonomie) => Promise<void>
   basculerActif: (agentId: string) => Promise<void>
   definirMissions: (agentId: string, missions: string[]) => Promise<void>
@@ -98,6 +103,24 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
   const [poseEnCours, setPoseEnCours] = useState<PoseEnCours | null>(null)
   const [ficheId, setFicheId] = useState<string | null>(null)
   const [chaineMasqueeTs, setChaineMasqueeTs] = useState(0)
+  const [phaseIntro, setPhaseIntro] = useState<'onboarding' | 'tour' | null>(() => {
+    try {
+      return localStorage.getItem('regain.onboarding.fait') ? null : 'onboarding'
+    } catch {
+      return 'onboarding'
+    }
+  })
+  const finirOnboarding = useCallback((lancerTour: boolean) => {
+    try {
+      localStorage.setItem('regain.onboarding.fait', '1')
+      localStorage.setItem('regain.brin.vu', '1')
+    } catch {
+      /* stockage indisponible : l'accueil pourra réapparaître, sans gravité */
+    }
+    setPhaseIntro(lancerTour ? 'tour' : null)
+  }, [])
+  const finirTour = useCallback(() => setPhaseIntro(null), [])
+  const lancerVisite = useCallback(() => setPhaseIntro('tour'), [])
 
   useEffect(() => {
     amorcerSiNecessaire().then(() => setPret(true))
@@ -229,6 +252,10 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     annulerPose,
     ouvrirFiche,
     fermerFiche,
+    phaseIntro,
+    finirOnboarding,
+    finirTour,
+    lancerVisite,
     definirAutonomie,
     basculerActif,
     definirMissions,
