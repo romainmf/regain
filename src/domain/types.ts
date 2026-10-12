@@ -55,6 +55,10 @@ export type BatimentId =
   | 'jarre'
   | 'fontaine'
   | 'blason'
+  // Lieux signatures (maquette « les trois lieux »)
+  | 'atelier'
+  | 'jardin'
+  | 'refuge'
 
 export type SigneDeVie = 'lumiere' | 'fumee' | 'plante' | 'train' | 'eau' | 'etincelle'
 

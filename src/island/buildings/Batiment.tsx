@@ -219,5 +219,107 @@ export function Batiment({ id, couleur, niveau }: Props) {
           {n3 && <Arbre dx={-0.2} dy={0.2} r={5} tronc={0} />}
         </g>
       )
+
+    // ——— Lieux signatures : un grand lieu par domaine, que les agents étoffent ———
+    case 'atelier':
+      return (
+        <g>
+          <Ombre w={0.56} />
+          {/* Halle d'atelier, toit solaire */}
+          <Pave w={0.42} d={0.3} h={20} couleur={CREME} />
+          <Toit w={0.47} d={0.35} z={20} h={14} couleur={couleur} faitage={0.3} solaire />
+          {/* Auvent sur le devant, soutenu par deux poteaux */}
+          <Pave dx={-0.5} dy={0.26} w={0.025} h={13} couleur={BOIS} />
+          <Pave dx={-0.5} dy={-0.1} w={0.025} h={13} couleur={BOIS} />
+          <Pave dx={-0.42} dy={0.08} w={0.12} d={0.26} h={2} z={13} couleur={nuance(couleur, 0.35)} />
+          {/* Établi sous l'auvent, avec outils */}
+          <Pave dx={-0.44} dy={0.08} w={0.08} d={0.16} h={6} couleur={BOIS} />
+          <rect x={-33} y={-10} width={3} height={5} fill={PIERRE} />
+          <circle cx={-27} cy={-9} r={1.6} fill="#E7B04A" />
+          {/* Cheminée et fumée */}
+          <Pave dx={0.24} dy={-0.12} w={0.035} h={9} z={29} couleur={PIERRE} />
+          <circle cx={18} cy={-48} r={3} fill="#FBF8F1" opacity={0.55} />
+          <circle cx={21} cy={-53} r={2.2} fill="#FBF8F1" opacity={0.4} />
+          {/* Enseigne et lierre */}
+          <rect x={-5} y={-33} width={10} height={4.5} rx={1} fill={couleur} />
+          <path d="M 24 2 q 3 -8 0 -17 M 27 1 q 2 -5 1 -10" stroke={FEUILLE} strokeWidth={2.2} fill="none" strokeLinecap="round" />
+          {n2 && <Arbre dx={0.5} dy={0.36} r={6} tronc={4} />}
+          {n3 && <circle cx={-20} cy={-36} r={2.5} fill="#E7B04A" />}
+        </g>
+      )
+    case 'jardin':
+      return (
+        <g>
+          <Ombre w={0.56} />
+          {/* Grande serre */}
+          <Pave w={0.4} d={0.26} h={14} couleur="#A9D6C4" haut="#D4EEE4" />
+          <Toit w={0.4} d={0.26} z={14} h={15} couleur="#BFE3D5" faitage={0.3} />
+          <g stroke="#FBF8F1" strokeWidth={1} opacity={0.9}>
+            <line x1={-19} y1={1} x2={-19} y2={-13} />
+            <line x1={-9} y1={6} x2={-9} y2={-8} />
+            <line x1={1} y1={5} x2={1} y2={-9} />
+            <line x1={11} y1={0} x2={11} y2={-14} />
+          </g>
+          {/* Plantes derrière la vitre */}
+          <circle cx={-14} cy={-3} r={3.6} fill={couleur} />
+          <circle cx={-5} cy={1} r={3} fill={FEUILLE} />
+          <circle cx={5} cy={-2} r={3.4} fill={nuance(couleur, 0.15)} />
+          <circle cx={-9} cy={-9} r={2} fill="#E7B04A" />
+          {/* Potager en rangs sur le devant */}
+          {[0.2, 0.32, 0.44].map((dy, i) => (
+            <g key={i}>
+              <Pave dy={dy} dx={-0.3} w={0.2} d={0.035} h={2} couleur="#8A6A4A" />
+              {[-0.44, -0.34, -0.24, -0.14].map((dx) => {
+                const x = (dx - dy) * 32
+                const y = (dx + dy) * 16 - 3
+                return <circle key={dx} cx={x} cy={y} r={2.2} fill={i === 1 ? couleur : FEUILLE} />
+              })}
+            </g>
+          ))}
+          {/* Tonneau récupérateur d'eau */}
+          <g transform="translate(30 6)">
+            <rect x={-5} y={-11} width={10} height={12} fill={couleur} />
+            <ellipse cx={0} cy={1} rx={5} ry={2} fill={couleur} />
+            <ellipse cx={0} cy={-11} rx={5} ry={2} fill="#BFDCE0" stroke={nuance(couleur, -0.2)} strokeWidth={1} />
+          </g>
+          {n2 && <Arbre dx={0.5} dy={-0.3} r={7} tronc={5} couleur={couleur} />}
+          {n3 && <circle cx={8} cy={-20} r={2.5} fill="#E7B04A" />}
+        </g>
+      )
+    case 'refuge':
+      return (
+        <g>
+          <Ombre w={0.56} />
+          {/* Terrasse en bois */}
+          <Pave w={0.42} d={0.3} h={4} couleur={BOIS} haut={nuance(BOIS, 0.25)} />
+          {/* Six poteaux */}
+          {[[-0.38, -0.26], [0, -0.26], [0.38, -0.26], [-0.38, 0.26], [0, 0.26], [0.38, 0.26]].map(([x, y]) => (
+            <Pave key={`${x}${y}`} dx={x} dy={y} w={0.025} h={26} z={4} couleur={BOIS} />
+          ))}
+          {/* Toiture-tonnelle végétale */}
+          <Pave w={0.46} d={0.34} h={2} z={30} couleur={BOIS} haut={nuance(BOIS, 0.25)} />
+          <ellipse cx={-16} cy={-33} rx={12} ry={5} fill={FEUILLE} />
+          <ellipse cx={8} cy={-31} rx={14} ry={5.5} fill={nuance(FEUILLE, 0.1)} />
+          <ellipse cx={-2} cy={-36} rx={10} ry={4.5} fill={nuance(FEUILLE, -0.05)} />
+          {[[-22, -32], [-8, -30], [6, -34], [18, -30]].map(([x, y], i) => (
+            <circle key={i} cx={x} cy={y} r={2.4} fill={i % 2 ? nuance(couleur, 0.25) : couleur} />
+          ))}
+          <path d="M -26 -28 q -1 7 1 12 M 24 -27 q 2 6 0 11" stroke={FEUILLE} strokeWidth={2} fill="none" strokeLinecap="round" />
+          {/* Hamac entre deux poteaux, coussins */}
+          <path className="hamac-toile" d="M -24 -10 Q -6 6 12 -8 Q -6 0 -24 -10 Z" fill={couleur} />
+          <ellipse cx={20} cy={2} rx={5} ry={2.4} fill={nuance(couleur, 0.3)} />
+          <ellipse cx={26} cy={-1} rx={4.5} ry={2.2} fill="#F4EAD5" />
+          {/* Lanterne suspendue */}
+          <line x1={14} y1={-30} x2={14} y2={-22} stroke={BOIS} strokeWidth={1} />
+          <circle cx={14} cy={-20} r={2.6} fill="#E7B04A" />
+          <circle cx={14} cy={-20} r={6} fill="#E7B04A" opacity={0.18} />
+          {/* Petit bassin devant */}
+          <ellipse cx={-4} cy={16} rx={12} ry={5.5} fill={PIERRE} />
+          <ellipse cx={-4} cy={15} rx={9.5} ry={4} fill="#BFDCE0" />
+          <ellipse cx={-7} cy={14} rx={3} ry={1.2} fill={couleur} opacity={0.7} />
+          {n2 && <Arbre dx={0.5} dy={0.4} r={6} tronc={4} />}
+          {n3 && <circle cx={-12} cy={-38} r={2.5} fill="#E7B04A" />}
+        </g>
+      )
   }
 }

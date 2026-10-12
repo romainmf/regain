@@ -23,6 +23,8 @@ export interface PlacementVue {
   domaine: Domaine
   niveau: 1 | 2 | 3
   libelle: string
+  /** Lieu signature sans agent : pas de robot compagnon. */
+  sansRobot?: boolean
 }
 
 export interface DecorVue {
@@ -415,9 +417,11 @@ export function Island({
                     <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
                   </g>
                   {/* Le robot compagnon de l'agent, posé devant son bâtiment */}
-                  <g transform="translate(-13 10)">
-                    <Robot domaine={o.domaine} couleur={COULEUR[o.domaine]} phase={(hache(o.x, o.y) % 20) / 10} />
-                  </g>
+                  {!o.sansRobot && (
+                    <g transform="translate(-13 10)">
+                      <Robot domaine={o.domaine} couleur={COULEUR[o.domaine]} phase={(hache(o.x, o.y) % 20) / 10} />
+                    </g>
+                  )}
                 </g>
               )}
             </g>
