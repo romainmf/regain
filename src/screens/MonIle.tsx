@@ -84,7 +84,7 @@ export function MonIle() {
 
       <div className="mon-ile-cadre">
         <div className="mon-ile-scene" ref={scene}>
-          <ZoomPan>
+          <ZoomPan initiale={{ s: 1.12, cx: 0.5, cy: 0.46 }}>
           <Island
             tuiles={tuiles}
             placements={placements}

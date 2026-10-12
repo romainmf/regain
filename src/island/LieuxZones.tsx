@@ -407,11 +407,11 @@ function Bassin({ tuiles }: { tuiles: Tuile[] }) {
         <polygon key={i} points={pts([sx, sy - TH + 1], [sx + TW - 2, sy], [sx, sy + TH - 1], [sx - TW + 2, sy])} fill="#E9E2D0" />
       ))}
       {p.map(({ sx, sy }, i) => (
-        <polygon key={i} points={pts([sx, sy - TH + 4], [sx + TW - 7, sy], [sx, sy + TH - 4], [sx - TW + 7, sy])} fill="#9FCBD1" />
+        <polygon key={i} points={pts([sx, sy - TH + 4], [sx + TW - 7, sy], [sx, sy + TH - 4], [sx - TW + 7, sy])} fill="#86B9C4" />
       ))}
       {p.map(({ sx, sy }, i) => (
         <g key={i}>
-          <ellipse cx={sx - 4} cy={sy - 1} rx={9} ry={3.5} fill="#BFDCE0" />
+          <ellipse cx={sx - 4} cy={sy - 1} rx={9} ry={3.5} fill="#A9D0D8" />
           <path className="source-ride" d={`M ${sx - 8} ${sy} q 4 -3 8 0 q 4 3 8 0`} stroke="#FBF8F1" strokeWidth={0.9} fill="none" opacity={0.85} />
           <circle cx={sx + 9} cy={sy + 3} r={1.6} fill={nuance(COULEUR.peau, 0.4)} />
         </g>
@@ -520,9 +520,9 @@ export function LieuxHaut({ tuiles, murs = MURS_DEFAUT }: PropsLieux) {
                 <Vitre key={i} a={ar.a} b={ar.b} style={style} ombre socle={ar.exterieur ? 9 : 5} />
               ),
             )}
-            {/* Enseigne sur poteau, à l'angle extérieur */}
+            {/* Enseigne sur poteau, à l'angle extérieur, un peu rentrée vers le Cœur pour rester dans le cadre */}
             {angle && (
-              <g transform={`translate(${angle[0]} ${angle[1]})`}>
+              <g transform={`translate(${angle[0] + (coeur.sx - angle[0]) * 0.1} ${angle[1] + (coeur.sy - angle[1]) * 0.1})`}>
                 <rect x={-1.2} y={-34} width={2.4} height={34} fill={style.poteau} />
                 <rect x={-27} y={-46} width={54} height={16} rx={8} fill={c} />
                 <text x={0} y={-34.5} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={8.5} fontWeight={700} fill="#FBF8F1" letterSpacing={1.2}>

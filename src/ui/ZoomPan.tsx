@@ -10,9 +10,18 @@ interface Vue { s: number; tx: number; ty: number }
  * Zoom par pincement (ou molette) et déplacement au doigt sur l'île ;
  * double-tap pour recentrer. Les taps brefs continuent d'atteindre l'île.
  */
-export function ZoomPan({ children }: { children: ReactNode }) {
+interface VueInitiale {
+  /** Facteur de zoom de départ. */
+  s: number
+  /** Point du cadre (fractions 0-1) à garder au centre. */
+  cx: number
+  cy: number
+}
+
+export function ZoomPan({ children, initiale }: { children: ReactNode; initiale?: VueInitiale }) {
   const cadre = useRef<HTMLDivElement>(null)
   const [vue, setVue] = useState<Vue>({ s: 1, tx: 0, ty: 0 })
+  const initialisee = useRef(false)
   const pointeurs = useRef(new Map<number, { x: number; y: number }>())
   const geste = useRef<{ dist: number; cx: number; cy: number; vue: Vue } | null>(null)
   const dernierTap = useRef<{ t: number; x: number; y: number } | null>(null)
@@ -36,7 +45,31 @@ export function ZoomPan({ children }: { children: ReactNode }) {
     return borner({ s, tx: px - (px - base.tx) * r, ty: py - (py - base.ty) * r })
   }, [borner])
 
-  const recentrer = useCallback(() => setVue({ s: 1, tx: 0, ty: 0 }), [])
+  /** Vue de départ : zoom léger centré sur l'île. */
+  const vueInitiale = useCallback((): Vue => {
+    const el = cadre.current
+    if (!el || !initiale) return { s: 1, tx: 0, ty: 0 }
+    const w = el.clientWidth, h = el.clientHeight
+    return borner({ s: initiale.s, tx: w / 2 - initiale.cx * w * initiale.s, ty: h / 2 - initiale.cy * h * initiale.s })
+  }, [borner, initiale])
+
+  // Double-tap : retour à la vue de départ ; si on y est déjà, vue d'ensemble.
+  const recentrer = useCallback(() => {
+    setVue((v) => {
+      const init = vueInitiale()
+      const dejaLa = Math.abs(v.s - init.s) < 0.02 && Math.abs(v.tx - init.tx) < 2 && Math.abs(v.ty - init.ty) < 2
+      return dejaLa ? { s: 1, tx: 0, ty: 0 } : init
+    })
+  }, [vueInitiale])
+
+  // Au premier affichage (une fois le cadre mesuré), on applique la vue de départ.
+  useEffect(() => {
+    if (initialisee.current || !initiale) return
+    const el = cadre.current
+    if (!el || !el.clientHeight) return
+    initialisee.current = true
+    setVue(vueInitiale())
+  })
 
   const local = (e: { clientX: number; clientY: number }) => {
     const r = cadre.current!.getBoundingClientRect()
@@ -123,7 +156,7 @@ export function ZoomPan({ children }: { children: ReactNode }) {
       <div className="zoompan-contenu" style={{ transform: `translate(${vue.tx}px, ${vue.ty}px) scale(${vue.s})` }}>
         {children}
       </div>
-      {vue.s > 1.02 && (
+      {Math.abs(vue.s - (initiale?.s ?? 1)) > 0.02 && (
         <button className="zoompan-recentrer" onClick={recentrer} aria-label="Recentrer l’île">
           ⤢
         </button>

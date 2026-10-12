@@ -181,7 +181,7 @@ export function Island({
   if (ratio) {
     // Plein écran : la scène épouse le cadre, l'île un peu sous le milieu, ciel et mer tout autour.
     H = Math.max(H, W / ratio)
-    y0 = (b.minY + b.maxY) / 2 - H * 0.56
+    y0 = (b.minY + b.maxY) / 2 - H * 0.5
   }
   const horizon = y0 + H * 0.26
   const cadre = { x0, y0, W, H, horizon }
