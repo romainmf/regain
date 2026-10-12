@@ -9,7 +9,8 @@ import {
   elanLisse,
   equilibre,
   grainesPourValidation,
-  meteoDepuisElan,
+  lumiereDepuisElan,
+  meteoIle,
 } from './economy'
 
 describe('graines', () => {
@@ -62,10 +63,18 @@ describe('élan', () => {
 })
 
 describe('météo', () => {
-  it('suit l’élan', () => {
-    expect(meteoDepuisElan(1.4)).toBe('soleil')
-    expect(meteoDepuisElan(1.2)).toBe('voile')
-    expect(meteoDepuisElan(1.0)).toBe('brume')
+  it('est ensoleillée tant qu’aucun domaine ne se repose', () => {
+    expect(meteoIle(0)).toBe('soleil')
+  })
+  it('se voile avec un domaine en repos, brume au-delà', () => {
+    expect(meteoIle(1)).toBe('voile')
+    expect(meteoIle(2)).toBe('brume')
+    expect(meteoIle(3)).toBe('brume')
+  })
+  it('la lumière du soleil se réchauffe avec l’élan, bornée', () => {
+    expect(lumiereDepuisElan(1.0)).toBeCloseTo(0.35, 5)
+    expect(lumiereDepuisElan(1.5)).toBeCloseTo(0.7, 5)
+    expect(lumiereDepuisElan(3)).toBe(0.7)
   })
 })
 

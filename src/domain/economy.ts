@@ -73,11 +73,20 @@ export function elanLisse(ancien: number, ancienQuand: number, cible: number, ma
   return Math.max(cible, Math.round(Math.max(1, plancher) * 100) / 100)
 }
 
-/** Météo de l'île déduite de l'élan. */
-export function meteoDepuisElan(elan: number): Meteo {
-  if (elan >= 1.3) return 'soleil'
-  if (elan >= 1.1) return 'voile'
-  return 'brume'
+/**
+ * Météo de l'île. Ensoleillée par défaut : une île fraîche ou active reste
+ * lumineuse. Elle ne se voile que lorsqu'un domaine se repose, et ne passe en
+ * brume douce que si plusieurs domaines dorment. Jamais punitif.
+ */
+export function meteoIle(nbDomainesEnRepos: number): Meteo {
+  if (nbDomainesEnRepos >= 2) return 'brume'
+  if (nbDomainesEnRepos === 1) return 'voile'
+  return 'soleil'
+}
+
+/** Intensité du halo de soleil (0,35 à 0,7) : l'élan réchauffe la lumière. */
+export function lumiereDepuisElan(elan: number): number {
+  return Math.min(0.7, Math.max(0.35, 0.35 + (elan - 1) * 0.7))
 }
 
 /** Un domaine passe en repos s'il n'a pas eu de validation depuis 7 jours. */

@@ -8,7 +8,7 @@ import { Robot } from './Robot'
 import { CascadesRiviere, Riviere } from './Riviere'
 import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
-import type { Meteo } from '../domain/economy'
+import { lumiereDepuisElan, type Meteo } from '../domain/economy'
 import type { Chaine } from '../domain/chains'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
@@ -191,7 +191,7 @@ export function Island({
         {/* Vignette douce qui ancre l'île */}
         <radialGradient id="vignette" cx="0.5" cy="0.46" r="0.62">
           <stop offset="0.55" stopColor="rgba(34,48,31,0)" />
-          <stop offset="1" stopColor="rgba(34,48,31,0.10)" />
+          <stop offset="1" stopColor="rgba(34,48,31,0.06)" />
         </radialGradient>
         {/* Halo chaud du soleil, posé sur l'île */}
         <radialGradient id="lumiereJour" cx="0.32" cy="0.2" r="0.7">
@@ -256,8 +256,8 @@ export function Island({
         })}
       </g>
 
-      {/* Lumière chaude du soleil sur l'île (côté haut-gauche) */}
-      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" pointerEvents="none" />
+      {/* Lumière chaude du soleil sur l'île : plus l'élan est fort, plus elle réchauffe */}
+      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" opacity={lumiereDepuisElan(elan ?? 1)} pointerEvents="none" />
 
       <Riviere />
 
@@ -416,12 +416,12 @@ export function Island({
         </g>
       )}
 
-      {/* Voile de météo (voilé ou brume douce) */}
+      {/* Voile de météo, doux et léger : voilé réchauffe un peu, brume reste tendre */}
       {meteo !== 'soleil' && (
         <rect
           x={x0} y={y0} width={W} height={H}
-          fill={meteo === 'brume' ? '#A9B7B5' : '#C3CDC8'}
-          opacity={meteo === 'brume' ? 0.26 : 0.12}
+          fill={meteo === 'brume' ? '#C6D1CD' : '#F0E8D4'}
+          opacity={meteo === 'brume' ? 0.16 : 0.08}
           pointerEvents="none"
         />
       )}

@@ -8,7 +8,7 @@ import {
   domaineEnRepos,
   elanCible,
   elanLisse,
-  meteoDepuisElan,
+  meteoIle,
   type Meteo,
 } from '../domain/economy'
 import type { GraineDB } from './db'
@@ -82,11 +82,13 @@ export function etatEconomie(
     ;(parMois[k] ??= zero())[g.domaine]++
   }
 
+  const repos = domainesEnRepos(journal, maintenant)
+  const nbRepos = Object.values(repos).filter(Boolean).length
   return {
     solde: soldeGraines(journal),
     elan,
-    meteo: meteoDepuisElan(elan),
-    repos: domainesEnRepos(journal, maintenant),
+    meteo: meteoIle(nbRepos),
+    repos,
     recoltes: compterRecoltes(parMois),
     validations7j: v7,
   }
