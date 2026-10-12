@@ -1,0 +1,27 @@
+.saisie-intro { margin: 0 0 16px; color: var(--texte-2); }
+.saisie-choix { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.saisie-type {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  min-height: 92px; padding: 14px;
+  background: var(--fond); border: 1.5px solid var(--ligne); border-radius: var(--r-m);
+  font: inherit; font-weight: 700; font-size: 15px; text-align: left; cursor: pointer;
+}
+.saisie-type:active { transform: scale(.98); }
+.saisie-icone {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 18px;
+  background: var(--surface); color: var(--encre);
+}
+
+.saisie-form h3 { font-size: 18px; margin-bottom: 14px; }
+.saisie-note { color: var(--texte-2); }
+.champ { display: block; margin-bottom: 14px; }
+.champ span { display: block; font-size: 14px; color: var(--texte-2); margin-bottom: 6px; }
+.champ input {
+  width: 100%; min-height: var(--cible); padding: 0 14px;
+  border-radius: var(--r-s); border: 1.5px solid var(--ligne);
+  background: var(--fond); font: inherit; color: var(--encre);
+}
+.champ input:focus-visible { outline: none; border-color: var(--planete); }
+.saisie-switch { display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 15px; }
+.saisie-switch input { position: absolute; opacity: 0; width: 0; height: 0; }

@@ -1,0 +1,14 @@
+.bandeau-chaine {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 10px 12px 0; padding: 12px 14px;
+  background: linear-gradient(100deg, var(--soleil-teinte), var(--planete-teinte));
+  border-radius: var(--r-m);
+  animation: bandeau-in .4s ease;
+}
+@keyframes bandeau-in { from { opacity: 0; transform: translateY(-6px) } }
+.bandeau-txt { flex: 1; }
+.bandeau-txt strong { font-family: var(--titre); font-size: 15px; }
+.bandeau-txt ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.bandeau-txt li { font-size: 13px; color: var(--texte-2); }
+.bandeau-txt li span { color: var(--soleil-fonce); font-weight: 700; }
+.bandeau-fermer { flex: 0 0 auto; border: 0; background: transparent; color: var(--texte-2); cursor: pointer; width: 32px; height: 32px; display: grid; place-items: center; }

@@ -44,3 +44,18 @@
   font-weight: 700; font-size: 14px; padding: 8px 14px;
   border-radius: 999px; cursor: pointer; min-height: 38px;
 }
+
+.actions-jeu { display: flex; gap: 10px; padding: 12px 16px 4px; }
+.action-saisir, .action-valider {
+  flex: 1; min-height: var(--cible);
+  border-radius: 999px; border: 1.5px solid var(--ligne);
+  font: inherit; font-weight: 700; font-size: 15px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.action-saisir { background: var(--encre); color: var(--surface); border-color: var(--encre); }
+.action-valider { background: var(--surface); color: var(--encre); position: relative; }
+.action-badge {
+  background: var(--boite); color: var(--surface);
+  min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
+  font-size: 13px; display: inline-grid; place-items: center;
+}

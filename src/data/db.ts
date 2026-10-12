@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Autonomie, Domaine } from '../domain/types'
+import type { Proposition, Saisie } from '../domain/propositions'
 
 /** Un agent recruté (de départ, du catalogue ou créé par l'utilisateur). */
 export interface AgentDB {
@@ -31,10 +32,22 @@ export interface MetaDB {
   valeur: unknown
 }
 
+/** Une ligne du journal de graines : chaque validation en ajoute une (gain éventuellement nul). */
+export interface GraineDB {
+  id: string
+  ts: number
+  domaine: Domaine
+  montant: number
+  motif: 'validation' | 'exemple' | 'depense'
+}
+
 export class RegainDB extends Dexie {
   agents!: Table<AgentDB, string>
   placements!: Table<PlacementDB, string>
   meta!: Table<MetaDB, string>
+  saisies!: Table<Saisie, string>
+  propositions!: Table<Proposition, string>
+  graines!: Table<GraineDB, string>
 
   constructor() {
     super('regain')
@@ -42,6 +55,14 @@ export class RegainDB extends Dexie {
       agents: 'id, domaine',
       placements: 'id, refId, kind',
       meta: 'cle',
+    })
+    this.version(2).stores({
+      agents: 'id, domaine',
+      placements: 'id, refId, kind',
+      meta: 'cle',
+      saisies: 'id, date, kind',
+      propositions: 'id, statut, agentId, domaine, createdAt',
+      graines: 'id, ts, domaine, motif',
     })
   }
 }

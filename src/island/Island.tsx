@@ -8,6 +8,9 @@ import { Robot } from './Robot'
 import { CascadesRiviere, Riviere } from './Riviere'
 import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
+import type { Meteo } from '../domain/economy'
+import type { Chaine } from '../domain/chains'
+import { formatElan } from '../ui/EnTete'
 import './island.css'
 
 export interface PlacementVue {
@@ -41,6 +44,16 @@ interface Props {
   onDeplacerDemande?: (agentId: string) => void
   /** Tap bref sur un bâtiment : ouvre la fiche de son agent. */
   onBatimentTap?: (agentId: string) => void
+  /** Agents avec une proposition en attente : leur bâtiment donne signe de vie. */
+  agentsEnAttente?: Set<string>
+  /** Météo de l'île déduite de l'élan. */
+  meteo?: Meteo
+  /** Domaines en repos (brume douce, désaturés). */
+  repos?: Record<Domaine, boolean>
+  /** Élan courant, pour le badge au centre. */
+  elan?: number
+  /** Dernière chaîne : un flux doré relie les deux bâtiments concernés. */
+  chaine?: Chaine | null
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -48,6 +61,13 @@ const SOL: Record<Tuile['zone'], string> = {
   peau: 'var(--peau-sol)',
   planete: 'var(--planete-sol)',
   coeur: 'var(--coeur-sol)',
+}
+
+/** Sol désaturé d'un domaine en repos (brume douce). */
+const SOL_REPOS: Record<Domaine, string> = {
+  boite: '#D8CFC2',
+  peau: '#D3CBCF',
+  planete: '#CBD4CC',
 }
 
 const MOUSSE = '#7FAE73'
@@ -77,6 +97,11 @@ export function Island({
   onPoser,
   onDeplacerDemande,
   onBatimentTap,
+  agentsEnAttente,
+  meteo = 'soleil',
+  repos,
+  elan,
+  chaine,
 }: Props) {
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
   // Appui long sur un bâtiment pour le déplacer ; tap bref pour ouvrir la fiche.
@@ -191,16 +216,19 @@ export function Island({
 
       {/* Sol */}
       <g>
-        {triees.map((t) => (
-          <polygon
-            key={cle(t.x, t.y)}
-            points={losange(t.x, t.y)}
-            fill={SOL[t.zone]}
-            stroke="rgba(255,255,255,.55)"
-            strokeWidth={0.8}
-            data-zone={t.zone}
-          />
-        ))}
+        {triees.map((t) => {
+          const enRepos = t.zone !== 'coeur' && repos?.[t.zone]
+          return (
+            <polygon
+              key={cle(t.x, t.y)}
+              points={losange(t.x, t.y)}
+              fill={enRepos ? SOL_REPOS[t.zone as Domaine] : SOL[t.zone]}
+              stroke="rgba(255,255,255,.55)"
+              strokeWidth={0.8}
+              data-zone={t.zone}
+            />
+          )
+        })}
       </g>
 
       <Riviere />
@@ -276,7 +304,7 @@ export function Island({
                 </g>
               ) : (
                 <g
-                  className={`batiment${poseEnCours?.agentId === o.id ? ' batiment-deplace' : ''}`}
+                  className={`batiment${poseEnCours?.agentId === o.id ? ' batiment-deplace' : ''}${agentsEnAttente?.has(o.id) ? ' batiment-vivant' : ''}`}
                   aria-label={poseEnCours ? o.libelle : `${o.libelle} — appui long pour déplacer`}
                   role={poseEnCours ? undefined : 'button'}
                   tabIndex={poseEnCours ? undefined : 0}
@@ -290,6 +318,15 @@ export function Island({
                 >
                   {/* Cible de toucher sous le bâtiment */}
                   <polygon points={losange(0, 0)} fill="transparent" />
+                  {agentsEnAttente?.has(o.id) && (
+                    <g className="signe-vie" aria-hidden>
+                      <ellipse className="signe-aura" cx={0} cy={-2} rx={22} ry={11} fill="none" stroke="#E7B04A" strokeWidth={1.5} />
+                      <g className="signe-point" transform="translate(0 -46)">
+                        <circle r={6} fill="#E7B04A" opacity={0.9} />
+                        <path d="M -2.4 0 L -0.6 2 L 3 -2.2" stroke="#FBF8F1" strokeWidth={1.4} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      </g>
+                    </g>
+                  )}
                   <g transform="scale(1.25)">
                     <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
                   </g>
@@ -303,6 +340,50 @@ export function Island({
           )
         })}
       </g>
+
+      {/* Flux doré de la dernière chaîne, entre les deux bâtiments concernés */}
+      {chaine && (() => {
+        const de = placements.find((p) => p.id === chaine.deAgentId)
+        const vers = placements.find((p) => p.id === chaine.versAgentId)
+        if (!de || !vers) return null
+        const a = iso(de.x, de.y)
+        const b = iso(vers.x, vers.y)
+        const mx = (a.sx + b.sx) / 2
+        const my = (a.sy + b.sy) / 2 - 26
+        const ang = (Math.atan2(b.sy - 20 - (my), b.sx - mx) * 180) / Math.PI
+        return (
+          <g className="flux" aria-hidden>
+            <path
+              className="flux-trait"
+              d={`M ${a.sx} ${a.sy - 20} Q ${mx} ${my} ${b.sx} ${b.sy - 20}`}
+              fill="none" stroke="#E7B04A" strokeWidth={3} strokeLinecap="round" strokeDasharray="2 7"
+            />
+            <g transform={`translate(${b.sx} ${b.sy - 20}) rotate(${ang})`}>
+              <path className="flux-fleche" d="M -7 -4 L 0 0 L -7 4" fill="none" stroke="#E7B04A" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+            </g>
+          </g>
+        )
+      })()}
+
+      {/* Badge d'élan, près de l'arbre */}
+      {elan != null && (
+        <g className="elan-badge" transform={`translate(${iso(0, 0).sx} ${iso(0, 0).sy - 96})`} aria-hidden>
+          <rect x={-40} y={-14} width={80} height={26} rx={13} fill="#FBF8F1" stroke="#E7B04A" strokeWidth={1.5} />
+          <text x={0} y={4} textAnchor="middle" fontFamily="Fraunces, serif" fontSize={14} fontWeight={600} fill="#7A5410">
+            {formatElan(elan)} élan
+          </text>
+        </g>
+      )}
+
+      {/* Voile de météo (voilé ou brume douce) */}
+      {meteo !== 'soleil' && (
+        <rect
+          x={x0} y={y0} width={W} height={H}
+          fill={meteo === 'brume' ? '#A9B7B5' : '#C3CDC8'}
+          opacity={meteo === 'brume' ? 0.26 : 0.12}
+          pointerEvents="none"
+        />
+      )}
 
       <Pollen {...cadre} />
     </svg>

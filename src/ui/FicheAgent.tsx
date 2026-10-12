@@ -17,7 +17,7 @@ import './fiche.css'
 
 /** Fiche détaillée et paramétrable d'un agent (ouverte depuis l'île ou l'équipe). */
 export function FicheAgent() {
-  const { ficheId, agents, fermerFiche, definirAutonomie, basculerActif, definirMissions, demarrerDeplacement } = useJeu()
+  const { ficheId, agents, fermerFiche, definirAutonomie, basculerActif, definirMissions, demarrerDeplacement, nbParAgentSemaine } = useJeu()
   const navigate = useNavigate()
   const agent = ficheId ? agents.find((a) => a.id === ficheId) : undefined
   const t = agent?.templateId ? getTemplate(agent.templateId) : undefined
@@ -135,12 +135,17 @@ export function FicheAgent() {
         {/* Compteurs de la semaine */}
         <section className="fiche-bloc">
           <h3 className="fiche-titre">Cette semaine</h3>
-          <div className="compteurs">
-            <div><strong>{0}</strong><span>préparées</span></div>
-            <div><strong>{0}</strong><span>validées</span></div>
-            <div><strong>{0}</strong><span>graines</span></div>
-          </div>
-          <p className="fiche-note">L’historique de ses propositions apparaîtra ici dès que tu auras fait tes premières saisies.</p>
+          {(() => {
+            const c = nbParAgentSemaine(agent.id)
+            return (
+              <div className="compteurs">
+                <div><strong>{c.preparees}</strong><span>préparées</span></div>
+                <div><strong>{c.validees}</strong><span>validées</span></div>
+                <div><strong>{c.graines}</strong><span>graines</span></div>
+              </div>
+            )
+          })()}
+          <p className="fiche-note">Les graines sont comptées pour tout le domaine {DOMAINE_LABEL[agent.domaine]}.</p>
         </section>
 
         {/* Effet sur les 3 domaines */}

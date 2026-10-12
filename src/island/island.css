@@ -83,6 +83,22 @@
 .batiment { cursor: pointer; }
 .batiment-deplace { opacity: .4; }
 
+/* Signe de vie : l'agent a une proposition en attente */
+.signe-aura { transform-box: fill-box; transform-origin: center; animation: signe-aura 2s ease-in-out infinite; }
+@keyframes signe-aura { 0%, 100% { opacity: .2; transform: scale(.9) } 50% { opacity: .75; transform: scale(1.08) } }
+.signe-point { transform-box: fill-box; transform-origin: center; animation: signe-point 2s ease-in-out infinite; }
+@keyframes signe-point { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-3px) } }
+
+/* Flux doré d'une chaîne */
+.flux-trait { animation: flux-court 1s linear infinite; }
+@keyframes flux-court { to { stroke-dashoffset: -18; } }
+.flux-fleche, .flux-trait { filter: drop-shadow(0 0 2px rgba(231,176,74,.6)); }
+.flux { animation: flux-pop .4s ease; }
+@keyframes flux-pop { from { opacity: 0 } }
+
+/* Badge d'élan */
+.elan-badge { animation: flux-pop .4s ease; }
+
 /* Fanions au vent */
 .fanion-tissu { transform-box: fill-box; transform-origin: 0 50%; animation: flotte-fanion 3.2s ease-in-out infinite alternate; }
 @keyframes flotte-fanion { from { transform: skewY(-3deg) scaleX(.97) } to { transform: skewY(3deg) scaleX(1) } }
@@ -91,6 +107,7 @@
   .feuille { display: none; }
   .courant, .source-ride, .coeur-couronne, .coeur-yeux, .fanion-tissu,
   .robot-corps, .robot-yeux, .robot-antenne, .robot-coeur, .robot-bras, .pose-tuile,
+  .signe-aura, .signe-point, .flux-trait,
   .coeur-halo, .coeur-bulle,
   .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
 }

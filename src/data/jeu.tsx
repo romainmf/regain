@@ -4,8 +4,18 @@ import { getTemplate } from '../domain/catalog'
 import type { AgentTemplate, Autonomie, Domaine } from '../domain/types'
 import { niveauBatiment } from '../domain/progression'
 import type { PlacementVue } from '../island/Island'
+import type { Proposition, SaisieData, SaisieKind } from '../domain/propositions'
+import type { Chaine } from '../domain/chains'
+import { etatEconomie, type EtatEconomie } from './selectors'
+import * as actions from './actions'
 import { amorcerSiNecessaire } from './seed'
-import { db, nouvelId, type AgentDB } from './db'
+import { db, getMeta, nouvelId, type AgentDB, type GraineDB } from './db'
+
+export interface DerniereChaine {
+  chaines: Chaine[]
+  ts: number
+  propType: string
+}
 
 /** Un bâtiment en cours de pose (nouveau recrutement) ou de déplacement. */
 export interface PoseEnCours {
@@ -33,6 +43,25 @@ interface JeuCtx {
   definirAutonomie: (agentId: string, autonomie: Autonomie) => Promise<void>
   basculerActif: (agentId: string) => Promise<void>
   definirMissions: (agentId: string, missions: string[]) => Promise<void>
+  // ——— Jalon 3 : saisies, file de validation, économie ———
+  economie: EtatEconomie
+  /** Propositions en attente de validation. */
+  aValider: Proposition[]
+  /** Propositions mises à « plus tard ». */
+  plusTardListe: Proposition[]
+  /** Agents qui ont une proposition en attente (signe de vie sur l'île). */
+  agentsEnAttente: Set<string>
+  /** Dernière chaîne déclenchée (bandeau + flux doré), effaçable. */
+  derniereChaine: DerniereChaine | null
+  effacerDerniereChaine: () => void
+  exemplesPresents: boolean
+  nbParAgentSemaine: (agentId: string) => { preparees: number; validees: number; graines: number }
+  saisir: (kind: SaisieKind, data: SaisieData) => Promise<number>
+  validerProposition: typeof actions.validerProposition
+  plusTard: (id: string) => Promise<void>
+  revoir: typeof actions.revoir
+  reprendre: (id: string) => Promise<void>
+  effacerExemples: () => Promise<void>
 }
 
 const Ctx = createContext<JeuCtx | null>(null)
@@ -68,6 +97,7 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
   const [pret, setPret] = useState(false)
   const [poseEnCours, setPoseEnCours] = useState<PoseEnCours | null>(null)
   const [ficheId, setFicheId] = useState<string | null>(null)
+  const [chaineMasqueeTs, setChaineMasqueeTs] = useState(0)
 
   useEffect(() => {
     amorcerSiNecessaire().then(() => setPret(true))
@@ -84,6 +114,50 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
   const templatesRecrutes = useMemo(
     () => new Set(agents.map((a) => a.templateId).filter((x): x is string => !!x)),
     [agents],
+  )
+
+  // ——— Données de jeu (jalon 3) ———
+  const propositions = useLiveQuery(() => db.propositions.toArray(), [], [] as Proposition[])
+  const graines = useLiveQuery(() => db.graines.toArray(), [], [] as GraineDB[])
+  const elanMemo = useLiveQuery(() => getMeta('elan', { value: 1, ts: Date.now() }), [], { value: 1, ts: Date.now() })
+  const derniereChaineMeta = useLiveQuery(() => getMeta<DerniereChaine | null>('derniereChaine', null), [], null)
+  const exemplesEffaces = useLiveQuery(() => getMeta('exemples-effaces', false), [], false)
+
+  const now = Date.now()
+  const economie = useMemo(() => etatEconomie(graines, elanMemo, now), [graines, elanMemo, now])
+
+  const aValider = useMemo(
+    () => propositions.filter((p) => p.statut === 'a_valider').sort((a, b) => b.createdAt - a.createdAt),
+    [propositions],
+  )
+  const plusTardListe = useMemo(() => propositions.filter((p) => p.statut === 'plus_tard'), [propositions])
+  const agentsEnAttente = useMemo(() => new Set(aValider.map((p) => p.agentId)), [aValider])
+  const exemplesPresents = useMemo(
+    () => !exemplesEffaces && propositions.some((p) => p.exemple),
+    [exemplesEffaces, propositions],
+  )
+
+  const derniereChaine = useMemo(() => {
+    if (!derniereChaineMeta || derniereChaineMeta.ts <= chaineMasqueeTs) return null
+    return derniereChaineMeta
+  }, [derniereChaineMeta, chaineMasqueeTs])
+  const effacerDerniereChaine = useCallback(() => setChaineMasqueeTs(Date.now()), [])
+
+  const nbParAgentSemaine = useCallback(
+    (agentId: string) => {
+      const semaine = (ts: number) => now - ts <= 7 * 24 * 60 * 60 * 1000
+      const dAgent = propositions.filter((p) => p.agentId === agentId)
+      const preparees = dAgent.filter((p) => semaine(p.createdAt)).length
+      const validees = dAgent.filter((p) => p.statut === 'validee' && p.resolvedAt && semaine(p.resolvedAt))
+      const agentDom = agents.find((a) => a.id === agentId)?.domaine
+      const grainesAgent = agentDom
+        ? graines
+            .filter((g) => g.domaine === agentDom && g.motif === 'validation' && semaine(g.ts))
+            .reduce((s, g) => s + g.montant, 0)
+        : 0
+      return { preparees, validees: validees.length, graines: grainesAgent }
+    },
+    [propositions, graines, agents, now],
   )
 
   const recruter = useCallback(async (t: AgentTemplate) => {
@@ -158,6 +232,20 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     definirAutonomie,
     basculerActif,
     definirMissions,
+    economie,
+    aValider,
+    plusTardListe,
+    agentsEnAttente,
+    derniereChaine,
+    effacerDerniereChaine,
+    exemplesPresents,
+    nbParAgentSemaine,
+    saisir: actions.saisir,
+    validerProposition: actions.validerProposition,
+    plusTard: actions.plusTard,
+    revoir: actions.revoir,
+    reprendre: actions.reprendre,
+    effacerExemples: actions.effacerExemples,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useJeu } from '../data/jeu'
-import { DOMAINES, DOMAINE_LABEL } from '../domain/types'
 import { Island } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
 import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
+import { SaisieRapide } from '../ui/SaisieRapide'
+import { FileValidation } from '../ui/FileValidation'
+import { BandeauChaine } from '../ui/BandeauChaine'
 import './monile.css'
 
 const CLE_BRIN = 'regain.brin.vu'
@@ -18,9 +20,14 @@ function dejaVu(): boolean {
 }
 
 export function MonIle() {
-  const { pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose, ouvrirFiche } = useJeu()
+  const {
+    pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose, ouvrirFiche,
+    economie, aValider, agentsEnAttente, derniereChaine,
+  } = useJeu()
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
+  const [saisieOuverte, setSaisieOuverte] = useState(false)
+  const [fileOuverte, setFileOuverte] = useState(false)
 
   const ouvrirBrin = () => {
     setBrinOuvert(true)
@@ -38,7 +45,7 @@ export function MonIle() {
 
   return (
     <div className="ecran mon-ile">
-      <EnTete graines={0} elan={1} />
+      <EnTete graines={economie.solde} elan={economie.elan} />
 
       {poseEnCours && (
         <div className="pose-bandeau" role="status">
@@ -61,21 +68,32 @@ export function MonIle() {
             onPoser={poser}
             onDeplacerDemande={demarrerDeplacement}
             onBatimentTap={ouvrirFiche}
+            agentsEnAttente={agentsEnAttente}
+            meteo={economie.meteo}
+            repos={economie.repos}
+            elan={economie.elan}
+            chaine={derniereChaine?.chaines[0] ?? null}
           />
         </div>
       </div>
 
-      <ul className="legende" aria-label="Les trois domaines">
-        {DOMAINES.map((d) => (
-          <li key={d} className={`legende-item legende-${d}`}>
-            <span className="legende-point" aria-hidden /> {DOMAINE_LABEL[d]}
-          </li>
-        ))}
-      </ul>
+      {derniereChaine && <BandeauChaine />}
+
+      <div className="actions-jeu">
+        <button className="action-saisir" onClick={() => setSaisieOuverte(true)}>
+          <span aria-hidden>✎</span> Saisie rapide
+        </button>
+        <button className="action-valider" onClick={() => setFileOuverte(true)}>
+          À valider
+          {aValider.length > 0 && <span className="action-badge">{aValider.length}</span>}
+        </button>
+      </div>
 
       {!pret && <p className="mon-ile-chargement">Ton île se réveille…</p>}
 
       <BrinChat ouvert={brinOuvert} onFermer={fermerBrin} />
+      <SaisieRapide ouvert={saisieOuverte} onFermer={() => setSaisieOuverte(false)} />
+      <FileValidation ouvert={fileOuverte} onFermer={() => setFileOuverte(false)} />
     </div>
   )
 }

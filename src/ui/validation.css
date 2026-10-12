@@ -1,0 +1,43 @@
+.val-vide { color: var(--texte-2); text-align: center; padding: 24px 8px; }
+.val-liste { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.val-carte {
+  background: var(--surface); border: 1px solid var(--ligne);
+  border-left: 4px solid var(--ligne); border-radius: var(--r-m); padding: 14px;
+}
+.val-boite { border-left-color: var(--boite); }
+.val-peau { border-left-color: var(--peau); }
+.val-planete { border-left-color: var(--planete); }
+.val-haut { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.val-pastille { font-size: 12px; }
+.val-chaine, .val-exemple {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  padding: 3px 8px; border-radius: 999px;
+}
+.val-chaine { background: var(--soleil-teinte); color: var(--soleil-fonce); }
+.val-exemple { background: var(--fond); color: var(--texte-2); }
+.val-carte h3 { font-size: 17px; }
+.val-detail { margin: 6px 0 0; font-size: 14px; color: var(--texte-2); }
+.val-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.val-actions .btn { font-size: 14px; padding: 8px 14px; }
+
+.val-toast {
+  position: sticky; top: 0; z-index: 2;
+  background: var(--planete); color: var(--surface);
+  text-align: center; font-weight: 700; padding: 10px;
+  border-radius: var(--r-m); margin-bottom: 12px;
+  animation: val-toast .25s ease;
+}
+@keyframes val-toast { from { transform: translateY(-6px); opacity: 0 } }
+
+.val-plustard { margin-top: 20px; padding-top: 14px; border-top: 1px solid var(--ligne); }
+.val-plustard h4 { font-size: 14px; color: var(--texte-2); margin-bottom: 8px; }
+.val-plustard ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.val-plustard li { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 14px; }
+.val-reprendre { border: 0; background: var(--fond); color: var(--encre); font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 999px; cursor: pointer; min-height: 36px; }
+
+.val-effacer {
+  display: block; width: 100%; margin-top: 16px; min-height: 40px;
+  border: 0; background: transparent; color: var(--texte-2);
+  font-size: 13px; text-decoration: underline; cursor: pointer;
+}
+.val-revoir { margin-top: 4px; }
