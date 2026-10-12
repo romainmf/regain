@@ -12,7 +12,7 @@ import { lumiereDepuisElan, type Meteo } from '../domain/economy'
 import type { Chaine } from '../domain/chains'
 import { getAmbiance, type AmbianceId, type DecorId } from '../domain/boutique'
 import { Decor } from './Decor'
-import { LieuxHaut, LieuxSol } from './LieuxZones'
+import { LieuxHaut, LieuxSol, type StyleMur, type StyleSol } from './LieuxZones'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
 
@@ -75,6 +75,8 @@ interface Props {
   onDecorTap?: (id: string) => void
   /** Maquette : chaque domaine devient un grand lieu ouvert (Atelier, Spa, Jardin). */
   lieux?: boolean
+  murs?: Record<Domaine, StyleMur>
+  sols?: Record<Domaine, StyleSol>
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -128,6 +130,8 @@ export function Island({
   ambiance = 'jour',
   onDecorTap,
   lieux = false,
+  murs,
+  sols,
 }: Props) {
   const amb = getAmbiance(ambiance)
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
@@ -290,7 +294,7 @@ export function Island({
         })}
       </g>
 
-      {lieux && <LieuxSol tuiles={tuiles} />}
+      {lieux && <LieuxSol tuiles={tuiles} murs={murs} sols={sols} />}
 
       {/* Lumière chaude du soleil sur l'île : plus l'élan est fort, plus elle réchauffe */}
       <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" opacity={amb.astre === 'lune' ? 0 : lumiereDepuisElan(elan ?? 1)} pointerEvents="none" />
@@ -435,7 +439,7 @@ export function Island({
         })}
       </g>
 
-      {lieux && <LieuxHaut tuiles={tuiles} />}
+      {lieux && <LieuxHaut tuiles={tuiles} murs={murs} sols={sols} />}
 
       {/* Perspective aérienne : le fond de l'île s'éclaircit légèrement */}
       <rect x={x0} y={y0 + H * 0.3} width={W} height={H * 0.55} fill="url(#haze)" pointerEvents="none" />
