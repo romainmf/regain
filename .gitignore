@@ -5,3 +5,7 @@ test-results
 playwright-report
 .vercel
 .env*
+
+# Playwright
+/test-results/
+/playwright-report/
