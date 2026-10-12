@@ -1,47 +1,66 @@
 import { useMemo, useState } from 'react'
 import type { Domaine } from '../domain/types'
 import { DOMAINE_LABEL } from '../domain/types'
-import type { PlacementVue } from '../island/Island'
+import type { DecorVue, PlacementVue } from '../island/Island'
 import { Island } from '../island/Island'
 import { tuilesDeDepart } from '../island/iso'
 import { MURS_DEFAUT, SOLS_DEFAUT, STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/LieuxZones'
 import '../design/tokens.css'
 
 /**
- * Maquette (dev) : « un lieu par domaine » avec murs et sols personnalisables,
- * façon mode Construction des Sims. L'île de gauche suit les choix de la
- * palette ; celle de droite montre un autre jeu de matières, pour comparer.
+ * Maquette (dev) : l'île pleine, avec les seize agents du catalogue à leur
+ * poste, le mobilier des lieux et du décor de la boutique. Murs et sols se
+ * changent avec la palette, comme dans le rayon Construction.
  */
-const P = (id: string, x: number, y: number, batiment: PlacementVue['batiment'], domaine: PlacementVue['domaine'], niveau: 1 | 2 | 3 = 1): PlacementVue => ({
-  id, x, y, batiment, domaine, niveau, libelle: id,
+const P = (id: string, x: number, y: number, poste: PlacementVue['poste'], domaine: Domaine, niveau: 1 | 2 | 3 = 1): PlacementVue => ({
+  id, x, y, batiment: 'cabane', poste, domaine, niveau, libelle: id,
 })
 
 const AGENTS: PlacementVue[] = [
-  { ...P('factures', 1, 3, 'cabane', 'boite', 2), poste: 'factures' },
-  { ...P('relance', 2, 5, 'boite-aux-lettres', 'boite'), poste: 'relance' },
-  { ...P('vigie', 0, 2, 'tour-de-guet', 'boite'), poste: 'vigie' },
-  { ...P('rythme', 5, 1, 'pergola', 'peau', 2), poste: 'rythme' },
-  { ...P('cloture', 6, 2, 'lanterne', 'peau'), poste: 'cloture' },
-  { ...P('miroir', 2, 1, 'banc', 'peau'), poste: 'miroir' },
-  { ...P('empreinte', 5, 4, 'serre', 'planete', 2), poste: 'empreinte' },
-  { ...P('sobriete', 3, 5, 'composteur', 'planete'), poste: 'sobriete' },
-  { ...P('deplacements', 4, 6, 'petit-rail', 'planete'), poste: 'deplacements' },
+  // Atelier · Ma boîte
+  P('factures', 1, 3, 'factures', 'boite', 3),
+  P('relance', 2, 5, 'relance', 'boite', 2),
+  P('vigie', 0, 2, 'vigie', 'boite'),
+  P('coussin', 1, 5, 'coussin', 'boite', 2),
+  P('don', 2, 3, 'don', 'boite'),
+  // Spa · Ma peau
+  P('rythme', 5, 1, 'rythme', 'peau', 3),
+  P('cloture', 6, 2, 'cloture', 'peau'),
+  P('regulateur', 3, 2, 'regulateur', 'peau', 2),
+  P('air', 1, 0, 'air', 'peau'),
+  P('lien', 2, 2, 'lien', 'peau', 2),
+  P('miroir', 2, 1, 'miroir', 'peau'),
+  // Jardin · Ma planète
+  P('empreinte', 5, 4, 'empreinte', 'planete', 3),
+  P('sobriete', 3, 5, 'sobriete', 'planete', 2),
+  P('deplacements', 4, 6, 'deplacements', 'planete'),
+  P('achats', 4, 3, 'achats', 'planete', 2),
+  P('label', 5, 5, 'label', 'planete'),
 ]
 
-const VARIANTE: { murs: Record<Domaine, StyleMur>; sols: Record<Domaine, StyleSol> } = {
-  murs: { boite: 'pierre', peau: 'bambou', planete: 'terre' },
-  sols: { boite: 'tomettes', peau: 'gravier', planete: 'gazon' },
-}
+const DECORS: DecorVue[] = [
+  { id: 'd1', x: 1, y: 1, decorId: 'fleurs' },
+  { id: 'd2', x: 1, y: 6, decorId: 'banc' },
+  { id: 'd3', x: 5, y: 2, decorId: 'lampadaire' },
+  { id: 'd4', x: 3, y: 0, decorId: 'massif' },
+  { id: 'd5', x: 6, y: 5, decorId: 'haie' },
+  { id: 'd6', x: 3, y: 4, decorId: 'fleurs' },
+  { id: 'd7', x: 3, y: 6, decorId: 'massif' },
+]
 
 const ZONES: Domaine[] = ['boite', 'peau', 'planete']
 const LIEU: Record<Domaine, string> = { boite: 'Atelier', peau: 'Spa', planete: 'Jardin' }
+const NOMS: Record<string, string> = {
+  factures: 'Factures', relance: 'Relance douce', vigie: 'Vigie trésorerie', coussin: 'Coussin fiscal', don: 'Don à impact',
+  rythme: 'Rythme', cloture: 'Clôture', regulateur: 'Régulateur de charge', air: 'Compagnon d’air', lien: 'Anti-isolement', miroir: 'Miroir doux',
+  empreinte: 'Empreinte', sobriete: 'Sobriété numérique', deplacements: 'Déplacements', achats: 'Achats alignés', label: 'Label vivant',
+}
 
 export function Maquette() {
   const tuiles = useMemo(tuilesDeDepart, [])
   const [murs, setMurs] = useState<Record<Domaine, StyleMur>>(MURS_DEFAUT)
   const [sols, setSols] = useState<Record<Domaine, StyleSol>>(SOLS_DEFAUT)
 
-  const col: React.CSSProperties = { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }
   const h2: React.CSSProperties = { fontFamily: 'var(--titre)', fontSize: 20, margin: 0, color: 'var(--encre)' }
   const sous: React.CSSProperties = { margin: 0, fontSize: 13, color: 'var(--texte-2)' }
   const pastille = (fond: string, actif: boolean) => ({
@@ -50,12 +69,11 @@ export function Maquette() {
 
   return (
     <div style={{ background: 'var(--fond)', minHeight: '100vh', padding: 20, fontFamily: 'var(--texte)', color: 'var(--encre)' }}>
-      <h1 style={{ ...h2, fontSize: 24, marginBottom: 4 }}>Maquette : un lieu par domaine, murs et sols personnalisables</h1>
+      <h1 style={{ ...h2, fontSize: 24, marginBottom: 4 }}>Maquette : l’île pleine, seize agents à leur poste</h1>
       <p style={{ ...sous, marginBottom: 14 }}>
-        Façon mode Construction des Sims : murs abaissés côté caméra pour voir l’intérieur, façade haute au fond avec auvent, portes avec arche entre les lieux, mobilier propre à chaque lieu. Les couleurs de domaine ne changent jamais.
+        Trois lieux vitrés, mobilier propre à chaque lieu, un poste de travail par agent, décor de la boutique. Les niveaux (1 à 3) suivent l’usage : plante qui grandit, écran ou badge en plus.
       </p>
 
-      {/* Palette façon Sims */}
       <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap', background: 'var(--surface)', border: '1px solid var(--ligne)', borderRadius: 16, padding: '12px 16px', marginBottom: 16 }}>
         {ZONES.map((z) => (
           <div key={z} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -77,17 +95,21 @@ export function Maquette() {
       </div>
 
       <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-        <div style={col}>
-          <h2 style={h2}>Tes choix</h2>
-          <p style={sous}>
-            Murs : {ZONES.map((z) => `${LIEU[z]} ${STYLES_MUR[murs[z]].nom.toLowerCase()}`).join(' · ')}. Sols : {ZONES.map((z) => `${LIEU[z]} ${STYLES_SOL[sols[z]].nom.toLowerCase()}`).join(' · ')}.
-          </p>
-          <Island tuiles={tuiles} placements={AGENTS} elan={1.3} meteo="soleil" lieux murs={murs} sols={sols} />
+        <div style={{ flex: '0 0 68%', minWidth: 0 }}>
+          <Island tuiles={tuiles} placements={AGENTS} decors={DECORS} elan={1.4} meteo="soleil" lieux murs={murs} sols={sols} />
         </div>
-        <div style={col}>
-          <h2 style={h2}>Autre jeu de matières</h2>
-          <p style={sous}>Murs pierre sèche · bambou · terre crue. Sols tomettes · gravier · gazon.</p>
-          <Island tuiles={tuiles} placements={AGENTS} elan={1.3} meteo="soleil" lieux murs={VARIANTE.murs} sols={VARIANTE.sols} />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {ZONES.map((z) => (
+            <section key={z}>
+              <h2 style={{ ...h2, fontSize: 16, color: `var(--${z})` }}>{LIEU[z]} · {DOMAINE_LABEL[z]}</h2>
+              <ul style={{ ...sous, margin: '4px 0 0', paddingLeft: 16, lineHeight: 1.5 }}>
+                {AGENTS.filter((a) => a.domaine === z).map((a) => (
+                  <li key={a.id}>{NOMS[a.id]} <span style={{ opacity: 0.6 }}>· niveau {a.niveau}</span></li>
+                ))}
+              </ul>
+            </section>
+          ))}
+          <p style={sous}>Décor : fleurs, banc, lampadaire, massifs, haie.</p>
         </div>
       </div>
     </div>
