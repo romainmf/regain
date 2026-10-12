@@ -51,7 +51,7 @@ export function FicheAgent() {
             navigate('/')
           }}
         >
-          Déplacer le bâtiment
+          Déplacer le poste
         </Bouton>
       }
     >
@@ -63,7 +63,7 @@ export function FicheAgent() {
           </svg>
           <div className="fiche-tete-txt">
             <span className={`pastille-${agent.domaine}`}>{DOMAINE_LABEL[agent.domaine]}</span>
-            <p className="fiche-sous">{t?.batimentNom ?? 'Bâtiment'} · niveau {niveau}</p>
+            <p className="fiche-sous">{t?.posteNom ?? 'Son poste'} · niveau {niveau}</p>
           </div>
         </div>
 

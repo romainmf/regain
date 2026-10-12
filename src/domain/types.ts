@@ -60,6 +60,16 @@ export type BatimentId =
   | 'jardin'
   | 'refuge'
 
+/**
+ * Poste de travail d'un agent dans son lieu (Atelier, Spa, Jardin) : un
+ * meuble solarpunk qui raconte sa fonction, où son robot travaille.
+ */
+export type PosteId =
+  | 'factures' | 'relance' | 'vigie' | 'coussin' | 'don'
+  | 'rythme' | 'cloture' | 'regulateur' | 'air' | 'lien' | 'miroir'
+  | 'empreinte' | 'sobriete' | 'deplacements' | 'achats' | 'label'
+  | 'generique'
+
 export type SigneDeVie = 'lumiere' | 'fumee' | 'plante' | 'train' | 'eau' | 'etincelle'
 
 export interface AgentTemplate {
@@ -70,8 +80,12 @@ export interface AgentTemplate {
   mission: string
   entrees: string[]
   propositions: string[]
+  /** Ancien bâtiment (compatibilité des îles déjà créées). */
   batiment: BatimentId
   batimentNom: string
+  /** Poste de travail dans son lieu. */
+  poste: PosteId
+  posteNom: string
   signeDeVie: SigneDeVie
   autonomies: Autonomie[]
   relie: { vers: Domaine; produit: string }

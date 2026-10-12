@@ -57,18 +57,18 @@ export const SUJETS: Sujet[] = [
     reponse: [
       'Une seule action peut nourrir les trois domaines. Exemple : tu valides une facture dans Ma boîte.',
       'Aussitôt, Ma peau te propose de mettre de côté de quoi payer tes cotisations (moins d’angoisse), et Ma planète ajoute l’empreinte de la mission à ton bilan.',
-      'Sur l’île, tu verras un flux doré filer d’un bâtiment à l’autre quand ça arrive.',
+      'Sur l’île, tu verras un flux doré filer d’un poste à l’autre quand ça arrive.',
     ],
     suites: ['elan', 'validation'],
   },
   {
     id: 'agents',
     question: 'C’est quoi un agent ?',
-    motsCles: ['agent', 'recruter', 'recrute', 'equipe', 'plume', 'source', 'racine', 'catalogue', 'batiment'],
+    motsCles: ['agent', 'recruter', 'recrute', 'equipe', 'plume', 'source', 'racine', 'catalogue', 'batiment', 'poste', 'atelier', 'spa', 'jardin'],
     reponse: [
       'Un agent, c’est un petit assistant spécialisé. Tu en as déjà trois, offerts : Factures (tes factures et échéances), Rythme (ton rythme de travail) et Empreinte (l’empreinte de tes projets).',
-      'Dans l’onglet Agents, tu en trouveras d’autres à recruter. Chacun apporte son bâtiment sur l’île : la cabane de Factures, la pergola de Rythme, la serre d’Empreinte…',
-      'Plus un agent t’aide, plus son bâtiment grandit. C’est l’usage qui le fait évoluer, jamais l’argent.',
+      'Dans l’onglet Agents, tu en trouveras d’autres à recruter. Chacun a son poste de travail dans son lieu : le bureau d’écriture de Factures dans l’Atelier, la cabine de Rythme au Spa, la table de serre d’Empreinte au Jardin…',
+      'Plus un agent t’aide, plus son poste s’enrichit. C’est l’usage qui le fait évoluer, jamais l’argent.',
     ],
     suites: ['autonomie', 'creer', 'validation'],
   },
@@ -138,8 +138,8 @@ export const SUJETS: Sujet[] = [
     question: 'Je peux construire ?',
     motsCles: ['ile', 'construire', 'poser', 'deplacer', 'personnaliser', 'decorer', 'coeur', 'arbre', 'serveur'],
     reponse: [
-      'Oui ! Chaque agent recruté apporte son bâtiment, que tu poses dans sa zone. Un appui long permet de le déplacer.',
-      'Tu peux ajouter du décor et agrandir l’île avec tes graines. Les couleurs des domaines, elles, restent fixes : on personnalise l’ambiance, jamais le sens.',
+      'Oui ! Ton île a trois lieux : l’Atelier (Ma boîte), le Spa (Ma peau) et le Jardin (Ma planète). Chaque agent recruté y installe son poste de travail ; un appui long permet de le déplacer.',
+      'Dans la boutique, tu changes les murs et les sols de chaque lieu, tu ajoutes du décor et tu agrandis l’île avec tes graines. Les couleurs des domaines, elles, restent fixes : on personnalise la matière, jamais le sens.',
       'Au fond de l’île, c’est moi : un arbre dont le pied est un petit serveur. Je rappelle que tes données vivent chez toi.',
     ],
     suites: ['donnees', 'creer'],
@@ -160,7 +160,7 @@ export const SUJETS: Sujet[] = [
     motsCles: ['creer', 'creation', 'nouveau', 'inventer', 'personnalise', 'plus', 'bouton'],
     reponse: [
       'Le bouton « + » en bas te permet de créer ton propre agent en moins d’une minute.',
-      'Quatre étapes : choisir son domaine, lui donner un nom, cocher ses missions dans une liste, choisir son autonomie. Puis tu poses son bâtiment.',
+      'Quatre étapes : choisir son domaine, lui donner un nom, cocher ses missions dans une liste, choisir son autonomie. Puis tu installes son poste dans son lieu.',
     ],
     suites: ['agents', 'autonomie'],
   },

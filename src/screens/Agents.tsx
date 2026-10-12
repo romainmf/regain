@@ -14,7 +14,7 @@ import { niveauBatiment } from '../domain/progression'
 import { COULEUR } from '../domain/couleurs'
 import { Robot } from '../island/Robot'
 import { energieAgent, JaugeEnergie } from '../ui/JaugeEnergie'
-import { BatimentIcone } from '../ui/BatimentIcone'
+import { PosteIcone } from '../ui/PosteIcone'
 import { Bouton } from '../ui/Boutons'
 import './agents.css'
 
@@ -87,7 +87,7 @@ function CarteCatalogue({ t, recrute, onRecruter }: { t: AgentTemplate; recrute:
   return (
     <article className="carte">
       <div className="carte-haut">
-        <BatimentIcone id={t.batiment} domaine={t.domaine} />
+        <PosteIcone id={t.poste} domaine={t.domaine} />
         <div className="carte-titre">
           <h3>{t.nom}</h3>
           <p className="carte-mission">{t.mission}</p>
@@ -99,7 +99,7 @@ function CarteCatalogue({ t, recrute, onRecruter }: { t: AgentTemplate; recrute:
         ))}
       </ul>
       <div className="carte-meta">
-        <span className="carte-bat">{t.batimentNom}</span>
+        <span className="carte-bat">{t.posteNom}</span>
         <span className="carte-autos">{t.autonomies.map((a) => AUTONOMIE_LABEL[a]).join(' · ')}</span>
       </div>
       <p className="carte-relie">Relié à <strong>{DOMAINE_LABEL[t.relie.vers]}</strong> : {t.relie.produit}</p>

@@ -1,5 +1,7 @@
 import { AGENTS_DE_DEPART, getTemplate } from '../domain/catalog'
 import type { Proposition } from '../domain/propositions'
+import { cle, tuilesDeDepart } from '../island/iso'
+import { tuilesReservees } from '../island/LieuxZones'
 import { db, getMeta, setMeta, type AgentDB, type PlacementDB } from './db'
 
 /** Propositions d'exemple, clairement signalées et effaçables, pour découvrir la boucle. */
@@ -35,7 +37,7 @@ function propositionsExemple(base: number): Proposition[] {
 /** Pose de départ des trois agents offerts, dans leur zone respective. */
 const POSES_DEPART: Record<string, { x: number; y: number }> = {
   plume: { x: 1, y: 3 },
-  source: { x: 4, y: 1 },
+  source: { x: 5, y: 1 },
   racine: { x: 5, y: 4 },
 }
 
@@ -87,5 +89,26 @@ async function synchroniserNomsDeDepart(): Promise<void> {
     const t = getTemplate(id)
     const a = await db.agents.get(id)
     if (t && a && a.nom !== t.nom) await db.agents.update(id, { nom: t.nom })
+  }
+  await liberarTuilesReservees()
+}
+
+/**
+ * Migration « les trois lieux » : un poste posé sur une tuile désormais
+ * réservée (bassin du Spa, mobilier) est déplacé sur une tuile libre de sa zone.
+ */
+async function liberarTuilesReservees(): Promise<void> {
+  const tuiles = tuilesDeDepart()
+  const reservees = tuilesReservees(tuiles)
+  const placements = await db.placements.toArray()
+  const occupees = new Set(placements.map((p) => cle(p.x, p.y)))
+  for (const p of placements) {
+    if (!reservees.has(cle(p.x, p.y))) continue
+    const zone = tuiles.find((t) => t.x === p.x && t.y === p.y)?.zone
+    const libre = tuiles.find((t) => t.zone === zone && !reservees.has(cle(t.x, t.y)) && !occupees.has(cle(t.x, t.y)))
+    if (!libre) continue
+    occupees.delete(cle(p.x, p.y))
+    occupees.add(cle(libre.x, libre.y))
+    await db.placements.update(p.id, { x: libre.x, y: libre.y })
   }
 }

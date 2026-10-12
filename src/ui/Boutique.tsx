@@ -2,16 +2,24 @@ import { useState } from 'react'
 import { useJeu } from '../data/jeu'
 import { AMBIANCES, DECORS, EXPANSION, PRIX_TUILE, type DecorItem } from '../domain/boutique'
 import { Decor } from '../island/Decor'
+import { STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/LieuxZones'
+import { DOMAINE_LABEL, type Domaine } from '../domain/types'
 import { Bouton } from './Boutons'
 import { IconeGraine } from './icons'
 import { Sheet } from './Sheet'
 import './boutique.css'
 
-type Onglet = 'ambiances' | 'decor' | 'tuiles'
+type Onglet = 'construction' | 'ambiances' | 'decor' | 'tuiles'
+
+const LIEUX: Domaine[] = ['boite', 'peau', 'planete']
+const NOM_LIEU: Record<Domaine, string> = { boite: 'Atelier', peau: 'Spa', planete: 'Jardin' }
 
 export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
-  const { economie, ambianceActive, ambiancesPossedees, tuilesAchetees, acheterAmbiance, activerAmbiance, acheterTuile, demarrerPoseDecor } = useJeu()
-  const [onglet, setOnglet] = useState<Onglet>('ambiances')
+  const {
+    economie, ambianceActive, ambiancesPossedees, tuilesAchetees, acheterAmbiance, activerAmbiance, acheterTuile, demarrerPoseDecor,
+    murs, sols, stylesPossedes, choisirMur, choisirSol,
+  } = useJeu()
+  const [onglet, setOnglet] = useState<Onglet>('construction')
   const [msg, setMsg] = useState<string | null>(null)
   const solde = economie.solde
 
@@ -36,10 +44,66 @@ export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
       {msg && <div className="bq-msg" role="status">{msg}</div>}
 
       <div className="segment" role="tablist" aria-label="Rayons">
+        <button role="tab" aria-selected={onglet === 'construction'} className={onglet === 'construction' ? 'actif' : ''} onClick={() => setOnglet('construction')}>Construction</button>
         <button role="tab" aria-selected={onglet === 'ambiances'} className={onglet === 'ambiances' ? 'actif' : ''} onClick={() => setOnglet('ambiances')}>Ambiances</button>
         <button role="tab" aria-selected={onglet === 'decor'} className={onglet === 'decor' ? 'actif' : ''} onClick={() => setOnglet('decor')}>Décor</button>
         <button role="tab" aria-selected={onglet === 'tuiles'} className={onglet === 'tuiles' ? 'actif' : ''} onClick={() => setOnglet('tuiles')}>Tuiles</button>
       </div>
+
+      {onglet === 'construction' && (
+        <div className="bq-construction">
+          <p className="bq-aide">Murs et sols de chaque lieu. Les trois premiers sont offerts ; les couleurs des domaines ne changent jamais.</p>
+          {LIEUX.map((lieu) => (
+            <section key={lieu} className="bq-lieu">
+              <h3 className={`bq-lieu-titre pastille-${lieu}`}>{NOM_LIEU[lieu]} · {DOMAINE_LABEL[lieu]}</h3>
+              <div className="bq-rangee">
+                <span className="bq-rangee-nom">Murs</span>
+                {(Object.keys(STYLES_MUR) as StyleMur[]).map((k) => {
+                  const s = STYLES_MUR[k]
+                  const actif = murs[lieu] === k
+                  const possede = s.prix === 0 || stylesPossedes.includes(`mur:${k}`)
+                  return (
+                    <button
+                      key={k}
+                      className={`bq-pastille${actif ? ' bq-pastille-on' : ''}`}
+                      style={{ background: s.fond }}
+                      title={`${s.nom}${possede ? '' : ` · ${s.prix} graines`}`}
+                      aria-label={`${s.nom}${possede ? '' : `, ${s.prix} graines`}`}
+                      aria-pressed={actif}
+                      disabled={!possede && solde < s.prix}
+                      onClick={async () => { (await choisirMur(lieu, k)) ? flash(`${NOM_LIEU[lieu]} : murs ${s.nom.toLowerCase()}.`) : flash('Pas assez de graines.') }}
+                    >
+                      {!possede && <span className="bq-pastille-prix">{s.prix}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="bq-rangee">
+                <span className="bq-rangee-nom">Sols</span>
+                {(Object.keys(STYLES_SOL) as StyleSol[]).map((k) => {
+                  const s = STYLES_SOL[k]
+                  const actif = sols[lieu] === k
+                  const possede = s.prix === 0 || stylesPossedes.includes(`sol:${k}`)
+                  return (
+                    <button
+                      key={k}
+                      className={`bq-pastille${actif ? ' bq-pastille-on' : ''}`}
+                      style={{ background: s.fond ?? `var(--${lieu}-sol)` }}
+                      title={`${s.nom}${possede ? '' : ` · ${s.prix} graines`}`}
+                      aria-label={`${s.nom}${possede ? '' : `, ${s.prix} graines`}`}
+                      aria-pressed={actif}
+                      disabled={!possede && solde < s.prix}
+                      onClick={async () => { (await choisirSol(lieu, k)) ? flash(`${NOM_LIEU[lieu]} : sol ${s.nom.toLowerCase()}.`) : flash('Pas assez de graines.') }}
+                    >
+                      {!possede && <span className="bq-pastille-prix">{s.prix}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
 
       {onglet === 'ambiances' && (
         <ul className="bq-liste">

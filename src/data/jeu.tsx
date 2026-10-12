@@ -7,6 +7,7 @@ import type { AmbianceId, DecorId } from '../domain/boutique'
 import { EXPANSION } from '../domain/boutique'
 import { tuilesDeDepart } from '../island/iso'
 import type { PlacementVue } from '../island/Island'
+import { MURS_DEFAUT, SOLS_DEFAUT, type StyleMur, type StyleSol } from '../island/LieuxZones'
 import type { Proposition, SaisieData, SaisieKind } from '../domain/propositions'
 import type { Chaine } from '../domain/chains'
 import { etatEconomie, type EtatEconomie } from './selectors'
@@ -94,6 +95,13 @@ interface JeuCtx {
   activerAmbiance: (id: AmbianceId) => Promise<void>
   acheterTuile: () => Promise<boolean>
   retirerDecor: (placementId: string) => Promise<void>
+  // ——— Construction : murs et sols des trois lieux ———
+  murs: Record<Domaine, StyleMur>
+  sols: Record<Domaine, StyleSol>
+  /** Styles déjà achetés, sous la forme « mur:pierre » ou « sol:gazon ». */
+  stylesPossedes: string[]
+  choisirMur: (lieu: Domaine, style: StyleMur) => Promise<boolean>
+  choisirSol: (lieu: Domaine, style: StyleSol) => Promise<boolean>
 }
 
 const Ctx = createContext<JeuCtx | null>(null)
@@ -112,15 +120,16 @@ function versVue(agents: AgentDB[]): (p: { refId: string; x: number; y: number }
     if (!a) return null
     const t = a.templateId ? getTemplate(a.templateId) : undefined
     const batiment = a.batiment ?? t?.batiment ?? 'cabane'
-    const batNom = t?.batimentNom ?? 'Son bâtiment'
+    const posteNom = t?.posteNom ?? 'Le poste'
     return {
       id: a.id,
       x: p.x,
       y: p.y,
       batiment,
+      poste: t?.poste ?? 'generique',
       domaine: a.domaine,
       niveau: niveauBatiment(a.validations),
-      libelle: `${batNom} de ${a.nom}`,
+      libelle: `${posteNom} de ${a.nom}`,
     }
   }
 }
@@ -175,6 +184,9 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     () => [...tuilesDeDepart(), ...EXPANSION.slice(0, tuilesAchetees)],
     [tuilesAchetees],
   )
+  const murs = useLiveQuery(() => getMeta<Record<Domaine, StyleMur>>('murs', MURS_DEFAUT), [], MURS_DEFAUT)
+  const sols = useLiveQuery(() => getMeta<Record<Domaine, StyleSol>>('sols', SOLS_DEFAUT), [], SOLS_DEFAUT)
+  const stylesPossedes = useLiveQuery(() => getMeta<string[]>('styles', []), [], [] as string[])
 
   const templatesRecrutes = useMemo(
     () => new Set(agents.map((a) => a.templateId).filter((x): x is string => !!x)),
@@ -335,6 +347,11 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     activerAmbiance: actions.activerAmbiance,
     acheterTuile: actions.acheterTuile,
     retirerDecor: actions.retirerDecor,
+    murs,
+    sols,
+    stylesPossedes,
+    choisirMur: actions.choisirMur,
+    choisirSol: actions.choisirSol,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

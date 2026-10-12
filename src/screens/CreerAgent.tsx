@@ -11,7 +11,7 @@ import {
   type Domaine,
 } from '../domain/types'
 import { BATIMENT_PERSO, missionsDuDomaine, nomSuggerePourMissions } from '../domain/missions'
-import { Batiment } from '../island/buildings/Batiment'
+import { Poste } from '../island/Poste'
 import { Bouton } from '../ui/Boutons'
 import './creer.css'
 
@@ -80,9 +80,9 @@ export function CreerAgent() {
               aria-pressed={domaine === d}
               onClick={() => choisirDomaine(d)}
             >
-              <svg width={48} height={44} viewBox="-24 -40 48 48" aria-hidden>
+              <svg width={48} height={44} viewBox="-28 -44 56 52" aria-hidden>
                 <ellipse cx={0} cy={0} rx={18} ry={8} fill={`var(--${d}-teinte)`} />
-                <Batiment id={BATIMENT_PERSO[d].batiment} couleur={COULEUR[d]} niveau={1} />
+                <Poste id="generique" domaine={d} couleur={COULEUR[d]} niveau={1} />
               </svg>
               {DOMAINE_LABEL[d]}
             </button>
@@ -157,7 +157,7 @@ export function CreerAgent() {
 
       <div className="creer-pied">
         <Bouton domaine={domaine ?? undefined} disabled={!pret || envoi} onClick={creer} style={{ width: '100%' }}>
-          {envoi ? 'Création…' : 'Créer et poser son bâtiment'}
+          {envoi ? 'Création…' : 'Créer et installer son poste'}
         </Bouton>
       </div>
     </div>

@@ -2,6 +2,7 @@ import type { Domaine, Tuile } from '../domain/types'
 import { COULEUR } from '../domain/couleurs'
 import { TH, TW, cle, iso } from './iso'
 import { BOIS, Eolienne, FEUILLE, nuance } from './buildings/primitives'
+import { MEUBLES_LIEUX } from './Meubles'
 
 /**
  * « Un lieu par domaine, sur toute la zone » : chaque zone devient un grand
@@ -434,6 +435,14 @@ export function tuilesBassin(tuiles: Tuile[]): Tuile[] {
   return [...peau]
     .sort((a, b) => Math.hypot(a.x - centre[0], a.y - centre[1]) - Math.hypot(b.x - centre[0], b.y - centre[1]))
     .slice(0, 3)
+}
+
+/** Tuiles réservées par les lieux (bassin du Spa, mobilier) : on n'y pose pas de poste. */
+export function tuilesReservees(tuiles: Tuile[]): Set<string> {
+  const index = new Set(tuiles.map((t) => cle(t.x, t.y)))
+  const out = new Set(tuilesBassin(tuiles).map((t) => cle(t.x, t.y)))
+  for (const m of MEUBLES_LIEUX) if (index.has(cle(m.x, m.y))) out.add(cle(m.x, m.y))
+  return out
 }
 
 /**

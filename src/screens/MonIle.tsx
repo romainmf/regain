@@ -24,7 +24,7 @@ export function MonIle() {
   const {
     pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose, ouvrirFiche,
     economie, aValider, agentsEnAttente, derniereChaine,
-    tuiles, decors, ambianceActive,
+    tuiles, decors, ambianceActive, murs, sols,
   } = useJeu()
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
@@ -48,7 +48,7 @@ export function MonIle() {
   const texteBandeau = poseEnCours
     ? poseEnCours.kind === 'decor'
       ? 'Pose ton décor : touche une tuile surlignée.'
-      : `${poseEnCours.mode === 'pose' ? 'Pose' : 'Déplace'} ${agentPose ? `le bâtiment de ${agentPose.nom}` : 'le bâtiment'} : touche une tuile surlignée.`
+      : `${poseEnCours.mode === 'pose' ? 'Installe' : 'Déplace'} ${agentPose ? `le poste de ${agentPose.nom}` : 'le poste'} : touche une tuile surlignée.`
     : ''
 
   return (
@@ -85,6 +85,9 @@ export function MonIle() {
             chaine={derniereChaine?.chaines[0] ?? null}
             decors={decors}
             ambiance={ambianceActive}
+            lieux
+            murs={murs}
+            sols={sols}
           />
         </div>
       </div>

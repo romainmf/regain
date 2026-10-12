@@ -25,3 +25,20 @@
 .bq-tuiles { margin-top: 18px; text-align: center; }
 .bq-aide { color: var(--texte-2); font-size: 14px; }
 .bq-reste { font-weight: 700; margin: 10px 0 16px; }
+
+/* Rayon Construction : murs et sols par lieu */
+.bq-construction { display: flex; flex-direction: column; gap: 14px; }
+.bq-lieu { display: flex; flex-direction: column; gap: 8px; }
+.bq-lieu-titre { margin: 0; font-size: 14px; font-weight: 600; align-self: flex-start; }
+.bq-rangee { display: flex; align-items: center; gap: 8px; }
+.bq-rangee-nom { width: 40px; font-size: 13px; color: var(--texte-2); }
+.bq-pastille {
+  position: relative; width: 34px; height: 34px; border-radius: 10px; padding: 0; cursor: pointer;
+  border: 1.5px solid var(--ligne);
+}
+.bq-pastille-on { border: 2.5px solid var(--encre); }
+.bq-pastille:disabled { opacity: .45; cursor: not-allowed; }
+.bq-pastille-prix {
+  position: absolute; right: -4px; bottom: -4px; min-width: 16px; padding: 0 3px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--ligne); font-size: 9px; font-weight: 600; color: var(--encre); line-height: 14px;
+}

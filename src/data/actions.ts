@@ -6,6 +6,8 @@ import { chainesDepuisValidation, type Chaine } from '../domain/chains'
 import { optionParLabel } from '../domain/missions'
 import type { AmbianceId, DecorId } from '../domain/boutique'
 import { PRIX_TUILE, EXPANSION } from '../domain/boutique'
+import type { Domaine } from '../domain/types'
+import { MURS_DEFAUT, SOLS_DEFAUT, STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/LieuxZones'
 import type { Brouillon, Proposition, Saisie, SaisieData, SaisieKind } from '../domain/propositions'
 import { db, getMeta, nouvelId, setMeta, type AgentDB, type GraineDB } from './db'
 import { grainesDuJour, validations7j } from './selectors'
@@ -165,6 +167,32 @@ export async function poserDecor(decorId: DecorId, prix: number, x: number, y: n
   if (!(await depenser(prix, 'depense'))) return false
   await db.placements.add({ id: nouvelId('dec'), kind: 'decor', refId: decorId, x, y })
   return true
+}
+
+// ——— Construction : murs et sols des lieux ———
+
+async function choisirStyle(kind: 'mur' | 'sol', lieu: Domaine, style: string, prix: number): Promise<boolean> {
+  const cle = `${kind}:${style}`
+  const possedes = await getMeta<string[]>('styles', [])
+  if (prix > 0 && !possedes.includes(cle)) {
+    if (!(await depenser(prix, 'depense'))) return false
+    await setMeta('styles', [...possedes, cle])
+  }
+  const metaCle = kind === 'mur' ? 'murs' : 'sols'
+  const defaut = kind === 'mur' ? MURS_DEFAUT : SOLS_DEFAUT
+  const actuel = await getMeta<Record<Domaine, string>>(metaCle, defaut)
+  await setMeta(metaCle, { ...actuel, [lieu]: style })
+  return true
+}
+
+/** Choisit la matière des murs d'un lieu (achat la première fois si payante). */
+export function choisirMur(lieu: Domaine, style: StyleMur): Promise<boolean> {
+  return choisirStyle('mur', lieu, style, STYLES_MUR[style].prix)
+}
+
+/** Choisit le sol d'un lieu (achat la première fois si payant). */
+export function choisirSol(lieu: Domaine, style: StyleSol): Promise<boolean> {
+  return choisirStyle('sol', lieu, style, STYLES_SOL[style].prix)
 }
 
 /** Retire un décor (sans remboursement). */

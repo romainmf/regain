@@ -18,14 +18,14 @@ const P = (id: string, x: number, y: number, batiment: PlacementVue['batiment'],
 
 const AGENTS: PlacementVue[] = [
   { ...P('factures', 1, 3, 'cabane', 'boite', 2), poste: 'factures' },
-  { ...P('relance', 2, 5, 'boite-aux-lettres', 'boite'), poste: 'generique' },
-  P('vigie', 0, 2, 'tour-de-guet', 'boite'),
+  { ...P('relance', 2, 5, 'boite-aux-lettres', 'boite'), poste: 'relance' },
+  { ...P('vigie', 0, 2, 'tour-de-guet', 'boite'), poste: 'vigie' },
   { ...P('rythme', 5, 1, 'pergola', 'peau', 2), poste: 'rythme' },
-  P('cloture', 6, 2, 'lanterne', 'peau'),
-  P('miroir', 2, 1, 'banc', 'peau'),
+  { ...P('cloture', 6, 2, 'lanterne', 'peau'), poste: 'cloture' },
+  { ...P('miroir', 2, 1, 'banc', 'peau'), poste: 'miroir' },
   { ...P('empreinte', 5, 4, 'serre', 'planete', 2), poste: 'empreinte' },
-  P('sobriete', 3, 5, 'composteur', 'planete'),
-  P('deplacements', 4, 6, 'petit-rail', 'planete'),
+  { ...P('sobriete', 3, 5, 'composteur', 'planete'), poste: 'sobriete' },
+  { ...P('deplacements', 4, 6, 'petit-rail', 'planete'), poste: 'deplacements' },
 ]
 
 const VARIANTE: { murs: Record<Domaine, StyleMur>; sols: Record<Domaine, StyleSol> } = {

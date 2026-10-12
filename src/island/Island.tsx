@@ -12,7 +12,7 @@ import { lumiereDepuisElan, type Meteo } from '../domain/economy'
 import type { Chaine } from '../domain/chains'
 import { getAmbiance, type AmbianceId, type DecorId } from '../domain/boutique'
 import { Decor } from './Decor'
-import { LieuxHaut, LieuxSol, type StyleMur, type StyleSol } from './LieuxZones'
+import { LieuxHaut, LieuxSol, tuilesReservees, type StyleMur, type StyleSol } from './LieuxZones'
 import { MEUBLES_LIEUX, Meuble, type MeubleId } from './Meubles'
 import { Poste, type PosteId } from './Poste'
 import { formatElan } from '../ui/EnTete'
@@ -182,11 +182,13 @@ export function Island({
   const occupeesPose = new Set(
     [...placements.filter((p) => p.id !== poseEnCours?.agentId), ...decors].map((p) => cle(p.x, p.y)),
   )
+  const reservees = lieux ? tuilesReservees(tuiles) : new Set<string>()
   const libres = poseEnCours
     ? tuiles.filter(
         (t) =>
           t.zone !== 'coeur' &&
           !occupeesPose.has(cle(t.x, t.y)) &&
+          !reservees.has(cle(t.x, t.y)) &&
           (poseEnCours.kind === 'decor' || t.zone === poseEnCours.domaine),
       )
     : []
