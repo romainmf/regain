@@ -1,0 +1,28 @@
+.zoompan {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--r-l);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.zoompan-contenu {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.zoompan-recentrer {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--ligne);
+  background: var(--surface);
+  color: var(--encre);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(34, 48, 31, 0.15);
+}

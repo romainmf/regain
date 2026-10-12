@@ -8,6 +8,7 @@ import { FileValidation } from '../ui/FileValidation'
 import { Reglages } from '../ui/Reglages'
 import { Boutique } from '../ui/Boutique'
 import { BandeauChaine } from '../ui/BandeauChaine'
+import { ZoomPan } from '../ui/ZoomPan'
 import './monile.css'
 
 const CLE_BRIN = 'regain.brin.vu'
@@ -69,6 +70,7 @@ export function MonIle() {
 
       <div className="mon-ile-cadre">
         <div className="mon-ile-scene">
+          <ZoomPan>
           <Island
             tuiles={tuiles}
             placements={placements}
@@ -89,6 +91,7 @@ export function MonIle() {
             murs={murs}
             sols={sols}
           />
+          </ZoomPan>
         </div>
       </div>
 

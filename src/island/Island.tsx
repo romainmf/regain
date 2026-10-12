@@ -141,11 +141,11 @@ export function Island({
   const amb = getAmbiance(ambiance)
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
   // Appui long sur un bâtiment pour le déplacer ; tap bref pour ouvrir la fiche.
-  const appui = useRef<{ agentId: string; long: boolean } | null>(null)
+  const appui = useRef<{ agentId: string; long: boolean; x: number; y: number } | null>(null)
   const minuteur = useRef<number | undefined>(undefined)
-  const demarrerAppui = (agentId: string) => {
+  const demarrerAppui = (agentId: string, e: React.PointerEvent) => {
     if (poseEnCours) return
-    appui.current = { agentId, long: false }
+    appui.current = { agentId, long: false, x: e.clientX, y: e.clientY }
     minuteur.current = window.setTimeout(() => {
       if (appui.current) {
         appui.current.long = true
@@ -161,6 +161,11 @@ export function Island({
   const annulerAppui = () => {
     clearTimeout(minuteur.current)
     appui.current = null
+  }
+  // Le doigt glisse (déplacement ou pincement de l'île) : ce n'est plus un appui.
+  const bougerAppui = (e: React.PointerEvent) => {
+    const a = appui.current
+    if (a && !a.long && Math.hypot(e.clientX - a.x, e.clientY - a.y) > 8) annulerAppui()
   }
   // Cadre de la scène : l'île en bas, du ciel au-dessus pour les bâtiments.
   const b = bornes(tuiles)
@@ -424,7 +429,8 @@ export function Island({
                   aria-label={poseEnCours ? o.libelle : `${o.libelle} : appui long pour déplacer`}
                   role={poseEnCours ? undefined : 'button'}
                   tabIndex={poseEnCours ? undefined : 0}
-                  onPointerDown={() => demarrerAppui(o.id)}
+                  onPointerDown={(e) => demarrerAppui(o.id, e)}
+                  onPointerMove={bougerAppui}
                   onPointerUp={finirAppui}
                   onPointerLeave={annulerAppui}
                   onPointerCancel={annulerAppui}
