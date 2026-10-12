@@ -24,7 +24,7 @@ export const RuleEngine: AgentEngine = {
         const client = data.client?.trim() || 'ton client'
         ajouter('plume', 'boite', {
           type: 'facture',
-          titre: `Brouillon de facture — ${client}`,
+          titre: `Brouillon de facture : ${client}`,
           detail: data.montant ? `${euro(data.montant)}, conforme. À relire avant envoi.` : 'Facture conforme à relire.',
           payload: { client, montant: data.montant },
         })

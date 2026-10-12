@@ -21,7 +21,7 @@ export interface MissionOption {
 
 export const MISSIONS_PAR_DOMAINE: Record<Domaine, MissionOption[]> = {
   boite: [
-    { id: 'facture', label: 'Préparer mes factures', kind: 'mission_terminee', type: 'facture', titre: (c) => `Brouillon de facture — ${c ?? 'client'}`, detail: 'Facture conforme à relire avant envoi.', noms: ['Scribe', 'Grimoire', 'Sceau', 'Quittance'] },
+    { id: 'facture', label: 'Préparer mes factures', kind: 'mission_terminee', type: 'facture', titre: (c) => `Brouillon de facture : ${c ?? 'client'}`, detail: 'Facture conforme à relire avant envoi.', noms: ['Scribe', 'Grimoire', 'Sceau', 'Quittance'] },
     { id: 'echeances', label: 'Rappeler mes échéances', kind: 'encaissement', type: 'echeance', titre: () => 'Pense à tes échéances', detail: 'URSSAF, TVA : rien ne doit te surprendre.', noms: ['Carillon', 'Horloge', 'Repère', 'Balise'] },
     { id: 'coussin', label: 'Mettre de côté pour les cotisations', kind: 'encaissement', type: 'coussin', titre: () => 'Mets de côté pour tes cotisations', detail: 'Une part réservée à chaque encaissement.', noms: ['Coussin', 'Jarre', 'Pécule', 'Réserve'] },
   ],

@@ -33,7 +33,7 @@ export const SUJETS: Sujet[] = [
     reponse: [
       'Regain, c’est ton atelier d’agents, dans trois domaines : Ma boîte (ton activité), Ma peau (ton énergie) et Ma planète (ton empreinte).',
       'Tu recrutes des agents qui préparent les petites choses du quotidien d’indépendant : factures et échéances, rythme et vraies coupures, trajets et achats plus sobres.',
-      'La règle d’or : ils préparent, tu valides. Rien ne part jamais sans ton accord — et en bêta, rien n’est envoyé du tout.',
+      'La règle d’or : ils préparent, tu valides. Rien ne part jamais sans ton accord : et en bêta, rien n’est envoyé du tout.',
       'Le secret : prendre soin des trois en même temps fait grandir ton activité, et ton île fleurit à chaque validation.',
     ],
     suites: ['domaines', 'agents', 'ile'],

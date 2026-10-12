@@ -15,7 +15,7 @@ function propositionsExemple(base: number): Proposition[] {
   return [
     p({
       agentId: 'plume', domaine: 'boite', type: 'facture',
-      titre: 'Brouillon de facture — Atelier Garance',
+      titre: 'Brouillon de facture : Atelier Garance',
       detail: '480 €, conforme. À relire avant envoi. (exemple)',
       payload: { client: 'Atelier Garance', montant: 480 },
     }),

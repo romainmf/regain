@@ -25,9 +25,9 @@ const CARTES: Carte[] = [
     lignes: (
       <>
         <ul className="onb-domaines">
-          <li><span className="point point-boite" /> <strong>{DOMAINE_LABEL.boite}</strong> — ton activité, tes factures, ta trésorerie.</li>
-          <li><span className="point point-peau" /> <strong>{DOMAINE_LABEL.peau}</strong> — ton rythme, ton énergie, ton équilibre.</li>
-          <li><span className="point point-planete" /> <strong>{DOMAINE_LABEL.planete}</strong> — ton empreinte, ta sobriété.</li>
+          <li><span className="point point-boite" /> <strong>{DOMAINE_LABEL.boite}</strong> : ton activité, tes factures, ta trésorerie.</li>
+          <li><span className="point point-peau" /> <strong>{DOMAINE_LABEL.peau}</strong> : ton rythme, ton énergie, ton équilibre.</li>
+          <li><span className="point point-planete" /> <strong>{DOMAINE_LABEL.planete}</strong> : ton empreinte, ta sobriété.</li>
         </ul>
         <p>En prendre soin des trois en même temps fait grandir toute ton activité.</p>
       </>
@@ -38,7 +38,7 @@ const CARTES: Carte[] = [
     lignes: (
       <>
         <p>Tes agents préparent les propositions ; <strong>rien ne part jamais sans ton accord</strong>.</p>
-        <p>En bêta, rien n’est envoyé du tout, et tout reste sur ton téléphone — pas de compte, ça marche même hors ligne.</p>
+        <p>En bêta, rien n’est envoyé du tout, et tout reste sur ton téléphone : pas de compte, ça marche même hors ligne.</p>
       </>
     ),
   },

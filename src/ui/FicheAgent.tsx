@@ -154,11 +154,11 @@ export function FicheAgent() {
             <h3 className="fiche-titre">Son effet sur tes 3 domaines</h3>
             <p className="fiche-effet fiche-effet-direct">
               <span className={`point point-${agent.domaine}`} aria-hidden />
-              <span><strong>{DOMAINE_LABEL[agent.domaine]}</strong> — son travail direct, posé sur ton île.</span>
+              <span><strong>{DOMAINE_LABEL[agent.domaine]}</strong> : son travail direct, posé sur ton île.</span>
             </p>
             <p className="fiche-effet">
               <span className={`point point-${t.relie.vers}`} aria-hidden />
-              <span><strong>{DOMAINE_LABEL[t.relie.vers]}</strong> — {t.relie.produit}</span>
+              <span><strong>{DOMAINE_LABEL[t.relie.vers]}</strong> : {t.relie.produit}</span>
             </p>
             <p className="fiche-note">Prendre soin des trois ensemble fait grandir ton élan.</p>
           </section>

@@ -107,7 +107,7 @@ export function CreerAgent() {
         </div>
         <p className="creer-indice creer-sous-nom">
           {missions.length > 0
-            ? 'Suggestion inspirée de ses missions — à toi de la garder ou de la changer.'
+            ? 'Suggestion inspirée de ses missions : à toi de la garder ou de la changer.'
             : 'Choisis ses missions : le nom proposé suivra ce qu’il fait. Tu peux aussi écrire le tien.'}
         </p>
       </section>
