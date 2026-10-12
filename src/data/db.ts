@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Autonomie, Domaine } from '../domain/types'
+import type { Autonomie, BatimentId, Domaine, SigneDeVie } from '../domain/types'
 import type { Proposition, Saisie } from '../domain/propositions'
 
 /** Un agent recruté (de départ, du catalogue ou créé par l'utilisateur). */
@@ -14,6 +14,9 @@ export interface AgentDB {
   /** Nombre de validations : détermine le niveau du bâtiment. */
   validations: number
   createdAt: number
+  /** Bâtiment d'un agent personnalisé (les agents de catalogue le tiennent de leur template). */
+  batiment?: BatimentId
+  signeDeVie?: SigneDeVie
 }
 
 /** Un bâtiment ou un décor posé sur une tuile de l'île. */

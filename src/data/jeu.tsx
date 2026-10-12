@@ -79,8 +79,8 @@ function versVue(agents: AgentDB[]): (p: { refId: string; x: number; y: number }
     const a = parId.get(p.refId)
     if (!a) return null
     const t = a.templateId ? getTemplate(a.templateId) : undefined
-    const batiment = t?.batiment ?? 'cabane'
-    const batNom = t?.batimentNom ?? 'Le bâtiment'
+    const batiment = a.batiment ?? t?.batiment ?? 'cabane'
+    const batNom = t?.batimentNom ?? 'Son bâtiment'
     return {
       id: a.id,
       x: p.x,
