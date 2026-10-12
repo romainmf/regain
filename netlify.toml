@@ -1,0 +1,19 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Le client appelle /api/agent ; on le route vers la fonction, avant le repli SPA.
+[[redirects]]
+  from = "/api/agent"
+  to = "/.netlify/functions/agent"
+  status = 200
+
+# Repli SPA : toute autre route sert l'app (React Router gère le reste).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
