@@ -40,3 +40,5 @@
 .creer-missions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 
 .creer-pied { margin-top: 26px; }
+
+.creer-sous-nom { margin-top: 8px; }

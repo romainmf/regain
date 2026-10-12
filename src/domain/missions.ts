@@ -15,23 +15,25 @@ export interface MissionOption {
   type: string
   titre: (client?: string) => string
   detail: string
+  /** Noms suggérés quand l'agent porte cette mission (évocateurs de son action). */
+  noms: string[]
 }
 
 export const MISSIONS_PAR_DOMAINE: Record<Domaine, MissionOption[]> = {
   boite: [
-    { id: 'facture', label: 'Préparer mes factures', kind: 'mission_terminee', type: 'facture', titre: (c) => `Brouillon de facture — ${c ?? 'client'}`, detail: 'Facture conforme à relire avant envoi.' },
-    { id: 'echeances', label: 'Rappeler mes échéances', kind: 'encaissement', type: 'echeance', titre: () => 'Pense à tes échéances', detail: 'URSSAF, TVA : rien ne doit te surprendre.' },
-    { id: 'coussin', label: 'Mettre de côté pour les cotisations', kind: 'encaissement', type: 'coussin', titre: () => 'Mets de côté pour tes cotisations', detail: 'Une part réservée à chaque encaissement.' },
+    { id: 'facture', label: 'Préparer mes factures', kind: 'mission_terminee', type: 'facture', titre: (c) => `Brouillon de facture — ${c ?? 'client'}`, detail: 'Facture conforme à relire avant envoi.', noms: ['Scribe', 'Grimoire', 'Sceau', 'Quittance'] },
+    { id: 'echeances', label: 'Rappeler mes échéances', kind: 'encaissement', type: 'echeance', titre: () => 'Pense à tes échéances', detail: 'URSSAF, TVA : rien ne doit te surprendre.', noms: ['Carillon', 'Horloge', 'Repère', 'Balise'] },
+    { id: 'coussin', label: 'Mettre de côté pour les cotisations', kind: 'encaissement', type: 'coussin', titre: () => 'Mets de côté pour tes cotisations', detail: 'Une part réservée à chaque encaissement.', noms: ['Coussin', 'Jarre', 'Pécule', 'Réserve'] },
   ],
   peau: [
-    { id: 'creneau', label: 'Protéger un créneau calme', kind: 'grosse_journee', type: 'creneau', titre: () => 'Protège un créneau calme', detail: 'Un moment à toi, bientôt, pour souffler.' },
-    { id: 'cloture', label: "M'aider à couper le soir", kind: 'grosse_journee', type: 'cloture', titre: () => 'Range et coupe ce soir', detail: 'On ferme en douceur, la suite attendra demain.' },
-    { id: 'air', label: 'Me proposer une vraie coupure', kind: 'grosse_journee', type: 'air', titre: () => 'Et si tu sortais marcher ?', detail: 'Dehors, sans écran, juste un moment.' },
+    { id: 'creneau', label: 'Protéger un créneau calme', kind: 'grosse_journee', type: 'creneau', titre: () => 'Protège un créneau calme', detail: 'Un moment à toi, bientôt, pour souffler.', noms: ['Havre', 'Halte', 'Oasis', 'Pause'] },
+    { id: 'cloture', label: "M'aider à couper le soir", kind: 'grosse_journee', type: 'cloture', titre: () => 'Range et coupe ce soir', detail: 'On ferme en douceur, la suite attendra demain.', noms: ['Clôture', 'Veilleuse', 'Couvre-feu', 'Crépuscule'] },
+    { id: 'air', label: 'Me proposer une vraie coupure', kind: 'grosse_journee', type: 'air', titre: () => 'Et si tu sortais marcher ?', detail: 'Dehors, sans écran, juste un moment.', noms: ['Souffle', 'Brise', 'Grand air', 'Bourrasque'] },
   ],
   planete: [
-    { id: 'empreinte', label: 'Estimer mon empreinte', kind: 'mission_terminee', type: 'empreinte', titre: (c) => `Empreinte de la mission ${c ?? ''}`.trim(), detail: 'Estimation à ajouter à ton bilan regen.' },
-    { id: 'trajet', label: 'Proposer le bas carbone', kind: 'trajet', type: 'trajet_option', titre: () => 'Une option plus douce', detail: 'Une alternative bas carbone pour ce trajet.' },
-    { id: 'sobriete', label: 'Trier le superflu', kind: 'encaissement', type: 'sobriete', titre: () => 'Un petit tri à faire', detail: 'Fichiers lourds, abonnements dormants : on allège.' },
+    { id: 'empreinte', label: 'Estimer mon empreinte', kind: 'mission_terminee', type: 'empreinte', titre: (c) => `Empreinte de la mission ${c ?? ''}`.trim(), detail: 'Estimation à ajouter à ton bilan regen.', noms: ['Empreinte', 'Sillon', 'Lichen', 'Trace'] },
+    { id: 'trajet', label: 'Proposer le bas carbone', kind: 'trajet', type: 'trajet_option', titre: () => 'Une option plus douce', detail: 'Une alternative bas carbone pour ce trajet.', noms: ['Sentier', 'Cap', 'Boussole', 'Rail'] },
+    { id: 'sobriete', label: 'Trier le superflu', kind: 'encaissement', type: 'sobriete', titre: () => 'Un petit tri à faire', detail: 'Fichiers lourds, abonnements dormants : on allège.', noms: ['Compost', 'Épure', 'Essentiel', 'Tri'] },
   ],
 }
 
@@ -53,6 +55,20 @@ export const NOMS_SUGGERES: Record<Domaine, string[]> = {
 
 export function nomSuggere(d: Domaine, eviter?: string): string {
   const pool = NOMS_SUGGERES[d].filter((n) => n !== eviter)
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/**
+ * Nom suggéré selon l'action de l'agent : puisé dans les noms des missions
+ * choisies. Sans mission, on retombe sur le fond du domaine.
+ */
+export function nomSuggerePourMissions(d: Domaine, missionsLabels: string[], eviter?: string): string {
+  const noms = missionsLabels
+    .map((l) => optionParLabel(d, l))
+    .filter((m): m is MissionOption => !!m)
+    .flatMap((m) => m.noms)
+  const pool = (noms.length ? [...new Set(noms)] : NOMS_SUGGERES[d]).filter((n) => n !== eviter)
+  if (pool.length === 0) return eviter ?? NOMS_SUGGERES[d][0]
   return pool[Math.floor(Math.random() * pool.length)]
 }
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { DOMAINES } from './types'
-import { BATIMENT_PERSO, MISSIONS_PAR_DOMAINE, nomSuggere, optionParLabel } from './missions'
+import { BATIMENT_PERSO, MISSIONS_PAR_DOMAINE, nomSuggere, nomSuggerePourMissions, optionParLabel } from './missions'
 import { SAISIE_LABEL } from './propositions'
 
 describe('missions cadrées par domaine', () => {
@@ -25,5 +25,15 @@ describe('missions cadrées par domaine', () => {
   })
   it('donne un bâtiment personnalisé par domaine', () => {
     for (const d of DOMAINES) expect(BATIMENT_PERSO[d].batiment).toBeTruthy()
+  })
+
+  it('suggère un nom inspiré des missions choisies', () => {
+    const facture = MISSIONS_PAR_DOMAINE.boite[0]
+    for (let i = 0; i < 20; i++) {
+      expect(facture.noms).toContain(nomSuggerePourMissions('boite', [facture.label]))
+    }
+  })
+  it('retombe sur le fond du domaine sans mission', () => {
+    expect(typeof nomSuggerePourMissions('peau', [])).toBe('string')
   })
 })

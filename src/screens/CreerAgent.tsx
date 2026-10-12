@@ -10,7 +10,7 @@ import {
   type Autonomie,
   type Domaine,
 } from '../domain/types'
-import { BATIMENT_PERSO, missionsDuDomaine, nomSuggere } from '../domain/missions'
+import { BATIMENT_PERSO, missionsDuDomaine, nomSuggerePourMissions } from '../domain/missions'
 import { Batiment } from '../island/buildings/Batiment'
 import { Bouton } from '../ui/Boutons'
 import './creer.css'
@@ -30,12 +30,18 @@ export function CreerAgent() {
   const options = useMemo(() => (domaine ? missionsDuDomaine(domaine) : []), [domaine])
 
   const choisirDomaine = (d: Domaine) => {
+    // On change de domaine : les missions ne valent plus, et le nom suivra
+    // la prochaine mission choisie (sauf si l'utilisateur l'a déjà écrit).
+    if (d !== domaine) setMissions([])
     setDomaine(d)
-    setMissions([])
-    if (!nom) setNom(nomSuggere(d))
   }
-  const toggleMission = (label: string) =>
-    setMissions((m) => (m.includes(label) ? m.filter((x) => x !== label) : [...m, label]))
+  const toggleMission = (label: string) => {
+    if (!domaine) return
+    const nouvelles = missions.includes(label) ? missions.filter((x) => x !== label) : [...missions, label]
+    setMissions(nouvelles)
+    // Le nom proposé suit l'action de l'agent, tant que l'utilisateur n'a rien écrit.
+    if (!nom.trim() && nouvelles.length > 0) setNom(nomSuggerePourMissions(domaine, nouvelles))
+  }
 
   const pret = !!domaine && nom.trim().length > 0 && missions.length > 0
 
@@ -95,10 +101,15 @@ export function CreerAgent() {
             maxLength={24}
             disabled={!domaine}
           />
-          <button className="creer-suggere" onClick={() => domaine && setNom(nomSuggere(domaine, nom))} disabled={!domaine}>
+          <button className="creer-suggere" onClick={() => domaine && setNom(nomSuggerePourMissions(domaine, missions, nom))} disabled={!domaine}>
             Suggérer
           </button>
         </div>
+        <p className="creer-indice creer-sous-nom">
+          {missions.length > 0
+            ? 'Suggestion inspirée de ses missions — à toi de la garder ou de la changer.'
+            : 'Choisis ses missions : le nom proposé suivra ce qu’il fait. Tu peux aussi écrire le tien.'}
+        </p>
       </section>
 
       {/* 3. Missions */}
