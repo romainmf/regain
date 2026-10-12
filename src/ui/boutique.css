@@ -1,0 +1,27 @@
+.bq-solde {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--planete-teinte); color: var(--planete-fonce);
+  font-weight: 700; padding: 6px 14px; border-radius: 999px; margin-bottom: 14px;
+}
+.bq-msg { background: var(--soleil-teinte); color: var(--soleil-fonce); padding: 10px 12px; border-radius: var(--r-m); margin-bottom: 12px; font-weight: 500; font-size: 14px; }
+
+.bq-liste { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.bq-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m); padding: 12px 14px;
+}
+.bq-txt { flex: 1; display: flex; flex-direction: column; }
+.bq-txt strong { font-size: 16px; }
+.bq-prix { font-size: 13px; color: var(--texte-2); }
+.bq-item .btn { font-size: 14px; padding: 8px 16px; }
+.bq-active { font-size: 13px; font-weight: 700; color: var(--planete-fonce); background: var(--planete-teinte); padding: 6px 12px; border-radius: 999px; }
+
+.bq-ambiance { flex: 0 0 auto; width: 44px; height: 44px; border-radius: var(--r-s); border: 1px solid var(--ligne); }
+.bq-ambiance-jour { background: linear-gradient(135deg, #F6E6C2, #BFDCE0); }
+.bq-ambiance-nuit { background: linear-gradient(135deg, #2A2E4A, #4A5578); }
+.bq-ambiance-automne { background: linear-gradient(135deg, #E7B04A, #C96A41); }
+.bq-ambiance-hiver { background: linear-gradient(135deg, #E8EEF4, #BFDCE0); }
+
+.bq-tuiles { margin-top: 18px; text-align: center; }
+.bq-aide { color: var(--texte-2); font-size: 14px; }
+.bq-reste { font-weight: 700; margin: 10px 0 16px; }

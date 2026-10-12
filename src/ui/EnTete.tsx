@@ -5,18 +5,25 @@ interface Props {
   graines: number
   elan: number
   onReglages?: () => void
+  onBoutique?: () => void
 }
 
 export const formatElan = (e: number) => '×' + e.toFixed(1).replace('.', ',')
 
-export function EnTete({ graines, elan, onReglages }: Props) {
+export function EnTete({ graines, elan, onReglages, onBoutique }: Props) {
   return (
     <header className="entete">
       <h1 className="entete-titre">Regain</h1>
       <div className="entete-compteurs">
-        <span className="pastille pastille-graines" aria-label={`${graines} graines`}>
-          <IconeGraine /> {graines}
-        </span>
+        {onBoutique ? (
+          <button className="pastille pastille-graines pastille-bouton" aria-label={`${graines} graines — ouvrir la boutique`} onClick={onBoutique}>
+            <IconeGraine /> {graines}
+          </button>
+        ) : (
+          <span className="pastille pastille-graines" aria-label={`${graines} graines`}>
+            <IconeGraine /> {graines}
+          </span>
+        )}
         <span className="pastille pastille-elan" aria-label={`Élan ${formatElan(elan)}`}>
           <IconeElan /> {formatElan(elan)}
         </span>

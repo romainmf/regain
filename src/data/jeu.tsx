@@ -1,8 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { getTemplate } from '../domain/catalog'
-import type { AgentTemplate, Autonomie, Domaine } from '../domain/types'
+import type { AgentTemplate, Autonomie, Domaine, Tuile } from '../domain/types'
 import { niveauBatiment } from '../domain/progression'
+import type { AmbianceId, DecorId } from '../domain/boutique'
+import { EXPANSION } from '../domain/boutique'
+import { tuilesDeDepart } from '../island/iso'
 import type { PlacementVue } from '../island/Island'
 import type { Proposition, SaisieData, SaisieKind } from '../domain/propositions'
 import type { Chaine } from '../domain/chains'
@@ -17,11 +20,23 @@ export interface DerniereChaine {
   propType: string
 }
 
-/** Un bâtiment en cours de pose (nouveau recrutement) ou de déplacement. */
+/** Un élément en cours de pose ou de déplacement sur l'île. */
 export interface PoseEnCours {
   mode: 'pose' | 'deplacement'
-  agentId: string
-  domaine: Domaine
+  kind: 'batiment' | 'decor'
+  /** Bâtiment : l'agent et sa zone. */
+  agentId?: string
+  domaine?: Domaine
+  /** Décor : son type et son prix (dépensé à la pose). */
+  decorId?: DecorId
+  prix?: number
+}
+
+export interface DecorVue {
+  id: string
+  x: number
+  y: number
+  decorId: DecorId
 }
 
 interface JeuCtx {
@@ -67,6 +82,18 @@ interface JeuCtx {
   revoir: typeof actions.revoir
   reprendre: (id: string) => Promise<void>
   effacerExemples: () => Promise<void>
+  // ——— Jalon 6 : boutique (tuiles, décor, ambiances) ———
+  /** Tuiles de l'île (départ + agrandissements achetés). */
+  tuiles: Tuile[]
+  decors: DecorVue[]
+  ambianceActive: AmbianceId
+  ambiancesPossedees: AmbianceId[]
+  tuilesAchetees: number
+  demarrerPoseDecor: (decorId: DecorId, prix: number) => void
+  acheterAmbiance: (id: AmbianceId, prix: number) => Promise<boolean>
+  activerAmbiance: (id: AmbianceId) => Promise<void>
+  acheterTuile: () => Promise<boolean>
+  retirerDecor: (placementId: string) => Promise<void>
 }
 
 const Ctx = createContext<JeuCtx | null>(null)
@@ -128,11 +155,26 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
 
   const agents = useLiveQuery(() => db.agents.toArray(), [], [] as AgentDB[])
   const placementsDB = useLiveQuery(() => db.placements.where('kind').equals('batiment').toArray(), [], [])
+  const decorsDB = useLiveQuery(() => db.placements.where('kind').equals('decor').toArray(), [], [])
 
   const placements = useMemo(() => {
     const f = versVue(agents)
     return placementsDB.map(f).filter((p): p is PlacementVue => p !== null)
   }, [agents, placementsDB])
+
+  const decors = useMemo<DecorVue[]>(
+    () => decorsDB.map((p) => ({ id: p.id, x: p.x, y: p.y, decorId: p.refId as DecorId })),
+    [decorsDB],
+  )
+
+  // ——— Boutique : tuiles, ambiance ———
+  const tuilesAchetees = useLiveQuery(() => getMeta<number>('tuilesAchetees', 0), [], 0)
+  const ambianceActive = useLiveQuery(() => getMeta<AmbianceId>('ambianceActive', 'jour'), [], 'jour' as AmbianceId)
+  const ambiancesPossedees = useLiveQuery(() => getMeta<AmbianceId[]>('ambiances', ['jour']), [], ['jour'] as AmbianceId[])
+  const tuiles = useMemo<Tuile[]>(
+    () => [...tuilesDeDepart(), ...EXPANSION.slice(0, tuilesAchetees)],
+    [tuilesAchetees],
+  )
 
   const templatesRecrutes = useMemo(
     () => new Set(agents.map((a) => a.templateId).filter((x): x is string => !!x)),
@@ -197,25 +239,35 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
       validations: 0,
       createdAt: Date.now(),
     })
-    setPoseEnCours({ mode: 'pose', agentId: id, domaine: t.domaine })
+    setPoseEnCours({ mode: 'pose', kind: 'batiment', agentId: id, domaine: t.domaine })
     return id
   }, [])
 
   const creerAgent = useCallback(async (a: Omit<AgentDB, 'id' | 'createdAt'>) => {
     const id = nouvelId(a.templateId ?? 'perso')
     await db.agents.add({ ...a, id, createdAt: Date.now() })
-    setPoseEnCours({ mode: 'pose', agentId: id, domaine: a.domaine })
+    setPoseEnCours({ mode: 'pose', kind: 'batiment', agentId: id, domaine: a.domaine })
     return id
   }, [])
 
   const demarrerDeplacement = useCallback((agentId: string) => {
     const a = agents.find((x) => x.id === agentId)
-    if (a) setPoseEnCours({ mode: 'deplacement', agentId, domaine: a.domaine })
+    if (a) setPoseEnCours({ mode: 'deplacement', kind: 'batiment', agentId, domaine: a.domaine })
   }, [agents])
+
+  const demarrerPoseDecor = useCallback((decorId: DecorId, prix: number) => {
+    setPoseEnCours({ mode: 'pose', kind: 'decor', decorId, prix })
+  }, [])
 
   const poser = useCallback(async (x: number, y: number) => {
     if (!poseEnCours) return
-    const { agentId } = poseEnCours
+    if (poseEnCours.kind === 'decor' && poseEnCours.decorId) {
+      await actions.poserDecor(poseEnCours.decorId, poseEnCours.prix ?? 0, x, y)
+      setPoseEnCours(null)
+      return
+    }
+    const agentId = poseEnCours.agentId
+    if (!agentId) return
     const existant = await db.placements.where('refId').equals(agentId).first()
     if (existant) await db.placements.update(existant.id, { x, y })
     else await db.placements.add({ id: `pl_${agentId}`, kind: 'batiment', refId: agentId, x, y })
@@ -273,6 +325,16 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     revoir: actions.revoir,
     reprendre: actions.reprendre,
     effacerExemples: actions.effacerExemples,
+    tuiles,
+    decors,
+    ambianceActive,
+    ambiancesPossedees,
+    tuilesAchetees,
+    demarrerPoseDecor,
+    acheterAmbiance: actions.acheterAmbiance,
+    activerAmbiance: actions.activerAmbiance,
+    acheterTuile: actions.acheterTuile,
+    retirerDecor: actions.retirerDecor,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

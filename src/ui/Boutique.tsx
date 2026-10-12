@@ -1,0 +1,104 @@
+import { useState } from 'react'
+import { useJeu } from '../data/jeu'
+import { AMBIANCES, DECORS, EXPANSION, PRIX_TUILE, type DecorItem } from '../domain/boutique'
+import { Decor } from '../island/Decor'
+import { Bouton } from './Boutons'
+import { IconeGraine } from './icons'
+import { Sheet } from './Sheet'
+import './boutique.css'
+
+type Onglet = 'ambiances' | 'decor' | 'tuiles'
+
+export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
+  const { economie, ambianceActive, ambiancesPossedees, tuilesAchetees, acheterAmbiance, activerAmbiance, acheterTuile, demarrerPoseDecor } = useJeu()
+  const [onglet, setOnglet] = useState<Onglet>('ambiances')
+  const [msg, setMsg] = useState<string | null>(null)
+  const solde = economie.solde
+
+  const flash = (t: string) => {
+    setMsg(t)
+    window.setTimeout(() => setMsg(null), 2600)
+  }
+
+  const poserDecor = (d: DecorItem) => {
+    if (solde < d.prix) return flash('Pas assez de graines.')
+    demarrerPoseDecor(d.id, d.prix)
+    onFermer()
+  }
+
+  const tuilesRestantes = EXPANSION.length - tuilesAchetees
+
+  return (
+    <Sheet ouvert={ouvert} onFermer={onFermer} titre="Boutique">
+      <div className="bq-solde">
+        <IconeGraine /> {solde} graines
+      </div>
+      {msg && <div className="bq-msg" role="status">{msg}</div>}
+
+      <div className="segment" role="tablist" aria-label="Rayons">
+        <button role="tab" aria-selected={onglet === 'ambiances'} className={onglet === 'ambiances' ? 'actif' : ''} onClick={() => setOnglet('ambiances')}>Ambiances</button>
+        <button role="tab" aria-selected={onglet === 'decor'} className={onglet === 'decor' ? 'actif' : ''} onClick={() => setOnglet('decor')}>Décor</button>
+        <button role="tab" aria-selected={onglet === 'tuiles'} className={onglet === 'tuiles' ? 'actif' : ''} onClick={() => setOnglet('tuiles')}>Tuiles</button>
+      </div>
+
+      {onglet === 'ambiances' && (
+        <ul className="bq-liste">
+          {AMBIANCES.map((a) => {
+            const possede = ambiancesPossedees.includes(a.id)
+            const active = ambianceActive === a.id
+            return (
+              <li key={a.id} className="bq-item">
+                <span className={`bq-ambiance bq-ambiance-${a.id}`} aria-hidden />
+                <div className="bq-txt">
+                  <strong>{a.nom}</strong>
+                  <span className="bq-prix">{a.prix === 0 ? 'Offerte' : `${a.prix} graines`}</span>
+                </div>
+                {active ? (
+                  <span className="bq-active">Active</span>
+                ) : possede ? (
+                  <Bouton variante="contour" onClick={() => activerAmbiance(a.id)}>Activer</Bouton>
+                ) : (
+                  <Bouton disabled={solde < a.prix} onClick={async () => { (await acheterAmbiance(a.id, a.prix)) ? flash(`${a.nom} activée.`) : flash('Pas assez de graines.') }}>
+                    Acheter
+                  </Bouton>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      {onglet === 'decor' && (
+        <ul className="bq-liste">
+          {DECORS.map((d) => (
+            <li key={d.id} className="bq-item">
+              <svg width={46} height={40} viewBox="-24 -34 48 44" aria-hidden className="bq-decor">
+                <ellipse cx={0} cy={2} rx={16} ry={6} fill="var(--planete-teinte)" />
+                <Decor id={d.id} />
+              </svg>
+              <div className="bq-txt">
+                <strong>{d.nom}</strong>
+                <span className="bq-prix">{d.prix} graines</span>
+              </div>
+              <Bouton domaine="planete" disabled={solde < d.prix} onClick={() => poserDecor(d)}>Poser</Bouton>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {onglet === 'tuiles' && (
+        <div className="bq-tuiles">
+          <p className="bq-aide">Agrandis ton île : chaque tuile coûte {PRIX_TUILE} graines et apparaît sur un bord.</p>
+          <p className="bq-reste">{tuilesRestantes > 0 ? `${tuilesRestantes} tuile${tuilesRestantes > 1 ? 's' : ''} disponible${tuilesRestantes > 1 ? 's' : ''}` : 'Ton île est à sa taille maximale pour la bêta.'}</p>
+          <Bouton
+            disabled={solde < PRIX_TUILE || tuilesRestantes === 0}
+            style={{ width: '100%' }}
+            onClick={async () => { (await acheterTuile()) ? flash('Une nouvelle tuile a poussé !') : flash('Pas assez de graines.') }}
+          >
+            Agrandir l’île ({PRIX_TUILE})
+          </Bouton>
+        </div>
+      )}
+    </Sheet>
+  )
+}

@@ -25,3 +25,6 @@
   color: var(--texte-2); display: grid; place-items: center; cursor: pointer; border-radius: 50%;
 }
 .entete-reglages:hover { background: var(--fond); color: var(--encre); }
+
+.pastille-bouton { border: 0; cursor: pointer; font: inherit; }
+.pastille-bouton:active { transform: scale(.96); }

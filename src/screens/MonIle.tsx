@@ -1,12 +1,12 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useJeu } from '../data/jeu'
 import { Island } from '../island/Island'
-import { tuilesDeDepart } from '../island/iso'
 import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
 import { SaisieRapide } from '../ui/SaisieRapide'
 import { FileValidation } from '../ui/FileValidation'
 import { Reglages } from '../ui/Reglages'
+import { Boutique } from '../ui/Boutique'
 import { BandeauChaine } from '../ui/BandeauChaine'
 import './monile.css'
 
@@ -24,12 +24,14 @@ export function MonIle() {
   const {
     pret, placements, agents, poseEnCours, poser, demarrerDeplacement, annulerPose, ouvrirFiche,
     economie, aValider, agentsEnAttente, derniereChaine,
+    tuiles, decors, ambianceActive,
   } = useJeu()
   const [brinOuvert, setBrinOuvert] = useState(false)
   const [teaser, setTeaser] = useState(() => !dejaVu())
   const [saisieOuverte, setSaisieOuverte] = useState(false)
   const [fileOuverte, setFileOuverte] = useState(false)
   const [reglagesOuverts, setReglagesOuverts] = useState(false)
+  const [boutiqueOuverte, setBoutiqueOuverte] = useState(false)
 
   const ouvrirBrin = () => {
     setBrinOuvert(true)
@@ -41,20 +43,26 @@ export function MonIle() {
     }
   }
   const fermerBrin = useCallback(() => setBrinOuvert(false), [])
-  const tuiles = useMemo(tuilesDeDepart, [])
 
-  const agentPose = poseEnCours ? agents.find((a) => a.id === poseEnCours.agentId) : undefined
+  const agentPose = poseEnCours?.agentId ? agents.find((a) => a.id === poseEnCours.agentId) : undefined
+  const texteBandeau = poseEnCours
+    ? poseEnCours.kind === 'decor'
+      ? 'Pose ton décor : touche une tuile surlignée.'
+      : `${poseEnCours.mode === 'pose' ? 'Pose' : 'Déplace'} ${agentPose ? `le bâtiment de ${agentPose.nom}` : 'le bâtiment'} : touche une tuile surlignée.`
+    : ''
 
   return (
     <div className="ecran mon-ile">
-      <EnTete graines={economie.solde} elan={economie.elan} onReglages={() => setReglagesOuverts(true)} />
+      <EnTete
+        graines={economie.solde}
+        elan={economie.elan}
+        onReglages={() => setReglagesOuverts(true)}
+        onBoutique={() => setBoutiqueOuverte(true)}
+      />
 
       {poseEnCours && (
         <div className="pose-bandeau" role="status">
-          <span>
-            {poseEnCours.mode === 'pose' ? 'Pose' : 'Déplace'} {agentPose ? `le bâtiment de ${agentPose.nom}` : 'le bâtiment'}
-            {' '}: touche une tuile surlignée.
-          </span>
+          <span>{texteBandeau}</span>
           <button className="pose-annuler" onClick={annulerPose}>Annuler</button>
         </div>
       )}
@@ -75,6 +83,8 @@ export function MonIle() {
             repos={economie.repos}
             elan={economie.elan}
             chaine={derniereChaine?.chaines[0] ?? null}
+            decors={decors}
+            ambiance={ambianceActive}
           />
         </div>
       </div>
@@ -97,6 +107,7 @@ export function MonIle() {
       <SaisieRapide ouvert={saisieOuverte} onFermer={() => setSaisieOuverte(false)} />
       <FileValidation ouvert={fileOuverte} onFermer={() => setFileOuverte(false)} />
       <Reglages ouvert={reglagesOuverts} onFermer={() => setReglagesOuverts(false)} />
+      <Boutique ouvert={boutiqueOuverte} onFermer={() => setBoutiqueOuverte(false)} />
     </div>
   )
 }

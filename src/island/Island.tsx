@@ -10,6 +10,8 @@ import { SOCLE, TH, TW, bornes, cle, iso, losange } from './iso'
 import { Fond, Nenuphars, Pollen, hache } from './Paysage'
 import { lumiereDepuisElan, type Meteo } from '../domain/economy'
 import type { Chaine } from '../domain/chains'
+import { getAmbiance, type AmbianceId, type DecorId } from '../domain/boutique'
+import { Decor } from './Decor'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
 
@@ -23,10 +25,18 @@ export interface PlacementVue {
   libelle: string
 }
 
+export interface DecorVue {
+  id: string
+  x: number
+  y: number
+  decorId: DecorId
+}
+
 export interface PoseVue {
-  agentId: string
-  domaine: Domaine
   mode: 'pose' | 'deplacement'
+  kind: 'batiment' | 'decor'
+  agentId?: string
+  domaine?: Domaine
 }
 
 interface Props {
@@ -54,6 +64,12 @@ interface Props {
   elan?: number
   /** Dernière chaîne : un flux doré relie les deux bâtiments concernés. */
   chaine?: Chaine | null
+  /** Décor posé par l'utilisateur. */
+  decors?: DecorVue[]
+  /** Ambiance active (jour, nuit, saisons). */
+  ambiance?: AmbianceId
+  /** Tap sur un décor : le retirer. */
+  onDecorTap?: (id: string) => void
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -77,6 +93,7 @@ type Objet =
   | (PlacementVue & { type: 'bat' })
   | { type: 'coeur'; id: string; x: number; y: number }
   | { type: 'fanion'; id: string; x: number; y: number; zone: Domaine }
+  | { type: 'decor'; id: string; x: number; y: number; decorId: DecorId }
 
 /** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
 const FANIONS: { x: number; y: number; zone: Domaine }[] = [
@@ -102,7 +119,11 @@ export function Island({
   repos,
   elan,
   chaine,
+  decors = [],
+  ambiance = 'jour',
+  onDecorTap,
 }: Props) {
+  const amb = getAmbiance(ambiance)
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
   // Appui long sur un bâtiment pour le déplacer ; tap bref pour ouvrir la fiche.
   const appui = useRef<{ agentId: string; long: boolean } | null>(null)
@@ -138,15 +159,21 @@ export function Island({
   const cx = (b.minX + b.maxX) / 2
 
   const triees = [...tuiles].sort((a, c) => a.x + a.y - (c.x + c.y))
-  const occupees = new Set(placements.map((p) => cle(p.x, p.y)))
+  const occupees = new Set([...placements, ...decors].map((p) => cle(p.x, p.y)))
 
-  // Tuiles libres de la zone pendant une pose ou un déplacement.
+  // Tuiles libres pendant une pose ou un déplacement.
+  // Bâtiment : tuiles de sa zone. Décor : toute tuile libre (hors Cœur).
   // Lors d'un déplacement, la tuile actuelle du bâtiment déplacé redevient libre.
   const occupeesPose = new Set(
-    placements.filter((p) => p.id !== poseEnCours?.agentId).map((p) => cle(p.x, p.y)),
+    [...placements.filter((p) => p.id !== poseEnCours?.agentId), ...decors].map((p) => cle(p.x, p.y)),
   )
   const libres = poseEnCours
-    ? tuiles.filter((t) => t.zone === poseEnCours.domaine && !occupeesPose.has(cle(t.x, t.y)))
+    ? tuiles.filter(
+        (t) =>
+          t.zone !== 'coeur' &&
+          !occupeesPose.has(cle(t.x, t.y)) &&
+          (poseEnCours.kind === 'decor' || t.zone === poseEnCours.domaine),
+      )
     : []
 
   const fanions = FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
@@ -154,6 +181,7 @@ export function Island({
 
   const objets: Objet[] = [
     ...placements.map((p) => ({ ...p, type: 'bat' as const })),
+    ...decors.map((d) => ({ type: 'decor' as const, id: d.id, x: d.x, y: d.y, decorId: d.decorId })),
     ...tuiles.filter((t) => t.zone === 'coeur').map((t) => ({ type: 'coeur' as const, id: 'coeur', x: t.x, y: t.y })),
     ...fanions.map((f) => ({ type: 'fanion' as const, id: `fanion-${f.zone}`, ...f })),
   ].sort((a, c) => a.x + a.y - (c.x + c.y) || a.x - c.x)
@@ -257,7 +285,7 @@ export function Island({
       </g>
 
       {/* Lumière chaude du soleil sur l'île : plus l'élan est fort, plus elle réchauffe */}
-      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" opacity={lumiereDepuisElan(elan ?? 1)} pointerEvents="none" />
+      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" opacity={amb.astre === 'lune' ? 0 : lumiereDepuisElan(elan ?? 1)} pointerEvents="none" />
 
       <Riviere />
 
@@ -303,6 +331,25 @@ export function Island({
             return (
               <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
                 <Fanion zone={o.zone} />
+              </g>
+            )
+          }
+          if (o.type === 'decor') {
+            return (
+              <g
+                key={o.id}
+                className="decor"
+                transform={`translate(${sx} ${sy})`}
+                role={onDecorTap ? 'button' : undefined}
+                tabIndex={onDecorTap ? 0 : undefined}
+                aria-label="Décor — toucher pour retirer"
+                onClick={() => onDecorTap?.(o.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') onDecorTap?.(o.id)
+                }}
+              >
+                <polygon points={losange(0, 0)} fill="transparent" />
+                <Decor id={o.decorId} nuit={amb.astre === 'lune'} />
               </g>
             )
           }
@@ -424,6 +471,42 @@ export function Island({
           opacity={meteo === 'brume' ? 0.16 : 0.08}
           pointerEvents="none"
         />
+      )}
+
+      {/* Ambiance : voile coloré, lune et étoiles la nuit, feuilles ou neige */}
+      {amb.voile && (
+        <rect x={x0} y={y0} width={W} height={H} fill={amb.voile.couleur} opacity={amb.voile.opacite} pointerEvents="none" />
+      )}
+      {amb.astre === 'lune' && (
+        <g aria-hidden pointerEvents="none">
+          <circle cx={x0 + W * 0.22} cy={y0 + H * 0.13} r={16} fill="#F4EFD6" />
+          <circle cx={x0 + W * 0.22 + 6} cy={y0 + H * 0.13 - 5} r={14} fill={amb.ciel?.[0] ?? '#2A2E4A'} />
+          {Array.from({ length: 18 }).map((_, i) => {
+            const h = hache(i * 13 + 7, i * 29 + 3)
+            const sx = x0 + ((h % 1000) / 1000) * W
+            const sy = y0 + (((h >> 10) % 1000) / 1000) * (horizon - y0)
+            return <circle key={i} className="etoile" cx={sx} cy={sy} r={(h % 2) + 0.8} fill="#FBF8F1" style={{ animationDelay: `${(h % 30) / 10}s` }} />
+          })}
+        </g>
+      )}
+      {amb.feuilles && (
+        <g aria-hidden pointerEvents="none" className="feuilles-auto">
+          {Array.from({ length: 8 }).map((_, i) => {
+            const h = hache(i * 17 + 1, i * 7 + 5)
+            const sx = x0 + W * 0.2 + ((h % 1000) / 1000) * W * 0.6
+            const col = ['#C96A41', '#E7B04A', '#B0512A'][h % 3]
+            return <path key={i} className="feuille-auto" d="M0 0 q3 -4 6 0 q-3 4 -6 0 Z" fill={col} transform={`translate(${sx} ${y0 + H * 0.3})`} style={{ animationDelay: `${(h % 50) / 10}s` }} />
+          })}
+        </g>
+      )}
+      {amb.neige && (
+        <g aria-hidden pointerEvents="none" className="neige">
+          {Array.from({ length: 16 }).map((_, i) => {
+            const h = hache(i * 23 + 9, i * 11 + 2)
+            const sx = x0 + ((h % 1000) / 1000) * W
+            return <circle key={i} className="flocon" cx={sx} cy={y0 + H * 0.3} r={(h % 2) + 1.3} fill="#FBF8F1" style={{ animationDelay: `${(h % 60) / 10}s` }} />
+          })}
+        </g>
       )}
 
       <Pollen {...cadre} />

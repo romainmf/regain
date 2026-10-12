@@ -4,6 +4,8 @@ import { LlmEngine } from '../domain/engine/LlmEngine'
 import type { AgentLite } from '../domain/engine/AgentEngine'
 import { chainesDepuisValidation, type Chaine } from '../domain/chains'
 import { optionParLabel } from '../domain/missions'
+import type { AmbianceId, DecorId } from '../domain/boutique'
+import { PRIX_TUILE, EXPANSION } from '../domain/boutique'
 import type { Brouillon, Proposition, Saisie, SaisieData, SaisieKind } from '../domain/propositions'
 import { db, getMeta, nouvelId, setMeta, type AgentDB, type GraineDB } from './db'
 import { grainesDuJour, validations7j } from './selectors'
@@ -117,4 +119,55 @@ export async function effacerExemples(): Promise<void> {
   const exemples = await db.propositions.filter((p) => !!p.exemple).primaryKeys()
   await db.propositions.bulkDelete(exemples)
   await setMeta('exemples-effaces', true)
+}
+
+// ——— Boutique (jalon 6) ———
+
+async function soldeActuel(): Promise<number> {
+  const journal = await db.graines.toArray()
+  return journal.reduce((s, g) => s + g.montant, 0)
+}
+
+/** Enregistre une dépense de graines (montant positif à retrancher). */
+async function depenser(montant: number, motif = 'depense'): Promise<boolean> {
+  const solde = await soldeActuel()
+  if (solde < montant) return false
+  await db.graines.add({ id: nouvelId('dep'), ts: Date.now(), domaine: 'boite', montant: -montant, motif: motif as GraineDB['motif'] })
+  return true
+}
+
+/** Achète une ambiance et l'active. Renvoie false si pas assez de graines. */
+export async function acheterAmbiance(id: AmbianceId, prix: number): Promise<boolean> {
+  const possedees = await getMeta<AmbianceId[]>('ambiances', ['jour'])
+  if (!possedees.includes(id)) {
+    if (prix > 0 && !(await depenser(prix, 'depense'))) return false
+    await setMeta('ambiances', [...possedees, id])
+  }
+  await setMeta('ambianceActive', id)
+  return true
+}
+
+export async function activerAmbiance(id: AmbianceId): Promise<void> {
+  await setMeta('ambianceActive', id)
+}
+
+/** Achète une tuile d'agrandissement (ajoute la prochaine tuile disponible). */
+export async function acheterTuile(): Promise<boolean> {
+  const n = await getMeta<number>('tuilesAchetees', 0)
+  if (n >= EXPANSION.length) return false
+  if (!(await depenser(PRIX_TUILE, 'depense'))) return false
+  await setMeta('tuilesAchetees', n + 1)
+  return true
+}
+
+/** Pose un décor acheté sur une tuile libre (dépense à la pose). */
+export async function poserDecor(decorId: DecorId, prix: number, x: number, y: number): Promise<boolean> {
+  if (!(await depenser(prix, 'depense'))) return false
+  await db.placements.add({ id: nouvelId('dec'), kind: 'decor', refId: decorId, x, y })
+  return true
+}
+
+/** Retire un décor (sans remboursement). */
+export async function retirerDecor(placementId: string): Promise<void> {
+  await db.placements.delete(placementId)
 }

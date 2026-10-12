@@ -76,6 +76,26 @@
 .robot-bras { transform-box: fill-box; transform-origin: 100% 100%; animation: robot-salue 2.8s ease-in-out infinite; animation-delay: var(--phase, 0s); }
 @keyframes robot-salue { 0%, 70%, 100% { transform: rotate(0) } 80%, 90% { transform: rotate(-16deg) } }
 
+/* Décor posé */
+.decor { cursor: pointer; }
+
+/* Ambiances */
+.etoile { animation: scintille 3s ease-in-out infinite; }
+@keyframes scintille { 0%, 100% { opacity: .3 } 50% { opacity: 1 } }
+.lampe-lueur { animation: lueur-placette 3.5s ease-in-out infinite; }
+.feuille-auto { transform-box: fill-box; transform-origin: center; animation: feuille-tombe 9s ease-in infinite; opacity: 0; }
+@keyframes feuille-tombe {
+  0% { opacity: 0; transform: translateY(-10px) rotate(0) }
+  10% { opacity: 1 }
+  100% { opacity: 0; transform: translateY(260px) translateX(30px) rotate(320deg) }
+}
+.flocon { transform-box: fill-box; animation: flocon-tombe 11s linear infinite; opacity: 0; }
+@keyframes flocon-tombe {
+  0% { opacity: 0; transform: translateY(-10px) }
+  10% { opacity: .9 }
+  100% { opacity: 0; transform: translateY(280px) translateX(-14px) }
+}
+
 /* Pose et déplacement : tuiles libres qui respirent */
 .pose-tuile { cursor: pointer; opacity: .55; animation: pose-pulse 1.6s ease-in-out infinite; }
 .pose-tuile:hover, .pose-tuile:focus-visible { opacity: .8; outline: none; }
@@ -111,6 +131,7 @@
   .feuille { display: none; }
   .courant, .source-ride, .coeur-couronne, .coeur-yeux, .fanion-tissu,
   .robot-corps, .robot-yeux, .robot-antenne, .robot-coeur, .robot-bras, .pose-tuile, .lanterne-lueur,
+  .etoile, .feuille-auto, .flocon, .lampe-lueur,
   .signe-aura, .signe-point, .flux-trait,
   .coeur-halo, .coeur-bulle,
   .pales, .pollen circle, .oiseaux, .voilier, .cascade, .coeur-diodes circle { animation: none !important; }
