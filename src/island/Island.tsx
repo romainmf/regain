@@ -388,6 +388,7 @@ export function Island({
               ) : (
                 <g
                   className={`batiment${poseEnCours?.agentId === o.id ? ' batiment-deplace' : ''}${agentsEnAttente?.has(o.id) ? ' batiment-vivant' : ''}`}
+                  data-agent={o.id}
                   aria-label={poseEnCours ? o.libelle : `${o.libelle} : appui long pour déplacer`}
                   role={poseEnCours ? undefined : 'button'}
                   tabIndex={poseEnCours ? undefined : 0}

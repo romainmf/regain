@@ -7,7 +7,7 @@ export const CATALOGUE: AgentTemplate[] = [
   // ——— Ma boîte ———
   {
     id: 'plume',
-    nom: 'Plume',
+    nom: 'Factures',
     domaine: 'boite',
     objectifs: ['temps', 'serenite', 'revenu'],
     mission: 'Prépare tes factures et te rappelle les échéances URSSAF et TVA.',
@@ -80,7 +80,7 @@ export const CATALOGUE: AgentTemplate[] = [
   // ——— Ma peau ———
   {
     id: 'source',
-    nom: 'Source',
+    nom: 'Rythme',
     domaine: 'peau',
     objectifs: ['energie', 'serenite'],
     mission: 'Garde ton rythme : repère les grosses journées enchaînées et protège un créneau calme.',
@@ -167,7 +167,7 @@ export const CATALOGUE: AgentTemplate[] = [
   // ——— Ma planète ———
   {
     id: 'racine',
-    nom: 'Racine',
+    nom: 'Empreinte',
     domaine: 'planete',
     objectifs: ['empreinte'],
     mission: 'Estime l’empreinte d’une mission (déplacements, matériel, numérique) et l’ajoute à ton bilan.',

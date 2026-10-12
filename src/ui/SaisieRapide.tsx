@@ -81,7 +81,7 @@ export function SaisieRapide({ ouvert, onFermer }: { ouvert: boolean; onFermer: 
           )}
 
           {kind === 'grosse_journee' && (
-            <p className="saisie-note">C’est noté. Source veillera à te proposer un vrai moment de pause.</p>
+            <p className="saisie-note">C’est noté. Rythme veillera à te proposer un vrai moment de pause.</p>
           )}
 
           {kind === 'trajet' && (

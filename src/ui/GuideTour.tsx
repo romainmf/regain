@@ -11,7 +11,10 @@ interface Etape {
 
 const ETAPES: Etape[] = [
   { selector: '.coeur-brin', titre: 'Voici moi, Brin', texte: 'L’arbre au cœur de ton île. Touche-moi quand tu veux me poser une question.' },
-  { selector: '.batiment', titre: 'Tes agents', texte: 'Chaque agent a son bâtiment et son petit robot. Touche-le pour le régler, appui long pour le déplacer.' },
+  { selector: '.batiment', titre: 'Tes agents', texte: 'Tu as déjà trois agents offerts, un par domaine. Chacun a son bâtiment et son petit robot. Je te les présente.' },
+  { selector: '[data-agent="plume"]', titre: 'Factures · Ma boîte', texte: 'Dans sa cabane, il prépare tes factures et te rappelle tes échéances URSSAF et TVA.' },
+  { selector: '[data-agent="source"]', titre: 'Rythme · Ma peau', texte: 'Sous sa pergola, il veille sur ton rythme et te propose de protéger un créneau calme quand les journées s’enchaînent.' },
+  { selector: '[data-agent="racine"]', titre: 'Empreinte · Ma planète', texte: 'Dans sa serre, il estime l’empreinte de tes missions et l’ajoute à ton bilan.' },
   { selector: '.elan-badge', titre: 'Ton élan', texte: 'Il grandit quand tes trois domaines avancent ensemble, et multiplie les graines que tu gagnes.' },
   { selector: '.action-saisir', titre: 'Dis-leur ce qui arrive', texte: 'Une mission finie, une grosse journée, un trajet… tes agents préparent aussitôt la suite.' },
   { selector: '.action-valider', titre: 'À valider', texte: 'Ici, tu valides ce qu’ils ont préparé. Chaque validation te donne des graines et fait pousser l’île.' },

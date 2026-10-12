@@ -49,6 +49,8 @@ export function amorcerSiNecessaire(): Promise<void> {
 }
 
 async function amorcer(): Promise<void> {
+  // Toujours : aligne les noms des agents de départ sur le catalogue (migrations).
+  await synchroniserNomsDeDepart()
   if (await getMeta('seed-fait', false)) return
   const agents: AgentDB[] = []
   const placements: PlacementDB[] = []
@@ -77,4 +79,13 @@ async function amorcer(): Promise<void> {
     await db.propositions.bulkPut(exemples)
     await setMeta('seed-fait', true)
   })
+}
+
+/** Met à jour le nom des agents de départ existants pour suivre le catalogue. */
+async function synchroniserNomsDeDepart(): Promise<void> {
+  for (const id of AGENTS_DE_DEPART) {
+    const t = getTemplate(id)
+    const a = await db.agents.get(id)
+    if (t && a && a.nom !== t.nom) await db.agents.update(id, { nom: t.nom })
+  }
 }

@@ -66,8 +66,8 @@ export const SUJETS: Sujet[] = [
     question: 'C’est quoi un agent ?',
     motsCles: ['agent', 'recruter', 'recrute', 'equipe', 'plume', 'source', 'racine', 'catalogue', 'batiment'],
     reponse: [
-      'Un agent, c’est un petit assistant spécialisé. Tu en as déjà trois, offerts : Plume (factures et échéances), Source (ton rythme) et Racine (l’empreinte de tes projets).',
-      'Dans l’onglet Agents, tu en trouveras d’autres à recruter. Chacun apporte son bâtiment sur l’île : la cabane de Plume, la pergola de Source, la serre de Racine…',
+      'Un agent, c’est un petit assistant spécialisé. Tu en as déjà trois, offerts : Factures (tes factures et échéances), Rythme (ton rythme de travail) et Empreinte (l’empreinte de tes projets).',
+      'Dans l’onglet Agents, tu en trouveras d’autres à recruter. Chacun apporte son bâtiment sur l’île : la cabane de Factures, la pergola de Rythme, la serre d’Empreinte…',
       'Plus un agent t’aide, plus son bâtiment grandit. C’est l’usage qui le fait évoluer, jamais l’argent.',
     ],
     suites: ['autonomie', 'creer', 'validation'],
