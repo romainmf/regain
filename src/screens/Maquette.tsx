@@ -17,13 +17,13 @@ const P = (id: string, x: number, y: number, batiment: PlacementVue['batiment'],
 })
 
 const AGENTS: PlacementVue[] = [
-  P('factures', 1, 3, 'cabane', 'boite', 2),
-  P('relance', 2, 5, 'boite-aux-lettres', 'boite'),
+  { ...P('factures', 1, 3, 'cabane', 'boite', 2), poste: 'factures' },
+  { ...P('relance', 2, 5, 'boite-aux-lettres', 'boite'), poste: 'generique' },
   P('vigie', 0, 2, 'tour-de-guet', 'boite'),
-  P('rythme', 5, 1, 'pergola', 'peau', 2),
+  { ...P('rythme', 5, 1, 'pergola', 'peau', 2), poste: 'rythme' },
   P('cloture', 6, 2, 'lanterne', 'peau'),
   P('miroir', 2, 1, 'banc', 'peau'),
-  P('empreinte', 5, 4, 'serre', 'planete', 2),
+  { ...P('empreinte', 5, 4, 'serre', 'planete', 2), poste: 'empreinte' },
   P('sobriete', 3, 5, 'composteur', 'planete'),
   P('deplacements', 4, 6, 'petit-rail', 'planete'),
 ]

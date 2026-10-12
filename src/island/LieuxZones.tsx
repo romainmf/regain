@@ -147,19 +147,33 @@ function SolLieu({ t, style }: { t: Tuile; style: DefStyleSol }) {
     <polygon points={pts([sx, sy - TH], [sx + TW, sy], [sx, sy + TH], [sx - TW, sy])} fill={style.fond} opacity={0.85} />
   ) : null
   const trait = style.fond ? nuance(style.fond, -0.25) : 'rgba(34,48,31,.22)'
+  // Bande de la tuile entre deux fractions u0..u1 (le long de l'axe gauche→droite)
+  const bande = (u0: number, u1: number) =>
+    pts([sx - TW + TW * u0, sy - TH * u0], [sx - TW + TW * u1, sy - TH * u1], [sx + TW * u1, sy + TH - TH * u1], [sx + TW * u0, sy + TH - TH * u0])
   switch (style.motif) {
-    case 'planches':
+    case 'planches': {
+      // Lames alternées, deux tons, joints fins : un vrai parquet
+      const base = style.fond ?? '#E4C9A6'
+      const tons = [nuance(base, 0.08), nuance(base, -0.04), nuance(base, 0.14), nuance(base, -0.08)]
       return (
-        <g>{fond}<g stroke={trait} strokeWidth={0.7} opacity={0.6}>
-          {[0.25, 0.5, 0.75].map((u) => <line key={u} x1={sx - TW + TW * u} y1={sy - TH * u} x2={sx + TW * u} y2={sy + TH - TH * u} />)}
-        </g></g>
+        <g>{fond}
+          {[0, 0.25, 0.5, 0.75].map((u, k) => <polygon key={u} points={bande(u, u + 0.25)} fill={tons[(k + t.x + t.y) % 4]} opacity={0.75} />)}
+          <g stroke={trait} strokeWidth={0.5} opacity={0.5}>
+            {[0.25, 0.5, 0.75].map((u) => <line key={u} x1={sx - TW + TW * u} y1={sy - TH * u} x2={sx + TW * u} y2={sy + TH - TH * u} />)}
+          </g>
+        </g>
       )
+    }
     case 'croisillons':
+      // Grands carreaux clairs, joints en croix
       return (
-        <g>{fond}<g stroke="#FBF8F1" strokeWidth={0.6} opacity={0.7}>
-          <line x1={sx - TW / 2} y1={sy - TH / 2} x2={sx + TW / 2} y2={sy + TH / 2} />
-          <line x1={sx + TW / 2} y1={sy - TH / 2} x2={sx - TW / 2} y2={sy + TH / 2} />
-        </g></g>
+        <g>{fond}
+          <polygon points={pts([sx, sy - TH + 1.5], [sx + TW - 3, sy], [sx, sy + TH - 1.5], [sx - TW + 3, sy])} fill="#FBF8F1" opacity={0.28} />
+          <g stroke="#FBF8F1" strokeWidth={0.8} opacity={0.8}>
+            <line x1={sx - TW / 2} y1={sy - TH / 2} x2={sx + TW / 2} y2={sy + TH / 2} />
+            <line x1={sx + TW / 2} y1={sy - TH / 2} x2={sx - TW / 2} y2={sy + TH / 2} />
+          </g>
+        </g>
       )
     case 'rangs':
       return (
@@ -168,8 +182,12 @@ function SolLieu({ t, style }: { t: Tuile; style: DefStyleSol }) {
         </g></g>
       )
     case 'brins':
+      // Gazon tondu : bandes claires et sombres alternées, quelques brins
       return (
-        <g>{fond}<g stroke={nuance(FEUILLE, -0.1)} strokeWidth={1} strokeLinecap="round" opacity={0.7}>
+        <g>{fond}
+          <polygon points={bande(0, 0.5)} fill="#FBF8F1" opacity={(t.x + t.y) % 2 ? 0.12 : 0} />
+          <polygon points={bande(0.5, 1)} fill="#FBF8F1" opacity={(t.x + t.y) % 2 ? 0 : 0.12} />
+          <g stroke={nuance(FEUILLE, -0.1)} strokeWidth={1} strokeLinecap="round" opacity={0.7}>
           {[[-8, 2], [4, -3], [10, 4], [-2, 6]].map(([x, y]) => <line key={`${x}${y}`} x1={sx + x} y1={sy + y} x2={sx + x + 1} y2={sy + y - 4} />)}
         </g></g>
       )
@@ -345,6 +363,40 @@ function Facade({ ar, z, style, i }: { ar: Arete; z: Domaine; style: DefStyleMur
   )
 }
 
+/** Hauteur des cloisons vitrées. */
+const HV = 30
+
+/**
+ * Cloison vitrée à cadre bois, sur un soubassement dans la matière du lieu :
+ * on voit à travers, mais le lieu est bien fermé, comme un vrai bâtiment.
+ */
+function Vitre({ a, b, style, ombre, socle = 6 }: { a: Pt; b: Pt; style: DefStyleMur; ombre: boolean; socle?: number }) {
+  const a1 = lever(a, socle), b1 = lever(b, socle)
+  const a2 = lever(a, HV), b2 = lever(b, HV)
+  const m = lerp(a, b, 0.5)
+  return (
+    <g>
+      <Mur a={a} b={b} h={socle} style={style} ombre={ombre} />
+      <polygon points={pts(a1, b1, b2, a2)} fill="#D4EEE4" opacity={ombre ? 0.3 : 0.22} />
+      {/* Reflet oblique */}
+      <polygon points={pts(lever(lerp(a, b, 0.1), socle + 2), lever(lerp(a, b, 0.3), socle + 2), lever(lerp(a, b, 0.55), HV - 2), lever(lerp(a, b, 0.35), HV - 2))} fill="#FBF8F1" opacity={0.22} />
+      {/* Cadre bois : traverses, meneau central, montants */}
+      <line x1={a1[0]} y1={a1[1]} x2={b1[0]} y2={b1[1]} stroke={style.poteau} strokeWidth={1.2} />
+      <line x1={a2[0]} y1={a2[1]} x2={b2[0]} y2={b2[1]} stroke={style.poteau} strokeWidth={1.8} />
+      <line x1={m[0]} y1={m[1] - socle} x2={m[0]} y2={m[1] - HV} stroke={style.poteau} strokeWidth={0.9} opacity={0.8} />
+      <rect x={a[0] - 1.1} y={a[1] - HV - 1} width={2.2} height={HV + 1} fill={style.poteau} />
+      <rect x={b[0] - 1.1} y={b[1] - HV - 1} width={2.2} height={HV + 1} fill={style.poteau} />
+    </g>
+  )
+}
+
+/** Ombre portée du mur sur le sol, le long d'une arête, vers l'intérieur. */
+function OmbreMur({ ar }: { ar: Arete }) {
+  const dedans: Pt = ar.cote === 'bl' ? [TW * 0.35, TH * 0.35] : ar.cote === 'br' ? [-TW * 0.35, TH * 0.35] : ar.cote === 'fr' ? [-TW * 0.25, -TH * 0.25] : [TW * 0.25, -TH * 0.25]
+  const a2: Pt = [ar.a[0] + dedans[0], ar.a[1] + dedans[1]], b2: Pt = [ar.b[0] + dedans[0], ar.b[1] + dedans[1]]
+  return <polygon points={pts(ar.a, ar.b, b2, a2)} fill="#22301F" opacity={ar.cote === 'bl' || ar.cote === 'br' ? 0.1 : 0.05} />
+}
+
 /** Bassin du Spa : margelle en pierre claire, eau profonde au centre, échelle. */
 function Bassin({ tuiles }: { tuiles: Tuile[] }) {
   const p = tuiles.map((t) => iso(t.x, t.y))
@@ -399,6 +451,8 @@ export function LieuxSol({ tuiles, murs = MURS_DEFAUT, sols = SOLS_DEFAUT }: Pro
         <SolLieu key={cle(t.x, t.y)} t={t} style={STYLES_SOL[sols[t.zone as Domaine]]} />
       ))}
       <Bassin tuiles={bassin} />
+      {/* Ombres des murs sur le sol : le lieu a du volume */}
+      {ZONES.flatMap((z) => aretesZone(tuiles, z).filter((ar) => !ouvertes.has(cleArete(ar.a, ar.b))).map((ar, i) => <OmbreMur key={`${z}${i}`} ar={ar} />))}
       {ZONES.map((z) => {
         const style = STYLES_MUR[murs[z]]
         const aretes = aretesZone(tuiles, z)
@@ -411,13 +465,10 @@ export function LieuxSol({ tuiles, murs = MURS_DEFAUT, sols = SOLS_DEFAUT }: Pro
                 archesFaites.add(k)
                 return <Arche key={i} a={ar.a} b={ar.b} couleur={COULEUR[z]} />
               }
-              const h = ar.exterieur ? 9 : 5
-              return (
-                <g key={i}>
-                  <Mur a={ar.a} b={ar.b} h={h} style={style} ombre={ar.cote.startsWith('f')} />
-                  <rect x={ar.a[0] - 1} y={ar.a[1] - h - 4} width={2} height={h + 4} fill={style.poteau} />
-                </g>
-              )
+              // Façades du fond : dessinées à part. Bords avant : vitrés, après les bâtiments.
+              if (ar.exterieur || ar.cote === 'fr' || ar.cote === 'fl') return null
+              // Frontières du fond entre lieux (et autour du Cœur) : cloison vitrée
+              return <Vitre key={i} a={ar.a} b={ar.b} style={style} ombre={false} />
             })}
             {aretes
               .filter((ar) => ar.exterieur && (ar.cote === 'bl' || ar.cote === 'br'))
@@ -429,20 +480,37 @@ export function LieuxSol({ tuiles, murs = MURS_DEFAUT, sols = SOLS_DEFAUT }: Pro
   )
 }
 
-/** Couche haute, après les bâtiments : enseignes aux angles, vapeur du spa, éolienne. */
+/**
+ * Couche haute, après les bâtiments : cloisons vitrées côté caméra (on voit à
+ * travers), enseignes aux angles, vapeur du spa, éolienne.
+ */
 export function LieuxHaut({ tuiles, murs = MURS_DEFAUT }: PropsLieux) {
   return (
     <g aria-hidden>
       {ZONES.map((z) => {
         const c = COULEUR[z]
         const style = STYLES_MUR[murs[z]]
-        const exterieures = aretesZone(tuiles, z).filter((ar) => ar.exterieur)
+        const aretes = aretesZone(tuiles, z)
+        const exterieures = aretes.filter((ar) => ar.exterieur)
+        // Bords avant extérieurs (les frontières entre lieux sont déjà posées dans LieuxSol).
+        // Jardin : à ciel ouvert, clôture basse ; Atelier et Spa : vitrés.
+        const vitresAvant = exterieures.filter((ar) => ar.cote === 'fr' || ar.cote === 'fl')
         // Enseigne : au sommet extérieur le plus éloigné du Cœur (angle du lieu)
         const sommets = exterieures.flatMap((ar) => [ar.a, ar.b])
         const coeur = iso(0, 0)
         const angle = sommets.reduce<Pt | null>((m, p) => (!m || Math.hypot(p[0] - coeur.sx, p[1] - coeur.sy) > Math.hypot(m[0] - coeur.sx, m[1] - coeur.sy) ? p : m), null)
         return (
           <g key={z}>
+            {vitresAvant.map((ar, i) =>
+              z === 'planete' ? (
+                <g key={i}>
+                  <Mur a={ar.a} b={ar.b} h={ar.exterieur ? 9 : 5} style={style} ombre />
+                  <rect x={ar.a[0] - 1} y={ar.a[1] - 13} width={2} height={13} fill={style.poteau} />
+                </g>
+              ) : (
+                <Vitre key={i} a={ar.a} b={ar.b} style={style} ombre socle={ar.exterieur ? 9 : 5} />
+              ),
+            )}
             {/* Enseigne sur poteau, à l'angle extérieur */}
             {angle && (
               <g transform={`translate(${angle[0]} ${angle[1]})`}>

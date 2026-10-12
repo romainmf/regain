@@ -14,6 +14,7 @@ import { getAmbiance, type AmbianceId, type DecorId } from '../domain/boutique'
 import { Decor } from './Decor'
 import { LieuxHaut, LieuxSol, type StyleMur, type StyleSol } from './LieuxZones'
 import { MEUBLES_LIEUX, Meuble, type MeubleId } from './Meubles'
+import { Poste, type PosteId } from './Poste'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
 
@@ -27,6 +28,8 @@ export interface PlacementVue {
   libelle: string
   /** Lieu signature sans agent : pas de robot compagnon. */
   sansRobot?: boolean
+  /** Poste de travail à la place du bâtiment : le robot y travaille, assis. */
+  poste?: PosteId
 }
 
 export interface DecorVue {
@@ -437,11 +440,17 @@ export function Island({
                       </g>
                     </g>
                   )}
-                  <g transform="scale(1.25)">
-                    <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
-                  </g>
+                  {o.poste ? (
+                    <g transform="scale(1.25)">
+                      <Poste id={o.poste} domaine={o.domaine} couleur={COULEUR[o.domaine]} niveau={o.niveau} phase={(hache(o.x, o.y) % 20) / 10} />
+                    </g>
+                  ) : (
+                    <g transform="scale(1.25)">
+                      <Batiment id={o.batiment} couleur={COULEUR[o.domaine]} niveau={o.niveau} />
+                    </g>
+                  )}
                   {/* Le robot compagnon de l'agent, posé devant son bâtiment */}
-                  {!o.sansRobot && (
+                  {!o.sansRobot && !o.poste && (
                     <g transform="translate(-13 10)">
                       <Robot domaine={o.domaine} couleur={COULEUR[o.domaine]} phase={(hache(o.x, o.y) % 20) / 10} />
                     </g>
