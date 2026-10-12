@@ -109,9 +109,9 @@ type Objet =
 
 /** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
 const FANIONS: { x: number; y: number; zone: Domaine }[] = [
-  { x: 0, y: 6, zone: 'boite' },
-  { x: 6, y: 0, zone: 'peau' },
-  { x: 6, y: 6, zone: 'planete' },
+  { x: 0, y: 8, zone: 'boite' },
+  { x: 8, y: 0, zone: 'peau' },
+  { x: 8, y: 8, zone: 'planete' },
 ]
 
 /** Au fond de l'île, l'arbre peut être plus grand sans rien cacher. */
@@ -164,9 +164,10 @@ export function Island({
   }
   // Cadre de la scène : l'île en bas, du ciel au-dessus pour les bâtiments.
   const b = bornes(tuiles)
-  const marge = 24
+  // Île 9×9 : marge réduite et ciel un peu plus bas pour qu'elle remplisse l'écran.
+  const marge = 10
   const W = b.maxX - b.minX + marge * 2
-  const H = Math.max(W * 0.98, b.maxY - b.minY + 200)
+  const H = Math.max(W * 0.9, b.maxY - b.minY + 170)
   const x0 = b.minX - marge
   const y0 = b.maxY + 34 - H
   const horizon = y0 + H * 0.26

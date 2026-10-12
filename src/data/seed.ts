@@ -36,9 +36,9 @@ function propositionsExemple(base: number): Proposition[] {
 
 /** Pose de départ des trois agents offerts, dans leur zone respective. */
 const POSES_DEPART: Record<string, { x: number; y: number }> = {
-  plume: { x: 1, y: 3 },
-  source: { x: 5, y: 1 },
-  racine: { x: 5, y: 4 },
+  plume: { x: 1, y: 4 },
+  source: { x: 6, y: 1 },
+  racine: { x: 6, y: 5 },
 }
 
 // Garde de session : évite un double amorçage (StrictMode monte l'effet deux fois).
@@ -94,8 +94,9 @@ async function synchroniserNomsDeDepart(): Promise<void> {
 }
 
 /**
- * Migration « les trois lieux » : un poste posé sur une tuile désormais
- * réservée (bassin du Spa, mobilier) est déplacé sur une tuile libre de sa zone.
+ * Migration « les trois lieux » (île 9×9) : un poste posé sur une tuile
+ * désormais réservée (bassin du Spa, mobilier) ou hors du lieu de son agent
+ * est déplacé sur une tuile libre de son lieu.
  */
 async function liberarTuilesReservees(): Promise<void> {
   const tuiles = tuilesDeDepart()
@@ -103,8 +104,11 @@ async function liberarTuilesReservees(): Promise<void> {
   const placements = await db.placements.toArray()
   const occupees = new Set(placements.map((p) => cle(p.x, p.y)))
   for (const p of placements) {
-    if (!reservees.has(cle(p.x, p.y))) continue
-    const zone = tuiles.find((t) => t.x === p.x && t.y === p.y)?.zone
+    const zoneTuile = tuiles.find((t) => t.x === p.x && t.y === p.y)?.zone
+    const agent = p.kind === 'batiment' ? await db.agents.get(p.refId) : undefined
+    const zone = agent?.domaine ?? zoneTuile
+    const bienPlace = !reservees.has(cle(p.x, p.y)) && (!agent || zoneTuile === agent.domaine)
+    if (bienPlace) continue
     const libre = tuiles.find((t) => t.zone === zone && !reservees.has(cle(t.x, t.y)) && !occupees.has(cle(t.x, t.y)))
     if (!libre) continue
     occupees.delete(cle(p.x, p.y))

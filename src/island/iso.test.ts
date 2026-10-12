@@ -6,14 +6,14 @@ describe('carte de départ', () => {
   const tuiles = tuilesDeDepart()
   const zoneDe = new Map(tuiles.map((t) => [cle(t.x, t.y), t.zone]))
 
-  it('a 16 tuiles par domaine et un Cœur', () => {
+  it('a trois lieux d’environ 27 tuiles et un Cœur', () => {
     const c = { boite: 0, peau: 0, planete: 0, coeur: 0 }
     tuiles.forEach((t) => c[t.zone]++)
-    expect(c).toEqual({ boite: 16, peau: 16, planete: 16, coeur: 1 })
+    expect(c).toEqual({ boite: 27, peau: 28, planete: 25, coeur: 1 })
   })
 
   it('place chaque agent de départ dans la zone de son domaine', () => {
-    const POSES: Record<string, [number, number]> = { plume: [1, 3], source: [4, 1], racine: [5, 4] }
+    const POSES: Record<string, [number, number]> = { plume: [1, 4], source: [6, 1], racine: [6, 5] }
     for (const id of AGENTS_DE_DEPART) {
       const t = getTemplate(id)!
       const [x, y] = POSES[id]

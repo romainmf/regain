@@ -18,34 +18,34 @@ const P = (id: string, x: number, y: number, poste: PlacementVue['poste'], domai
 
 const AGENTS: PlacementVue[] = [
   // Atelier · Ma boîte
-  P('factures', 1, 3, 'factures', 'boite', 3),
-  P('relance', 2, 5, 'relance', 'boite', 2),
-  P('vigie', 0, 2, 'vigie', 'boite'),
-  P('coussin', 1, 5, 'coussin', 'boite', 2),
-  P('don', 2, 3, 'don', 'boite'),
+  P('factures', 1, 4, 'factures', 'boite', 3),
+  P('relance', 2, 7, 'relance', 'boite', 2),
+  P('vigie', 0, 3, 'vigie', 'boite'),
+  P('coussin', 2, 5, 'coussin', 'boite', 2),
+  P('don', 3, 6, 'don', 'boite'),
   // Spa · Ma peau
-  P('rythme', 5, 1, 'rythme', 'peau', 3),
-  P('cloture', 6, 2, 'cloture', 'peau'),
+  P('rythme', 6, 1, 'rythme', 'peau', 3),
+  P('cloture', 8, 2, 'cloture', 'peau'),
   P('regulateur', 3, 2, 'regulateur', 'peau', 2),
   P('air', 1, 0, 'air', 'peau'),
   P('lien', 2, 2, 'lien', 'peau', 2),
-  P('miroir', 2, 1, 'miroir', 'peau'),
+  P('miroir', 3, 1, 'miroir', 'peau'),
   // Jardin · Ma planète
-  P('empreinte', 5, 4, 'empreinte', 'planete', 3),
-  P('sobriete', 3, 5, 'sobriete', 'planete', 2),
-  P('deplacements', 4, 6, 'deplacements', 'planete'),
-  P('achats', 4, 3, 'achats', 'planete', 2),
-  P('label', 5, 5, 'label', 'planete'),
+  P('empreinte', 6, 5, 'empreinte', 'planete', 3),
+  P('sobriete', 4, 7, 'sobriete', 'planete', 2),
+  P('deplacements', 5, 8, 'deplacements', 'planete'),
+  P('achats', 5, 4, 'achats', 'planete', 2),
+  P('label', 7, 6, 'label', 'planete'),
 ]
 
 const DECORS: DecorVue[] = [
   { id: 'd1', x: 1, y: 1, decorId: 'fleurs' },
-  { id: 'd2', x: 1, y: 6, decorId: 'banc' },
-  { id: 'd3', x: 5, y: 2, decorId: 'lampadaire' },
+  { id: 'd2', x: 1, y: 7, decorId: 'banc' },
+  { id: 'd3', x: 7, y: 3, decorId: 'lampadaire' },
   { id: 'd4', x: 3, y: 0, decorId: 'massif' },
-  { id: 'd5', x: 6, y: 5, decorId: 'haie' },
-  { id: 'd6', x: 3, y: 4, decorId: 'fleurs' },
-  { id: 'd7', x: 3, y: 6, decorId: 'massif' },
+  { id: 'd5', x: 8, y: 7, decorId: 'haie' },
+  { id: 'd6', x: 4, y: 5, decorId: 'fleurs' },
+  { id: 'd7', x: 4, y: 8, decorId: 'massif' },
 ]
 
 const ZONES: Domaine[] = ['boite', 'peau', 'planete']

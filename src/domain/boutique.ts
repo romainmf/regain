@@ -64,17 +64,17 @@ export function getDecor(id: DecorId): DecorItem | undefined {
 export const PRIX_TUILE = 300
 
 /**
- * Tuiles d'agrandissement, débloquées une par une (300 graines chacune).
- * Placées sur les bords arrière et latéraux pour ne pas croiser la rivière.
+ * Tuiles d'agrandissement, débloquées une par une (300 graines chacune),
+ * sur les bords latéraux et avant de l'île 9×9.
  */
 export const EXPANSION: { x: number; y: number; zone: 'boite' | 'peau' | 'planete' }[] = [
   { x: -1, y: 1, zone: 'boite' },
-  { x: 7, y: 1, zone: 'peau' },
+  { x: 9, y: 1, zone: 'peau' },
   { x: -1, y: 2, zone: 'boite' },
-  { x: 7, y: 2, zone: 'peau' },
+  { x: 9, y: 2, zone: 'peau' },
   { x: -1, y: 3, zone: 'boite' },
-  { x: 7, y: 3, zone: 'peau' },
-  { x: 2, y: 7, zone: 'planete' },
-  { x: 3, y: 7, zone: 'planete' },
-  { x: 4, y: 7, zone: 'planete' },
+  { x: 9, y: 3, zone: 'peau' },
+  { x: 4, y: 9, zone: 'planete' },
+  { x: 5, y: 9, zone: 'planete' },
+  { x: 6, y: 9, zone: 'planete' },
 ]

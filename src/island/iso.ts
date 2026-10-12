@@ -9,20 +9,21 @@ export const SOCLE = 14
 export const COEUR = { x: 0, y: 0 }
 
 /**
- * Répartition de départ 7×7 : 16 tuiles par domaine, le Cœur au fond de l'île
- * (coin arrière, d'où l'arbre veille sur tout). Ma boîte à gauche, Ma peau à
- * droite. Ma planète devant. La rivière fourche au milieu : son tronc sépare
- * Ma boîte de Ma peau, puis deux bras encadrent Ma planète jusqu'à la mer.
- * Lignes = y, colonnes = x. B = boîte, P = peau, V = planète, C = Cœur.
+ * Répartition de départ 9×9 : trois lieux d'environ 27 tuiles, le Cœur au
+ * fond de l'île (coin arrière, d'où l'arbre veille sur tout). L'Atelier
+ * (Ma boîte) à gauche, le Spa (Ma peau) à droite, le Jardin (Ma planète)
+ * devant. Lignes = y, colonnes = x. B = boîte, P = peau, V = planète, C = Cœur.
  */
 const CARTE_DEPART = [
-  'CPPPPPP',
-  'BBPPPPP',
-  'BBPPPPP',
-  'BBBVVVV',
-  'BBBVVVV',
-  'BBBVVVV',
-  'BBBVVVV',
+  'CPPPPPPPP',
+  'BBPPPPPPP',
+  'BBPPPPPPP',
+  'BBBPPPPPP',
+  'BBBBVVVVV',
+  'BBBBVVVVV',
+  'BBBBVVVVV',
+  'BBBBVVVVV',
+  'BBBBVVVVV',
 ]
 
 /**

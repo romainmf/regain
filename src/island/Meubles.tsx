@@ -18,17 +18,17 @@ export interface MeubleLieu {
 
 export const MEUBLES_LIEUX: MeubleLieu[] = [
   // Atelier : établi contre le mur du fond, caisses dans le coin
-  { x: 0, y: 4, zone: 'boite', meuble: 'etabli' },
+  { x: 0, y: 5, zone: 'boite', meuble: 'etabli' },
   { x: 0, y: 1, zone: 'boite', meuble: 'caisses' },
   // Spa : transats au soleil, grande plante à l'entrée
-  { x: 5, y: 0, zone: 'peau', meuble: 'transat' },
-  { x: 6, y: 1, zone: 'peau', meuble: 'transat' },
+  { x: 7, y: 0, zone: 'peau', meuble: 'transat' },
+  { x: 8, y: 1, zone: 'peau', meuble: 'transat' },
   { x: 2, y: 0, zone: 'peau', meuble: 'plante' },
   // Jardin : bacs potagers le long de la clôture, ruche, arbre fruitier
-  { x: 6, y: 3, zone: 'planete', meuble: 'bac' },
-  { x: 6, y: 4, zone: 'planete', meuble: 'bac' },
-  { x: 3, y: 3, zone: 'planete', meuble: 'ruche' },
-  { x: 5, y: 6, zone: 'planete', meuble: 'arbre-fruitier' },
+  { x: 8, y: 4, zone: 'planete', meuble: 'bac' },
+  { x: 8, y: 5, zone: 'planete', meuble: 'bac' },
+  { x: 4, y: 4, zone: 'planete', meuble: 'ruche' },
+  { x: 7, y: 8, zone: 'planete', meuble: 'arbre-fruitier' },
 ]
 
 const TERRE = '#8A6A4A'
