@@ -1,0 +1,10 @@
+.reg-bloc { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--ligne); }
+.reg-bloc h3 { font-size: 17px; margin-bottom: 4px; }
+.reg-aide { font-size: 14px; color: var(--texte-2); margin: 0 0 12px; }
+.reg-actions { display: flex; gap: 10px; }
+.reg-danger h3 { color: var(--boite-fonce); }
+.reg-rouge { background: var(--boite); color: var(--surface); }
+.reg-msg { padding: 10px 12px; border-radius: var(--r-m); margin-bottom: 14px; font-weight: 500; font-size: 14px; }
+.reg-ok { background: var(--planete-teinte); color: var(--planete-fonce); }
+.reg-err { background: var(--boite-teinte); color: var(--boite-fonce); }
+.reg-version { text-align: center; color: var(--texte-2); font-size: 13px; margin: 4px 0 0; }

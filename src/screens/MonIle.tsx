@@ -6,6 +6,7 @@ import { BrinChat } from '../ui/BrinChat'
 import { EnTete } from '../ui/EnTete'
 import { SaisieRapide } from '../ui/SaisieRapide'
 import { FileValidation } from '../ui/FileValidation'
+import { Reglages } from '../ui/Reglages'
 import { BandeauChaine } from '../ui/BandeauChaine'
 import './monile.css'
 
@@ -28,6 +29,7 @@ export function MonIle() {
   const [teaser, setTeaser] = useState(() => !dejaVu())
   const [saisieOuverte, setSaisieOuverte] = useState(false)
   const [fileOuverte, setFileOuverte] = useState(false)
+  const [reglagesOuverts, setReglagesOuverts] = useState(false)
 
   const ouvrirBrin = () => {
     setBrinOuvert(true)
@@ -45,7 +47,7 @@ export function MonIle() {
 
   return (
     <div className="ecran mon-ile">
-      <EnTete graines={economie.solde} elan={economie.elan} />
+      <EnTete graines={economie.solde} elan={economie.elan} onReglages={() => setReglagesOuverts(true)} />
 
       {poseEnCours && (
         <div className="pose-bandeau" role="status">
@@ -94,6 +96,7 @@ export function MonIle() {
       <BrinChat ouvert={brinOuvert} onFermer={fermerBrin} />
       <SaisieRapide ouvert={saisieOuverte} onFermer={() => setSaisieOuverte(false)} />
       <FileValidation ouvert={fileOuverte} onFermer={() => setFileOuverte(false)} />
+      <Reglages ouvert={reglagesOuverts} onFermer={() => setReglagesOuverts(false)} />
     </div>
   )
 }

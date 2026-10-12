@@ -19,3 +19,9 @@
 }
 .pastille-graines { background: var(--planete-teinte); color: var(--planete-fonce); }
 .pastille-elan { background: var(--soleil-teinte); color: var(--soleil-fonce); }
+
+.entete-reglages {
+  width: 36px; height: 36px; border: 0; background: transparent;
+  color: var(--texte-2); display: grid; place-items: center; cursor: pointer; border-radius: 50%;
+}
+.entete-reglages:hover { background: var(--fond); color: var(--encre); }
