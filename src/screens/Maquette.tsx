@@ -26,16 +26,16 @@ const ACTUEL: PlacementVue[] = [
   P('deplacements', 4, 6, 'petit-rail', 'planete'),
 ]
 
-/** B — les trois lieux : un lieu signature par domaine + les modules des agents. */
-const TROIS_LIEUX: PlacementVue[] = [
-  P('atelier', 1, 3, 'atelier', 'boite', 2, true),
+/** C — chaque domaine est un grand lieu : les agents se posent sur le quadrillage intérieur. */
+const LIEUX_ENTIERS: PlacementVue[] = [
+  P('factures', 1, 3, 'cabane', 'boite', 2),
   P('relance', 2, 5, 'boite-aux-lettres', 'boite'),
-  P('vigie', 0, 1, 'tour-de-guet', 'boite'),
-  P('refuge', 4, 1, 'refuge', 'peau', 2, true),
+  P('vigie', 0, 2, 'tour-de-guet', 'boite'),
+  P('rythme', 5, 1, 'pergola', 'peau', 2),
   P('cloture', 6, 2, 'lanterne', 'peau'),
-  P('miroir', 2, 2, 'bassin', 'peau'),
-  P('jardin', 5, 4, 'jardin', 'planete', 2, true),
-  P('sobriete', 3, 4, 'composteur', 'planete'),
+  P('miroir', 2, 1, 'banc', 'peau'),
+  P('empreinte', 5, 4, 'serre', 'planete', 2),
+  P('sobriete', 3, 5, 'composteur', 'planete'),
   P('deplacements', 4, 6, 'petit-rail', 'planete'),
 ]
 
@@ -55,9 +55,9 @@ export function Maquette() {
           <Island tuiles={tuiles} placements={ACTUEL} elan={1.3} meteo="soleil" />
         </div>
         <div style={styleCol}>
-          <h2 style={titre}>B · Les trois lieux</h2>
-          <p style={sous}>Un lieu signature par domaine — l’Atelier, le Refuge, le Jardin — que chaque agent étoffe d’un module, avec son robot.</p>
-          <Island tuiles={tuiles} placements={TROIS_LIEUX} elan={1.3} meteo="soleil" />
+          <h2 style={titre}>C · Un lieu par domaine, sur toute la zone</h2>
+          <p style={sous}>L’Atelier couvre toute Ma boîte, le Spa toute Ma peau, le Jardin toute Ma planète. À l’intérieur, le quadrillage reste là pour poser les agents.</p>
+          <Island tuiles={tuiles} placements={LIEUX_ENTIERS} elan={1.3} meteo="soleil" lieux />
         </div>
       </div>
     </div>
