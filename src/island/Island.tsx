@@ -175,6 +175,31 @@ export function Island({
 
   return (
     <svg className="ile" viewBox={`${x0} ${y0} ${W} ${H}`} role="img" aria-label="Ton île">
+      <defs>
+        {/* Ombre portée douce, réutilisée sous chaque bâtiment */}
+        <radialGradient id="ombreDouce">
+          <stop offset="0" stopColor="rgba(34,48,31,0.30)" />
+          <stop offset="0.6" stopColor="rgba(34,48,31,0.16)" />
+          <stop offset="1" stopColor="rgba(34,48,31,0)" />
+        </radialGradient>
+        {/* Perspective aérienne : léger voile clair vers le fond de l'île */}
+        <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#EAF1EC" stopOpacity="0.5" />
+          <stop offset="0.4" stopColor="#EAF1EC" stopOpacity="0.12" />
+          <stop offset="0.7" stopColor="#EAF1EC" stopOpacity="0" />
+        </linearGradient>
+        {/* Vignette douce qui ancre l'île */}
+        <radialGradient id="vignette" cx="0.5" cy="0.46" r="0.62">
+          <stop offset="0.55" stopColor="rgba(34,48,31,0)" />
+          <stop offset="1" stopColor="rgba(34,48,31,0.10)" />
+        </radialGradient>
+        {/* Halo chaud du soleil, posé sur l'île */}
+        <radialGradient id="lumiereJour" cx="0.32" cy="0.2" r="0.7">
+          <stop offset="0" stopColor="#FBEFC9" stopOpacity="0.5" />
+          <stop offset="0.5" stopColor="#FBEFC9" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+
       <Fond {...cadre} />
 
       {/* Reflet et halo d'eau autour de l'île */}
@@ -231,7 +256,18 @@ export function Island({
         })}
       </g>
 
+      {/* Lumière chaude du soleil sur l'île (côté haut-gauche) */}
+      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2} rx={(b.maxX - b.minX) / 2} ry={(b.maxY - b.minY) / 2} fill="url(#lumiereJour)" pointerEvents="none" />
+
       <Riviere />
+
+      {/* Ombres portées douces et directionnelles, sous les bâtiments et l'arbre */}
+      <g pointerEvents="none">
+        {[...placements.map((p) => ({ x: p.x, y: p.y, r: 20 })), { x: 0, y: 0, r: 30 }].map((o, i) => {
+          const { sx, sy } = iso(o.x, o.y)
+          return <ellipse key={i} cx={sx + o.r * 0.28} cy={sy + o.r * 0.18} rx={o.r} ry={o.r * 0.5} fill="url(#ombreDouce)" />
+        })}
+      </g>
 
       {/* Tuiles libres surlignées pendant une pose ou un déplacement */}
       {poseEnCours && (
@@ -340,6 +376,11 @@ export function Island({
           )
         })}
       </g>
+
+      {/* Perspective aérienne : le fond de l'île s'éclaircit légèrement */}
+      <rect x={x0} y={y0 + H * 0.3} width={W} height={H * 0.55} fill="url(#haze)" pointerEvents="none" />
+      {/* Vignette douce */}
+      <rect x={x0} y={y0} width={W} height={H} fill="url(#vignette)" pointerEvents="none" />
 
       {/* Flux doré de la dernière chaîne, entre les deux bâtiments concernés */}
       {chaine && (() => {

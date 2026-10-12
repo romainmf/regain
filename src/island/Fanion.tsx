@@ -1,15 +1,33 @@
 import type { Domaine } from '../domain/types'
-import { COULEUR } from '../domain/couleurs'
-import { BOIS } from './buildings/primitives'
+import { COULEUR, TEINTE } from '../domain/couleurs'
+import { TH, TW } from './iso'
+import { BOIS, nuance } from './buildings/primitives'
 
 const OR = '#E7B04A'
 
-/** Fanion d'entrée de zone, avec l'emblème du domaine. */
+/** Petite placette d'entrée de zone : dallage, fanion et lanterne. */
 export function Fanion({ zone }: { zone: Domaine }) {
   const c = COULEUR[zone]
   return (
     <g>
-      <ellipse cx={0} cy={2} rx={7} ry={3} fill="rgba(34,48,31,.12)" />
+      {/* Dallage losangé, teinté du domaine */}
+      <g opacity={0.9}>
+        <polygon points={`0,${-TH * 0.62} ${TW * 0.62},0 0,${TH * 0.62} ${-TW * 0.62},0`} fill={TEINTE[zone]} stroke="rgba(255,255,255,.5)" strokeWidth={0.8} />
+        <polygon points={`0,${-TH * 0.32} ${TW * 0.32},0 0,${TH * 0.32} ${-TW * 0.32},0`} fill={nuance(TEINTE[zone], -0.05)} />
+        <line x1={-TW * 0.62} y1={0} x2={TW * 0.62} y2={0} stroke="rgba(34,48,31,.1)" strokeWidth={0.6} />
+        <line x1={0} y1={-TH * 0.62} x2={0} y2={TH * 0.62} stroke="rgba(34,48,31,.1)" strokeWidth={0.6} />
+      </g>
+
+      {/* Lanterne solaire */}
+      <g transform={`translate(${-TW * 0.42} ${-TH * 0.1})`}>
+        <ellipse cx={0} cy={1} rx={3} ry={1.4} fill="rgba(34,48,31,.12)" />
+        <rect x={-1} y={-16} width={2} height={16} fill="#3A4636" />
+        <rect x={-3.2} y={-22} width={6.4} height={6} rx={1.2} fill={nuance(OR, 0.25)} stroke="#3A4636" strokeWidth={0.6} />
+        <circle className="lanterne-lueur" cx={0} cy={-19} r={5} fill={OR} opacity={0.22} />
+      </g>
+
+      {/* Fanion */}
+      <ellipse cx={0} cy={2} rx={6} ry={2.6} fill="rgba(34,48,31,.12)" />
       <rect x={-1.2} y={-40} width={2.4} height={41} fill={BOIS} />
       <circle cx={0} cy={-41} r={2} fill={OR} />
       <g className="fanion-tissu">
