@@ -9,3 +9,7 @@ playwright-report
 # Playwright
 /test-results/
 /playwright-report/
+
+# Build info
+tsconfig.tsbuildinfo
+*.tsbuildinfo
