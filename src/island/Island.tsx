@@ -81,6 +81,8 @@ interface Props {
   lieux?: boolean
   murs?: Record<Domaine, StyleMur>
   sols?: Record<Domaine, StyleSol>
+  /** Rapport largeur/hauteur du cadre : la scène le remplit (plein écran). */
+  ratio?: number
 }
 
 const SOL: Record<Tuile['zone'], string> = {
@@ -137,6 +139,7 @@ export function Island({
   lieux = false,
   murs,
   sols,
+  ratio,
 }: Props) {
   const amb = getAmbiance(ambiance)
   const index = useMemo(() => new Set(tuiles.map((t) => cle(t.x, t.y))), [tuiles])
@@ -170,11 +173,16 @@ export function Island({
   // Cadre de la scène : l'île en bas, du ciel au-dessus pour les bâtiments.
   const b = bornes(tuiles)
   // Île 9×9 : marge réduite et ciel un peu plus bas pour qu'elle remplisse l'écran.
-  const marge = 10
+  const marge = 30 // laisse la place aux enseignes des lieux, aux angles
   const W = b.maxX - b.minX + marge * 2
-  const H = Math.max(W * 0.9, b.maxY - b.minY + 170)
+  let H = Math.max(W * 0.9, b.maxY - b.minY + 170)
   const x0 = b.minX - marge
-  const y0 = b.maxY + 34 - H
+  let y0 = b.maxY + 34 - H
+  if (ratio) {
+    // Plein écran : la scène épouse le cadre, l'île un peu sous le milieu, ciel et mer tout autour.
+    H = Math.max(H, W / ratio)
+    y0 = (b.minY + b.maxY) / 2 - H * 0.56
+  }
   const horizon = y0 + H * 0.26
   const cadre = { x0, y0, W, H, horizon }
   const cx = (b.minX + b.maxX) / 2

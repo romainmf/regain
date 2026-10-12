@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useJeu } from '../data/jeu'
 import { Island } from '../island/Island'
 import { BrinChat } from '../ui/BrinChat'
@@ -33,6 +33,20 @@ export function MonIle() {
   const [fileOuverte, setFileOuverte] = useState(false)
   const [reglagesOuverts, setReglagesOuverts] = useState(false)
   const [boutiqueOuverte, setBoutiqueOuverte] = useState(false)
+  // Plein écran : l'île épouse le cadre de la scène, les commandes flottent par-dessus.
+  const scene = useRef<HTMLDivElement>(null)
+  const [ratio, setRatio] = useState<number | undefined>(undefined)
+  useEffect(() => {
+    const el = scene.current
+    if (!el) return
+    const mesurer = () => {
+      if (el.clientWidth && el.clientHeight) setRatio(el.clientWidth / el.clientHeight)
+    }
+    mesurer()
+    const ro = new ResizeObserver(mesurer)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
 
   const ouvrirBrin = () => {
     setBrinOuvert(true)
@@ -69,7 +83,7 @@ export function MonIle() {
       )}
 
       <div className="mon-ile-cadre">
-        <div className="mon-ile-scene">
+        <div className="mon-ile-scene" ref={scene}>
           <ZoomPan>
           <Island
             tuiles={tuiles}
@@ -90,6 +104,7 @@ export function MonIle() {
             lieux
             murs={murs}
             sols={sols}
+            ratio={ratio}
           />
           </ZoomPan>
         </div>
