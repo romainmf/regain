@@ -14,9 +14,9 @@ describe('boutique', () => {
       expect(getDecor(d.id)?.id).toBe(d.id)
     }
   })
-  it('les tuiles d’agrandissement ne chevauchent pas l’île de départ', () => {
-    const base = new Set(tuilesDeDepart().map((t) => cle(t.x, t.y)))
-    for (const e of EXPANSION) expect(base.has(cle(e.x, e.y))).toBe(false)
+  it('les tuiles d’agrandissement sont des tuiles de jardin, jamais des pièces', () => {
+    const zone = new Map(tuilesDeDepart().map((t) => [cle(t.x, t.y), t.zone]))
+    for (const e of EXPANSION) expect(zone.get(cle(e.x, e.y))).toBe('dehors')
     // et sont uniques entre elles
     const vus = new Set(EXPANSION.map((e) => cle(e.x, e.y)))
     expect(vus.size).toBe(EXPANSION.length)
