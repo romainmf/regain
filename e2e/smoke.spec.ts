@@ -10,12 +10,12 @@ test('premier parcours : accueil, île, validation, graines', async ({ page }) =
   await expect(page.getByRole('img', { name: 'Ton île' })).toBeVisible()
 
   // Au départ, zéro graine.
-  await expect(page.getByLabel('0 graines')).toBeVisible()
+  await expect(page.getByLabel(/^0 graines/)).toBeVisible()
 
-  // On ouvre la file et on valide la première proposition.
-  await page.getByRole('button', { name: /À valider/ }).click()
-  await page.getByRole('button', { name: 'Valider', exact: true }).first().click()
+  // On ouvre Aujourd'hui et on valide la première proposition (une facture).
+  await page.getByRole('link', { name: /Aujourd/ }).click()
+  await page.getByRole('button', { name: 'Envoyer la facture' }).first().click()
 
   // Les graines augmentent (10 × élan 1,0).
-  await expect(page.getByLabel('10 graines')).toBeVisible({ timeout: 6000 })
+  await expect(page.getByLabel(/10 graines/)).toBeVisible({ timeout: 6000 })
 })

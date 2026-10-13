@@ -8,7 +8,7 @@ import { EXPANSION } from '../domain/boutique'
 import { tuilesDeDepart } from '../island/iso'
 import type { PlacementVue } from '../island/Island'
 import { MURS_DEFAUT, SOLS_DEFAUT, type StyleMur, type StyleSol } from '../island/LieuxZones'
-import type { Proposition, SaisieData, SaisieKind } from '../domain/propositions'
+import type { Proposition, Saisie, SaisieData, SaisieKind } from '../domain/propositions'
 import type { Chaine } from '../domain/chains'
 import { etatEconomie, type EtatEconomie } from './selectors'
 import * as actions from './actions'
@@ -66,6 +66,10 @@ interface JeuCtx {
   definirMissions: (agentId: string, missions: string[]) => Promise<void>
   // ——— Jalon 3 : saisies, file de validation, économie ———
   economie: EtatEconomie
+  /** Toutes les propositions (pour la frise d'une mission). */
+  propositions: Proposition[]
+  /** Saisies de l'utilisateur, dans l'ordre. */
+  saisies: Saisie[]
   /** Propositions en attente de validation. */
   aValider: Proposition[]
   /** Propositions mises à « plus tard ». */
@@ -196,6 +200,7 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
 
   // ——— Données de jeu (jalon 3) ———
   const propositions = useLiveQuery(() => db.propositions.toArray(), [], [] as Proposition[])
+  const saisies = useLiveQuery(() => db.saisies.orderBy('date').toArray(), [], [] as Saisie[])
   const graines = useLiveQuery(() => db.graines.toArray(), [], [] as GraineDB[])
   const elanMemo = useLiveQuery(() => getMeta('elan', { value: 1, ts: Date.now() }), [], { value: 1, ts: Date.now() })
   const derniereChaineMeta = useLiveQuery(() => getMeta<DerniereChaine | null>('derniereChaine', null), [], null)
@@ -325,6 +330,8 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     basculerActif,
     definirMissions,
     economie,
+    propositions,
+    saisies,
     aValider,
     plusTardListe,
     agentsEnAttente,

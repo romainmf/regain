@@ -15,10 +15,10 @@ const ETAPES: Etape[] = [
   { selector: '[data-agent="plume"]', titre: 'Factures · Ma boîte', texte: 'À son bureau d’écriture, dans l’Atelier, il prépare tes factures et te rappelle tes échéances URSSAF et TVA.' },
   { selector: '[data-agent="source"]', titre: 'Rythme · Ma peau', texte: 'Dans sa cabine au Spa, il veille sur ton rythme et te propose de protéger un créneau calme quand les journées s’enchaînent.' },
   { selector: '[data-agent="racine"]', titre: 'Empreinte · Ma planète', texte: 'À sa table de serre, au Jardin, il estime l’empreinte de tes missions et l’ajoute à ton bilan.' },
-  { selector: '.elan-badge', titre: 'Ton élan', texte: 'Il grandit quand tes trois domaines avancent ensemble, et multiplie les graines que tu gagnes.' },
+  { selector: '.elan-badge', titre: 'Ton élan', texte: 'Il grandit quand tes trois pièces avancent ensemble, et multiplie les graines que tu gagnes.' },
   { selector: '.action-saisir', titre: 'Dis-leur ce qui arrive', texte: 'Une mission finie, une grosse journée, un trajet… tes agents préparent aussitôt la suite.' },
-  { selector: '.action-valider', titre: 'À valider', texte: 'Ici, tu valides ce qu’ils ont préparé. Chaque validation te donne des graines et fait pousser l’île.' },
-  { selector: '.nav-plus', titre: 'Crée tes agents', texte: 'Ce bouton te laisse créer ton propre agent, en moins d’une minute.' },
+  { selector: '.lieu-apercu, .lieu-col-gauche', titre: 'Aujourd’hui', texte: 'Ici, tu valides ce qu’ils ont préparé. Chaque validation te donne des graines et fait vivre le lieu.' },
+  { selector: '.nav-equipe, .equipe-bref-plus', titre: 'Ton équipe', texte: 'Recrute d’autres agents, ou crée le tien en moins d’une minute.' },
 ]
 
 interface Rect { left: number; top: number; width: number; height: number }
@@ -37,7 +37,7 @@ export function GuideTour() {
     const conteneur = document.querySelector('.telephone') ?? document.body
     const cr = conteneur.getBoundingClientRect()
     setCadre({ w: cr.width, h: cr.height })
-    const cible = document.querySelector(etape.selector)
+    const cible = [...document.querySelectorAll(etape.selector)].find((el) => el.getBoundingClientRect().width > 0) ?? null
     if (!cible) {
       setRect(null)
       return

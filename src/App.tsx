@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Agents } from './screens/Agents'
 import { CreerAgent } from './screens/CreerAgent'
 import { Galerie } from './screens/Galerie'
-import { MonIle } from './screens/MonIle'
+import { MonLieu } from './screens/MonLieu'
+import { Aujourdhui } from './screens/Aujourdhui'
+import { Construire } from './screens/Construire'
 import { BottomNav } from './ui/BottomNav'
 import { JeuProvider } from './data/jeu'
 import { FicheAgent } from './ui/FicheAgent'
@@ -29,8 +31,11 @@ export function App() {
         <div className="telephone">
           <main className="app">
             <Routes>
-              <Route path="/" element={<MonIle />} />
-              <Route path="/agents" element={<Agents />} />
+              <Route path="/" element={<MonLieu />} />
+              <Route path="/aujourdhui" element={<Aujourdhui />} />
+              <Route path="/equipe" element={<Agents />} />
+              <Route path="/construire" element={<Construire />} />
+              <Route path="/agents" element={<Navigate to="/equipe" replace />} />
               <Route path="/creer" element={<CreerAgent />} />
               {import.meta.env.DEV && <Route path="/galerie" element={<Galerie />} />}
             </Routes>

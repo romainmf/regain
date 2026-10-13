@@ -15,3 +15,12 @@ export const IconeGraine = () => (
 export const IconeElan = () => (
   <svg {...base} width={18} height={18}><path d="M4 16c3-6 6-8 9-8M13 8l-1 4M13 8l-4-.5" /><circle cx="18" cy="6" r="2.5" fill="currentColor" stroke="none" /></svg>
 )
+export const IconeLieu = () => (
+  <svg {...base}><path d="M3 11l9-6 9 6" /><path d="M5 10v9h14v-9" /><path d="M10 19v-5h4v5" /></svg>
+)
+export const IconeAujourdhui = () => (
+  <svg {...base}><path d="M5 12l4 4L19 6" /></svg>
+)
+export const IconeConstruire = () => (
+  <svg {...base}><path d="M4 20h16" /><path d="M6 20V9l6-4 6 4v11" /><path d="M10 20v-6h4v6" /></svg>
+)

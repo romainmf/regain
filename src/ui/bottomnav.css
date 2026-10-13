@@ -4,7 +4,7 @@
   height: calc(var(--nav-h) + var(--safe-bas));
   padding-bottom: var(--safe-bas);
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: repeat(4, 1fr);
   align-items: center;
   background: var(--surface);
   border-top: 1px solid var(--ligne);
@@ -18,25 +18,21 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--texte-2);
   text-decoration: none;
 }
 .nav-onglet.active { color: var(--encre); }
 .nav-onglet.active svg { color: var(--planete); }
-
-.nav-plus {
-  width: 60px;
-  height: 60px;
-  margin-top: -26px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--encre);
-  color: var(--soleil-teinte);
-  box-shadow: 0 6px 16px rgba(34, 48, 31, .25), 0 0 0 5px var(--fond);
-  transition: transform .15s ease;
+.nav-icone { position: relative; display: inline-grid; }
+.nav-badge {
+  position: absolute; top: -6px; right: -12px;
+  min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--boite); color: var(--surface);
+  font-size: 11px; font-weight: 700; display: grid; place-items: center;
 }
-.nav-plus:active { transform: scale(.94); }
-.nav-plus.active { background: var(--planete); }
+
+@media (min-width: 1024px) {
+  .nav-bas { display: none; }
+}

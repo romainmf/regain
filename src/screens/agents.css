@@ -103,3 +103,7 @@
 .fiche-infos dt { color: var(--texte-2); font-size: 14px; }
 .fiche-infos dd { margin: 0; font-weight: 500; font-size: 14px; text-align: right; }
 .fiche-note { font-size: 13px; color: var(--texte-2); margin: 14px 0 0; }
+.agents-titre-ligne { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.agents-titre-ligne h1 { margin-bottom: 0; }
+.agents-creer { font-size: 14px; padding: 8px 14px; min-height: 38px; }
+.ecran-sous { margin: -6px 0 10px; font-size: 13px; color: var(--texte-2); }

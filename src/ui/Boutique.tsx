@@ -6,7 +6,6 @@ import { STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/
 import { DOMAINE_LABEL, type Domaine } from '../domain/types'
 import { Bouton } from './Boutons'
 import { IconeGraine } from './icons'
-import { Sheet } from './Sheet'
 import './boutique.css'
 
 type Onglet = 'construction' | 'ambiances' | 'decor' | 'tuiles'
@@ -14,7 +13,8 @@ type Onglet = 'construction' | 'ambiances' | 'decor' | 'tuiles'
 const LIEUX: Domaine[] = ['boite', 'peau', 'planete']
 const NOM_LIEU: Record<Domaine, string> = { boite: 'Atelier', peau: 'Spa', planete: 'Jardin' }
 
-export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
+/** Rayons de la boutique ; `onPoser` est appelé quand un décor part se poser sur le plan. */
+export function BoutiqueContenu({ onPoser }: { onPoser: () => void }) {
   const {
     economie, ambianceActive, ambiancesPossedees, tuilesAchetees, acheterAmbiance, activerAmbiance, acheterTuile, demarrerPoseDecor,
     murs, sols, stylesPossedes, choisirMur, choisirSol,
@@ -31,13 +31,13 @@ export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
   const poserDecor = (d: DecorItem) => {
     if (solde < d.prix) return flash('Pas assez de graines.')
     demarrerPoseDecor(d.id, d.prix)
-    onFermer()
+    onPoser()
   }
 
   const tuilesRestantes = EXPANSION.length - tuilesAchetees
 
   return (
-    <Sheet ouvert={ouvert} onFermer={onFermer} titre="Boutique">
+    <div className="bq">
       <div className="bq-solde">
         <IconeGraine /> {solde} graines
       </div>
@@ -163,6 +163,6 @@ export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
           </Bouton>
         </div>
       )}
-    </Sheet>
+    </div>
   )
 }

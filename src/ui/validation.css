@@ -41,3 +41,18 @@
   font-size: 13px; text-decoration: underline; cursor: pointer;
 }
 .val-revoir { margin-top: 4px; }
+
+/* Cartes du fil Aujourd'hui */
+.val-point { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 auto; }
+.val-point-boite { background: var(--boite); }
+.val-point-peau { background: var(--peau); }
+.val-point-planete { background: var(--planete); }
+.val-agent { font-size: 13px; }
+.val-dom { font-size: 13px; color: var(--texte-2); }
+.val-suite { margin: 8px 0 0; font-size: 13px; color: var(--texte-2); background: var(--fond); border-radius: var(--r-s); padding: 8px 10px; }
+.val-lien { border: 0; background: transparent; color: var(--texte-2); font-size: 13px; text-decoration: underline; cursor: pointer; padding: 6px 4px; }
+.val-compacte { padding: 12px; }
+.val-compacte h3 { font-size: 15px; }
+.val-compacte .val-detail { font-size: 13px; }
+.val-actions .btn-plein { flex: 1 1 150px; }
+.val-actions .btn-doux, .val-actions .btn-contour { flex: 0 0 auto; }

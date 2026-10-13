@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useJeu } from '../data/jeu'
 import { SAISIE_LABEL, type SaisieData, type SaisieKind } from '../domain/propositions'
 import { Bouton } from './Boutons'
@@ -14,9 +14,13 @@ const ICONE: Record<SaisieKind, string> = {
   trajet: '→',
 }
 
-export function SaisieRapide({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
+export function SaisieRapide({ ouvert, kindInitial, onFermer }: { ouvert: boolean; kindInitial?: SaisieKind; onFermer: () => void }) {
   const { saisir } = useJeu()
   const [kind, setKind] = useState<SaisieKind | null>(null)
+  // Les puces de l'en-tête ouvrent directement sur un type.
+  useEffect(() => {
+    if (ouvert) setKind(kindInitial ?? null)
+  }, [ouvert, kindInitial])
   const [data, setData] = useState<SaisieData>({})
   const [envoi, setEnvoi] = useState(false)
 

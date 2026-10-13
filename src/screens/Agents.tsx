@@ -39,7 +39,10 @@ export function Agents() {
   return (
     <div className="ecran agents-ecran">
       <header className="agents-tete">
-        <h1>Agents</h1>
+        <div className="agents-titre-ligne">
+          <h1>L’équipe</h1>
+          <button className="btn btn-plein agents-creer" onClick={() => navigate('/creer')}>+ Créer un agent</button>
+        </div>
         <div className="segment" role="tablist" aria-label="Vue des agents">
           <button role="tab" aria-selected={onglet === 'catalogue'} className={onglet === 'catalogue' ? 'actif' : ''} onClick={() => setOnglet('catalogue')}>
             Catalogue
@@ -145,7 +148,7 @@ function Equipe() {
         ),
       )}
       <Bouton variante="contour" onClick={() => navigate('/')} style={{ width: '100%', marginTop: 8 }}>
-        Voir mon île
+        Voir mon lieu
       </Bouton>
     </div>
   )

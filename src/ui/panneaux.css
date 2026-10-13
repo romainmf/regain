@@ -1,0 +1,69 @@
+.panneau {
+  background: var(--surface);
+  border: 1px solid var(--ligne);
+  border-radius: var(--r-m);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.panneau-titre { font-size: 18px; }
+.panneau-sous { margin: -6px 0 0; font-size: 13px; color: var(--texte-2); }
+.panneau-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.panneau-compte { font-size: 12px; color: var(--texte-2); }
+
+/* Élan de la semaine */
+.elan-barres { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.elan-barres li { display: grid; grid-template-columns: 84px 1fr 22px; align-items: center; gap: 8px; font-size: 13px; }
+.elan-nom { font-weight: 700; }
+.elan-boite { color: var(--boite-fonce); }
+.elan-peau { color: var(--peau-fonce); }
+.elan-planete { color: var(--planete-fonce); }
+.elan-piste { height: 8px; border-radius: 4px; background: var(--fond); overflow: hidden; }
+.elan-barre { display: block; height: 100%; border-radius: 4px; transition: width .4s ease; }
+.elan-barre-boite { background: var(--boite); }
+.elan-barre-peau { background: var(--peau); }
+.elan-barre-planete { background: var(--planete); }
+.elan-val { text-align: right; font-variant-numeric: tabular-nums; color: var(--texte-2); }
+.elan-total { margin: 0; font-size: 13px; color: var(--texte-2); }
+
+/* Ce que ton lieu régénère */
+.regenere { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.regenere li { border-radius: var(--r-s); padding: 10px; display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--texte-2); }
+.regenere li strong { font-size: 13px; color: var(--encre); }
+.regenere-icone { font-size: 16px; }
+.regenere-note { margin: 0; font-size: 12px; color: var(--surface); background: var(--planete); border-radius: var(--r-s); padding: 8px 10px; }
+.regenere-bientot { font-weight: 700; background: rgba(255,255,255,.2); padding: 1px 6px; border-radius: 999px; margin-left: 4px; }
+
+/* L'équipe en bref */
+.equipe-bref { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.equipe-bref-item {
+  width: 100%; display: flex; align-items: center; gap: 10px; padding: 6px 4px;
+  border: 0; background: transparent; text-align: left; cursor: pointer; border-radius: var(--r-s);
+}
+.equipe-bref-item:hover { background: var(--fond); }
+.equipe-bref-txt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.equipe-bref-txt strong { font-size: 14px; }
+.equipe-bref-txt span { font-size: 12px; color: var(--texte-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.equipe-bref-etat { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--fond); color: var(--texte-2); white-space: nowrap; }
+.equipe-bref-attente { background: var(--soleil-teinte); color: var(--soleil-fonce); }
+.equipe-bref-repos { opacity: .7; }
+.equipe-bref-plus { text-decoration: none; font-size: 14px; }
+
+/* Brin */
+.brin-carte {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m); padding: 12px 14px;
+}
+.brin-carte p { flex: 1; margin: 0; font-size: 14px; color: var(--texte-2); }
+.brin-carte p strong { color: var(--encre); }
+
+/* Frise de la chaîne */
+.frise { background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+.frise-titre { font-size: 14px; }
+.frise-etapes { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.frise-etapes li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--texte-2); white-space: nowrap; }
+.frise-etapes li + li::before { content: ''; width: 14px; height: 2px; background: var(--ligne); margin-right: 2px; }
+.frise-point { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--fond); border: 1.5px solid var(--ligne); font-size: 11px; font-weight: 700; }
+.frise-fait { color: var(--encre); font-weight: 700; }
+.frise-fait .frise-point { background: var(--planete); border-color: var(--planete); color: var(--surface); }

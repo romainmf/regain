@@ -1,30 +1,67 @@
 .entete {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: max(12px, env(safe-area-inset-top)) 16px 8px;
+  flex-direction: column;
+  gap: 10px;
+  padding: max(12px, env(safe-area-inset-top)) 16px 10px;
 }
-.entete-titre { font-size: 24px; }
-.entete-compteurs { display: flex; gap: 8px; }
+.entete-ligne { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.entete-marque { display: flex; flex-direction: column; min-width: 0; }
+.entete-titre { font-size: 22px; line-height: 1.1; }
+.entete-sous { margin: 0; font-size: 12px; color: var(--texte-2); white-space: nowrap; }
+.entete-droite { display: flex; align-items: center; gap: 6px; }
+
 .pastille {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   min-height: 32px;
-  padding: 4px 12px 4px 8px;
+  padding: 4px 10px 4px 8px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  white-space: nowrap;
 }
 .pastille-graines { background: var(--planete-teinte); color: var(--planete-fonce); }
-.pastille-elan { background: var(--soleil-teinte); color: var(--soleil-fonce); }
+.pastille-mot { font-weight: 500; display: none; }
+.pastille-saison { background: var(--soleil-teinte); color: var(--soleil-fonce); font-weight: 500; display: none; }
+.pastille-brume { background: #E3E8E6; color: var(--texte-2); }
+.pastille-voile { background: #F0E8D4; color: var(--soleil-fonce); }
 
-.entete-reglages {
-  width: 36px; height: 36px; border: 0; background: transparent;
+.entete-brin, .entete-reglages {
+  width: 36px; height: 36px; border: 0; padding: 0; background: transparent;
   color: var(--texte-2); display: grid; place-items: center; cursor: pointer; border-radius: 50%;
 }
+.entete-brin { overflow: hidden; }
 .entete-reglages:hover { background: var(--fond); color: var(--encre); }
 
-.pastille-bouton { border: 0; cursor: pointer; font: inherit; }
-.pastille-bouton:active { transform: scale(.96); }
+/* Barre de saisie façon recherche, puces de raccourci */
+.entete-saisie { display: flex; flex-direction: column; gap: 8px; }
+.saisie-barre {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  min-height: 44px; padding: 6px 6px 6px 14px;
+  border: 1.5px solid var(--ligne); border-radius: 999px;
+  background: var(--surface); color: var(--texte-2); text-align: left; cursor: text;
+  box-shadow: var(--ombre);
+}
+.saisie-barre-texte { flex: 1; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saisie-barre-bouton {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--planete); color: var(--surface); flex: 0 0 auto;
+}
+.entete-puces { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.entete-puces::-webkit-scrollbar { display: none; }
+.entete-puces .puce { min-height: 34px; font-size: 13px; padding: 4px 12px; }
+
+@media (min-width: 1024px) {
+  .entete { flex-direction: row; align-items: center; padding: 14px 24px; gap: 16px; background: var(--surface); border-bottom: 1px solid var(--ligne); }
+  .entete-saisie { flex: 1; flex-direction: row; align-items: center; max-width: 720px; }
+  .saisie-barre { max-width: 440px; }
+  .pastille-saison, .pastille-mot { display: inline-flex; }
+  .entete-titre { font-size: 20px; }
+}
+@media (min-width: 1024px) {
+  .entete-saisie { flex-wrap: wrap; }
+  .entete-puces { flex-wrap: wrap; overflow: visible; }
+}
