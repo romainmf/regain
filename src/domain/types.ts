@@ -95,5 +95,6 @@ export interface AgentTemplate {
 export interface Tuile {
   x: number
   y: number
-  zone: Domaine | 'coeur'
+  /** Pièce d'un domaine, patio de Brin (coeur) ou jardin autour du lieu (dehors). */
+  zone: Domaine | 'coeur' | 'dehors'
 }

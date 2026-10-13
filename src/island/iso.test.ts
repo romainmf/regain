@@ -7,9 +7,9 @@ describe('carte de départ', () => {
   const zoneDe = new Map(tuiles.map((t) => [cle(t.x, t.y), t.zone]))
 
   it('a trois lieux d’environ 27 tuiles et un Cœur', () => {
-    const c = { boite: 0, peau: 0, planete: 0, coeur: 0 }
+    const c = { boite: 0, peau: 0, planete: 0, coeur: 0, dehors: 0 }
     tuiles.forEach((t) => c[t.zone]++)
-    expect(c).toEqual({ boite: 27, peau: 28, planete: 25, coeur: 1 })
+    expect(c).toEqual({ boite: 27, peau: 28, planete: 25, coeur: 1, dehors: 40 })
   })
 
   it('place chaque agent de départ dans la zone de son domaine', () => {

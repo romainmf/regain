@@ -180,10 +180,11 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
   const tuilesAchetees = useLiveQuery(() => getMeta<number>('tuilesAchetees', 0), [], 0)
   const ambianceActive = useLiveQuery(() => getMeta<AmbianceId>('ambianceActive', 'jour'), [], 'jour' as AmbianceId)
   const ambiancesPossedees = useLiveQuery(() => getMeta<AmbianceId[]>('ambiances', ['jour']), [], ['jour'] as AmbianceId[])
-  const tuiles = useMemo<Tuile[]>(
-    () => [...tuilesDeDepart(), ...EXPANSION.slice(0, tuilesAchetees)],
-    [tuilesAchetees],
-  )
+  // Les tuiles achetées transforment une tuile de jardin en pièce du domaine.
+  const tuiles = useMemo<Tuile[]>(() => {
+    const achetees = EXPANSION.slice(0, tuilesAchetees)
+    return tuilesDeDepart().map((t) => achetees.find((e) => e.x === t.x && e.y === t.y) ?? t)
+  }, [tuilesAchetees])
   const murs = useLiveQuery(() => getMeta<Record<Domaine, StyleMur>>('murs', MURS_DEFAUT), [], MURS_DEFAUT)
   const sols = useLiveQuery(() => getMeta<Record<Domaine, StyleSol>>('sols', SOLS_DEFAUT), [], SOLS_DEFAUT)
   const stylesPossedes = useLiveQuery(() => getMeta<string[]>('styles', []), [], [] as string[])

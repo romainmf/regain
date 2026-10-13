@@ -1,4 +1,4 @@
-import type { Domaine, Tuile } from '../domain/types'
+import { DOMAINE_LABEL, type Domaine, type Tuile } from '../domain/types'
 import { COULEUR } from '../domain/couleurs'
 import { TH, TW, cle, iso } from './iso'
 import { BOIS, Eolienne, FEUILLE, nuance } from './buildings/primitives'
@@ -70,10 +70,12 @@ interface Arete {
   exterieur: boolean
 }
 
-const NOM: Record<Domaine, string> = { boite: 'ATELIER', peau: 'SPA', planete: 'JARDIN' }
+/** Nom des pièces du lieu, par domaine. */
+export const NOM_LIEU: Record<Domaine, string> = { boite: 'Le Bureau', peau: 'Le Coin repos', planete: 'La Serre' }
 
 function aretesZone(tuiles: Tuile[], zone: Domaine): Arete[] {
-  const toutes = new Set(tuiles.map((t) => cle(t.x, t.y)))
+  // Le jardin (dehors) compte comme l'extérieur du bâtiment.
+  const toutes = new Set(tuiles.filter((t) => t.zone !== 'dehors').map((t) => cle(t.x, t.y)))
   const dansZone = new Set(tuiles.filter((t) => t.zone === zone).map((t) => cle(t.x, t.y)))
   const out: Arete[] = []
   const pousser = (t: Tuile, a: Pt, b: Pt, cote: Cote, vx: number, vy: number) => {
@@ -456,7 +458,7 @@ export function LieuxSol({ tuiles, murs = MURS_DEFAUT, sols = SOLS_DEFAUT }: Pro
   const archesFaites = new Set<string>()
   return (
     <g aria-hidden>
-      {tuiles.filter((t) => t.zone !== 'coeur' && !bassinCles.has(cle(t.x, t.y))).map((t) => (
+      {tuiles.filter((t) => t.zone !== 'coeur' && t.zone !== 'dehors' && !bassinCles.has(cle(t.x, t.y))).map((t) => (
         <SolLieu key={cle(t.x, t.y)} t={t} style={STYLES_SOL[sols[t.zone as Domaine]]} />
       ))}
       <Bassin tuiles={bassin} />
@@ -489,9 +491,25 @@ export function LieuxSol({ tuiles, murs = MURS_DEFAUT, sols = SOLS_DEFAUT }: Pro
   )
 }
 
+/** Étiquette de pièce, façon plan : domaine en petites capitales, nom de la pièce dessous. */
+function Etiquette({ x, y, domaine, nom, couleur }: { x: number; y: number; domaine: string; nom: string; couleur: string }) {
+  const l = Math.max(58, nom.length * 6.2 + 18)
+  return (
+    <g transform={`translate(${x} ${y})`} className="etiquette-lieu">
+      <rect x={-l / 2} y={-13} width={l} height={26} rx={13} fill="#FBF8F1" stroke="#E2DACA" strokeWidth={0.8} />
+      <text x={0} y={-3} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={5.5} fontWeight={700} fill={couleur} letterSpacing={1}>
+        {domaine.toUpperCase()}
+      </text>
+      <text x={0} y={7} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={8} fontWeight={700} fill="#22301F">
+        {nom}
+      </text>
+    </g>
+  )
+}
+
 /**
  * Couche haute, après les bâtiments : cloisons vitrées côté caméra (on voit à
- * travers), enseignes aux angles, vapeur du spa, éolienne.
+ * travers), étiquettes des pièces, vapeur du coin repos, éolienne.
  */
 export function LieuxHaut({ tuiles, murs = MURS_DEFAUT }: PropsLieux) {
   return (
@@ -504,32 +522,23 @@ export function LieuxHaut({ tuiles, murs = MURS_DEFAUT }: PropsLieux) {
         // Bords avant extérieurs (les frontières entre lieux sont déjà posées dans LieuxSol).
         // Jardin : à ciel ouvert, clôture basse ; Atelier et Spa : vitrés.
         const vitresAvant = exterieures.filter((ar) => ar.cote === 'fr' || ar.cote === 'fl')
-        // Enseigne : au sommet extérieur le plus éloigné du Cœur (angle du lieu)
+        // Étiquette de la pièce : au-dessus de sa tuile la plus au fond, comme sur un plan.
+        const tuilesZone = tuiles.filter((t) => t.zone === z)
+        const etiquette = iso(
+          tuilesZone.reduce((s, t) => s + t.x, 0) / tuilesZone.length,
+          tuilesZone.reduce((s, t) => s + t.y, 0) / tuilesZone.length,
+        )
+        // Éolienne : au sommet extérieur le plus éloigné du Cœur
         const sommets = exterieures.flatMap((ar) => [ar.a, ar.b])
         const coeur = iso(0, 0)
         const angle = sommets.reduce<Pt | null>((m, p) => (!m || Math.hypot(p[0] - coeur.sx, p[1] - coeur.sy) > Math.hypot(m[0] - coeur.sx, m[1] - coeur.sy) ? p : m), null)
         return (
           <g key={z}>
-            {vitresAvant.map((ar, i) =>
-              z === 'planete' ? (
-                <g key={i}>
-                  <Mur a={ar.a} b={ar.b} h={ar.exterieur ? 9 : 5} style={style} ombre />
-                  <rect x={ar.a[0] - 1} y={ar.a[1] - 13} width={2} height={13} fill={style.poteau} />
-                </g>
-              ) : (
-                <Vitre key={i} a={ar.a} b={ar.b} style={style} ombre socle={ar.exterieur ? 9 : 5} />
-              ),
-            )}
-            {/* Enseigne sur poteau, à l'angle extérieur, un peu rentrée vers le Cœur pour rester dans le cadre */}
-            {angle && (
-              <g transform={`translate(${angle[0] + (coeur.sx - angle[0]) * 0.1} ${angle[1] + (coeur.sy - angle[1]) * 0.1})`}>
-                <rect x={-1.2} y={-34} width={2.4} height={34} fill={style.poteau} />
-                <rect x={-27} y={-46} width={54} height={16} rx={8} fill={c} />
-                <text x={0} y={-34.5} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={8.5} fontWeight={700} fill="#FBF8F1" letterSpacing={1.2}>
-                  {NOM[z]}
-                </text>
-              </g>
-            )}
+            {vitresAvant.map((ar, i) => (
+              <Vitre key={i} a={ar.a} b={ar.b} style={style} ombre socle={ar.exterieur ? 9 : 5} />
+            ))}
+            <Etiquette x={etiquette.sx} y={etiquette.sy - 64} domaine={DOMAINE_LABEL[z]} nom={NOM_LIEU[z]} couleur={c} />
+            {z === 'peau' && <Etiquette x={coeur.sx - 78} y={coeur.sy - 70} domaine="Brin" nom="Le Patio" couleur={FEUILLE} />}
             {/* Vapeur du spa */}
             {z === 'peau' && (() => {
               const peau = tuiles.filter((t) => t.zone === 'peau')

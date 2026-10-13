@@ -45,11 +45,21 @@ export const RIVIERE = {
 
 const LETTRE: Record<string, Tuile['zone']> = { B: 'boite', P: 'peau', V: 'planete', C: 'coeur' }
 
+/** Largeur du jardin qui entoure le lieu, en tuiles. */
+export const JARDIN = 1
+
 export function tuilesDeDepart(): Tuile[] {
   const tuiles: Tuile[] = []
   CARTE_DEPART.forEach((ligne, y) =>
     [...ligne].forEach((c, x) => tuiles.push({ x, y, zone: LETTRE[c] })),
   )
+  // Le jardin : une couronne de pelouse autour du lieu (décor, arbres, plus tard des pièces en plus).
+  const n = CARTE_DEPART.length
+  for (let y = -JARDIN; y < n + JARDIN; y++) {
+    for (let x = -JARDIN; x < n + JARDIN; x++) {
+      if (x < 0 || y < 0 || x >= n || y >= n) tuiles.push({ x, y, zone: 'dehors' })
+    }
+  }
   return tuiles
 }
 
@@ -85,4 +95,4 @@ export function bornes(tuiles: Tuile[]) {
   return { minX, maxX, minY, maxY }
 }
 
-export const zonesDomaine = (z: Tuile['zone']): z is Domaine => z !== 'coeur'
+export const zonesDomaine = (z: Tuile['zone']): z is Domaine => z !== 'coeur' && z !== 'dehors'

@@ -152,7 +152,7 @@ export function Boutique({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
 
       {onglet === 'tuiles' && (
         <div className="bq-tuiles">
-          <p className="bq-aide">Agrandis ton île : chaque tuile coûte {PRIX_TUILE} graines et apparaît sur un bord.</p>
+          <p className="bq-aide">Agrandis ton lieu : chaque tuile coûte {PRIX_TUILE} graines et transforme un bout de jardin en pièce.</p>
           <p className="bq-reste">{tuilesRestantes > 0 ? `${tuilesRestantes} tuile${tuilesRestantes > 1 ? 's' : ''} disponible${tuilesRestantes > 1 ? 's' : ''}` : 'Ton île est à sa taille maximale pour la bêta.'}</p>
           <Bouton
             disabled={solde < PRIX_TUILE || tuilesRestantes === 0}

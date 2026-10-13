@@ -15,6 +15,7 @@ import { Decor } from './Decor'
 import { LieuxHaut, LieuxSol, tuilesReservees, type StyleMur, type StyleSol } from './LieuxZones'
 import { MEUBLES_LIEUX, Meuble, type MeubleId } from './Meubles'
 import { Poste, type PosteId } from './Poste'
+import { Arbre, Flore } from './buildings/primitives'
 import { formatElan } from '../ui/EnTete'
 import './island.css'
 
@@ -90,6 +91,7 @@ const SOL: Record<Tuile['zone'], string> = {
   peau: 'var(--peau-sol)',
   planete: 'var(--planete-sol)',
   coeur: 'var(--coeur-sol)',
+  dehors: '#C9DEB5',
 }
 
 /** Sol désaturé d'un domaine en repos (brume douce). */
@@ -108,8 +110,9 @@ type Objet =
   | { type: 'fanion'; id: string; x: number; y: number; zone: Domaine }
   | { type: 'decor'; id: string; x: number; y: number; decorId: DecorId }
   | { type: 'meuble'; id: string; x: number; y: number; meuble: MeubleId }
+  | { type: 'flore'; id: string; x: number; y: number; variante: number }
 
-/** Fanions d'entrée de zone, aux coins extérieurs de l'île. */
+/** Fanions d'entrée de zone, aux coins extérieurs de l'île (île classique seulement). */
 const FANIONS: { x: number; y: number; zone: Domaine }[] = [
   { x: 0, y: 8, zone: 'boite' },
   { x: 8, y: 0, zone: 'peau' },
@@ -207,15 +210,18 @@ export function Island({
       )
     : []
 
-  const fanions = FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
+  const fanions = lieux ? [] : FANIONS.filter((f) => index.has(cle(f.x, f.y)) && !occupees.has(cle(f.x, f.y)))
   fanions.forEach((f) => occupees.add(cle(f.x, f.y)))
   // Mobilier des lieux : sur des tuiles réservées, comme les fanions.
   const meubles = lieux ? MEUBLES_LIEUX.filter((m) => index.has(cle(m.x, m.y)) && !occupees.has(cle(m.x, m.y))) : []
   meubles.forEach((m) => occupees.add(cle(m.x, m.y)))
+  // Jardin autour du lieu : arbres et buissons sur les tuiles libres, toujours aux mêmes endroits.
+  const flore = tuiles.filter((t) => t.zone === 'dehors' && !occupees.has(cle(t.x, t.y)) && hache(t.x, t.y) % 5 < 2)
 
   const objets: Objet[] = [
     ...placements.map((p) => ({ ...p, type: 'bat' as const })),
     ...meubles.map((m) => ({ type: 'meuble' as const, id: `meuble-${m.x}-${m.y}`, x: m.x, y: m.y, meuble: m.meuble })),
+    ...flore.map((t) => ({ type: 'flore' as const, id: `flore-${t.x}-${t.y}`, x: t.x, y: t.y, variante: hache(t.x, t.y) >> 3 })),
     ...decors.map((d) => ({ type: 'decor' as const, id: d.id, x: d.x, y: d.y, decorId: d.decorId })),
     ...tuiles.filter((t) => t.zone === 'coeur').map((t) => ({ type: 'coeur' as const, id: 'coeur', x: t.x, y: t.y })),
     ...fanions.map((f) => ({ type: 'fanion' as const, id: `fanion-${f.zone}`, ...f })),
@@ -263,11 +269,20 @@ export function Island({
         </radialGradient>
       </defs>
 
-      <Fond {...cadre} />
-
-      {/* Reflet et halo d'eau autour de l'île */}
-      <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2 + 14} rx={(b.maxX - b.minX) / 2 + 10} ry={(b.maxY - b.minY) / 2 + 6} fill="#E3EFE9" opacity={0.7} />
-      <Nenuphars points={nenuphars} />
+      {lieux ? (
+        /* Le lieu est posé comme un plan : fond clair et uni, légère lumière au centre */
+        <g aria-hidden>
+          <rect x={x0} y={y0} width={W} height={H} fill="#EEF1E4" />
+          <ellipse cx={cx} cy={(b.minY + b.maxY) / 2} rx={W * 0.55} ry={H * 0.4} fill="url(#lumiereJour)" opacity={0.6} />
+        </g>
+      ) : (
+        <>
+          <Fond {...cadre} />
+          {/* Reflet et halo d'eau autour de l'île */}
+          <ellipse cx={cx} cy={b.maxY - (b.maxY - b.minY) / 2 + 14} rx={(b.maxX - b.minX) / 2 + 10} ry={(b.maxY - b.minY) / 2 + 6} fill="#E3EFE9" opacity={0.7} />
+          <Nenuphars points={nenuphars} />
+        </>
+      )}
 
       {/* Socle : terre, mousse qui déborde, lianes */}
       <g>
@@ -306,7 +321,7 @@ export function Island({
       {/* Sol */}
       <g>
         {triees.map((t) => {
-          const enRepos = t.zone !== 'coeur' && repos?.[t.zone]
+          const enRepos = t.zone !== 'coeur' && t.zone !== 'dehors' && repos?.[t.zone]
           return (
             <polygon
               key={cle(t.x, t.y)}
@@ -369,6 +384,13 @@ export function Island({
             return (
               <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
                 <Fanion zone={o.zone} />
+              </g>
+            )
+          }
+          if (o.type === 'flore') {
+            return (
+              <g key={o.id} transform={`translate(${sx} ${sy})`} aria-hidden>
+                {o.variante % 3 === 0 ? <Arbre r={9 + (o.variante % 4)} tronc={8} couleur={o.variante % 2 ? '#6FA56B' : '#5E9B62'} /> : <Flore type={o.variante} />}
               </g>
             )
           }
