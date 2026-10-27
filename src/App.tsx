@@ -27,7 +27,7 @@ export function App() {
 
   return (
     <JeuProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <div className="telephone">
           <main className="app">
             <Routes>
