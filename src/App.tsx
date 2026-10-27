@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Agents } from './screens/Agents'
 import { CreerAgent } from './screens/CreerAgent'
@@ -11,7 +10,9 @@ import { JeuProvider } from './data/jeu'
 import { FicheAgent } from './ui/FicheAgent'
 import { Onboarding } from './ui/Onboarding'
 import { GuideTour } from './ui/GuideTour'
-import { PorteBeta, porteRequise } from './ui/PorteBeta'
+import { Connexion } from './ui/Connexion'
+import { compteRequis } from './compte/supabase'
+import { useSession } from './compte/useSession'
 import { useJeu } from './data/jeu'
 
 function Intro() {
@@ -22,8 +23,11 @@ function Intro() {
 }
 
 export function App() {
-  const [bloque, setBloque] = useState(porteRequise)
-  if (bloque) return <PorteBeta onEntrer={() => setBloque(false)} />
+  const { chargement, session } = useSession()
+  if (compteRequis) {
+    if (chargement) return null
+    if (!session) return <Connexion />
+  }
 
   return (
     <JeuProvider>

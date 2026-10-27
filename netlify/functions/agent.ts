@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk'
+import { verifierAppelant } from '../../server/compte'
 
 /**
  * Fonction Netlify : fait préparer des propositions par Claude.
@@ -6,6 +7,7 @@ import Anthropic from '@anthropic-ai/sdk'
  * par AGENT_MODEL (défaut : claude-opus-5-5). Le client (LlmEngine) retombe
  * sur le RuleEngine déterministe en cas d'échec.
  * Exposée sur /api/agent via une réécriture dans netlify.toml.
+ * Réservée aux comptes connectés : le jeton Supabase est vérifié avant tout appel.
  */
 
 interface AgentLite {
@@ -40,6 +42,8 @@ const json = (data: unknown, status = 200) =>
 
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') return json({ error: 'Méthode non autorisée' }, 405)
+  const acces = await verifierAppelant(req.headers.get('authorization'))
+  if (!acces.ok) return json({ error: acces.message }, acces.statut)
   try {
     const { saisie, agents } = (await req.json()) as { saisie?: unknown; agents?: AgentLite[] }
     const actifs = (agents ?? []).filter((a) => a.actif)

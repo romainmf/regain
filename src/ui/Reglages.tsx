@@ -5,6 +5,8 @@ import { importerDepuisFichier, telechargerExport, toutEffacer } from '../data/e
 import { getMeta, setMeta } from '../data/db'
 import { Bouton } from './Boutons'
 import { Sheet } from './Sheet'
+import { compteRequis } from '../compte/supabase'
+import { useSession } from '../compte/useSession'
 import './reglages.css'
 
 export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
@@ -13,6 +15,7 @@ export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
   const [msg, setMsg] = useState<{ ton: 'ok' | 'err'; texte: string } | null>(null)
   const [confirmer, setConfirmer] = useState(false)
   const moteur = useLiveQuery(() => getMeta<'rule' | 'llm'>('moteur', 'rule'), [], 'rule')
+  const { email, deconnecter } = useSession()
 
   const dire = (ton: 'ok' | 'err', texte: string) => {
     setMsg({ ton, texte })
@@ -50,6 +53,14 @@ export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
   return (
     <Sheet ouvert={ouvert} onFermer={onFermer} titre="Réglages">
       {msg && <div className={`reg-msg reg-${msg.ton}`} role="status">{msg.texte}</div>}
+
+      {compteRequis && (
+        <section className="reg-bloc">
+          <h3>Ton compte</h3>
+          <p className="reg-aide">Connecté avec <strong>{email ?? '…'}</strong>. Le compte sert à savoir qui teste ; ton île, elle, reste ici.</p>
+          <Bouton variante="contour" onClick={() => deconnecter()} style={{ width: '100%' }}>Se déconnecter</Bouton>
+        </section>
+      )}
 
       <section className="reg-bloc">
         <h3>Ton île</h3>

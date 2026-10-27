@@ -1,6 +1,7 @@
 import type { Brouillon, Saisie } from '../propositions'
 import type { AgentEngine, ContexteMoteur } from './AgentEngine'
 import { RuleEngine } from './RuleEngine'
+import { jetonAcces } from '../../compte/supabase'
 
 /**
  * Moteur LLM optionnel : appelle la fonction serverless /api/agent (la clé
@@ -10,9 +11,10 @@ import { RuleEngine } from './RuleEngine'
 export const LlmEngine: AgentEngine = {
   async propose(saisie: Saisie, ctx: ContexteMoteur): Promise<Brouillon[]> {
     try {
+      const jeton = await jetonAcces()
       const reponse = await fetch('/api/agent', {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', ...(jeton ? { authorization: `Bearer ${jeton}` } : {}) },
         body: JSON.stringify({ saisie, agents: ctx.agents }),
         signal: AbortSignal.timeout(12000),
       })

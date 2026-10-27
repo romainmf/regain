@@ -44,11 +44,35 @@ npm run test       # tests unitaires (Vitest)
 npm run e2e         # test de fumée Playwright (à venir)
 ```
 
+## Bêta privée : les comptes
+
+En ligne, on entre avec son adresse e-mail : Supabase envoie un lien magique
+(ou un code à six chiffres si le modèle d'e-mail inclut `{{ .Token }}`).
+Seules les adresses invitées peuvent se connecter ; rien ne se crée tout seul.
+Le compte sert à savoir qui teste et à réserver le mode IA (la fonction
+`/api/agent` vérifie le jeton de session) ; l'île, elle, reste sur l'appareil.
+
+Mise en place, une fois :
+
+1. Créer un projet Supabase ; dans Authentication → Sign In / Providers,
+   laisser Email et **désactiver « Allow new users to sign up »**.
+2. Dans Authentication → URL Configuration : Site URL = l'adresse du site,
+   et l'ajouter aux Redirect URLs.
+3. Copier l'URL du projet et la clé anonyme (Settings → API) dans les
+   variables d'environnement du site : `VITE_SUPABASE_URL`,
+   `VITE_SUPABASE_ANON_KEY` (voir `.env.example`), puis redéployer.
+4. Inviter chaque testeur depuis Authentication → Users → **Invite user** :
+   la personne reçoit un e-mail et entre directement. Pour retirer quelqu'un,
+   supprimer l'utilisateur.
+
+Sans configuration Supabase, la version en ligne reste fermée (écran « bêta
+privée »). En développement local sans configuration, l'accès est libre.
+
 ## Confidentialité
 
-Tout vit sur l'appareil : pas de compte, pas de cloud. L'île s'exporte et
-se réimporte en JSON (à venir). En bêta, les factures restent des brouillons,
-jamais envoyées.
+Tout vit sur l'appareil : le compte ne porte qu'une adresse e-mail, pas de
+cloud pour l'île. L'île s'exporte et se réimporte en JSON. En bêta, les
+factures restent des brouillons, jamais envoyées.
 
 ## Statut
 

@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { verifierAppelant } from '../server/compte'
 
 /**
  * Fonction serverless : fait préparer des propositions par Claude.
@@ -39,6 +40,11 @@ N'utilise que des agentId présents dans la liste fournie, et respecte le domain
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Méthode non autorisée' })
+    return
+  }
+  const acces = await verifierAppelant(req.headers.authorization)
+  if (!acces.ok) {
+    res.status(acces.statut).json({ error: acces.message })
     return
   }
   try {

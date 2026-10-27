@@ -12,11 +12,6 @@
   to = "/.netlify/functions/agent"
   status = 200
 
-[[redirects]]
-  from = "/api/acces"
-  to = "/.netlify/functions/acces"
-  status = 200
-
 # Repli SPA : toute autre route sert l'app (React Router gère le reste).
 [[redirects]]
   from = "/*"
