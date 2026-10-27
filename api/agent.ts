@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { verifierAppelant } from '../server/compte'
+import { verifierAppelant } from '../server/compte.js'
 
 /**
  * Fonction serverless : fait préparer des propositions par Claude.

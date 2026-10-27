@@ -13,3 +13,6 @@ playwright-report
 # Build info
 tsconfig.tsbuildinfo
 *.tsbuildinfo
+
+# Local Netlify folder
+.netlify
