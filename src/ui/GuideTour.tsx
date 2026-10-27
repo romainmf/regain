@@ -1,114 +1,155 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useJeu } from '../data/jeu'
+import { getMeta } from '../data/db'
 import { BrinAvatar } from './BrinAvatar'
+import { actionsIle, useEtatIle } from './visite/pilote'
+import { etapesVisibles, type Contexte } from './visite/etapes'
 import './intro.css'
-
-interface Etape {
-  selector: string
-  titre: string
-  texte: string
-}
-
-const ETAPES: Etape[] = [
-  { selector: '.coeur-brin', titre: 'Voici moi, Brin', texte: 'L’arbre au cœur de ton île. Touche-moi quand tu veux me poser une question.' },
-  { selector: '.batiment', titre: 'Tes lieux', texte: 'Tu as déjà trois agents offerts, un par lieu : l’Atelier, le Spa et le Jardin. Touche un lieu pour y entrer et aller les voir. Je te les présente.' },
-  { selector: '[data-lieu="atelier"]', titre: 'L’Atelier · Ma boîte', texte: 'Factures y travaille : il prépare tes factures et te rappelle tes échéances URSSAF et TVA.' },
-  { selector: '[data-lieu="spa"]', titre: 'Le Spa · Ma peau', texte: 'Rythme y veille sur toi : quand les journées s’enchaînent, il te propose de protéger un créneau calme.' },
-  { selector: '[data-agent="racine"], [data-lieu="jardin"]', titre: 'Le Jardin · Ma planète', texte: 'Empreinte y cultive ton bilan : il estime l’empreinte de tes missions et l’ajoute à ton bilan.' },
-  { selector: '.elan-badge', titre: 'Ton élan', texte: 'Il grandit quand tes trois lieux avancent ensemble, et multiplie les graines que tu gagnes.' },
-  { selector: '.action-saisir', titre: 'Dis-leur ce qui arrive', texte: 'Une mission finie, une grosse journée, un trajet… tes agents préparent aussitôt la suite.' },
-  { selector: '.tiroir, .lieu-col-gauche', titre: 'Aujourd’hui', texte: 'Ici, tu valides ce qu’ils ont préparé. Sur téléphone, tire le tiroir sous l’île. Chaque validation te donne des graines et fait vivre l’île.' },
-  { selector: '.nav-equipe, .equipe-bref-plus', titre: 'Ton équipe', texte: 'Recrute d’autres agents, ou crée le tien en moins d’une minute.' },
-]
 
 interface Rect { left: number; top: number; width: number; height: number }
 
-/** Visite guidée : Brin met en lumière les vrais éléments, un par un. */
+const MARGE = 8
+
+/**
+ * Visite guidée : Brin met en lumière les vrais éléments et attend que l'on
+ * fasse le geste (entrer, parler, valider, sortir, tirer le tiroir), ou le
+ * fait à notre place. Le voile laisse la cible touchable.
+ */
 export function GuideTour() {
-  const { finirTour } = useJeu()
-  const [i, setI] = useState(0)
+  const { finirTour, aValider } = useJeu()
+  const etat = useEtatIle()
+  const prenom = useLiveQuery(() => getMeta<string>('prenom', ''), [], '')
+
+  const [id, setId] = useState<string>('brin')
+  const [repere, setRepere] = useState(aValider.length)
   const [rect, setRect] = useState<Rect | null>(null)
-  const [cadre, setCadre] = useState<{ w: number; h: number }>({ w: 0, h: 0 })
+  const [cadre, setCadre] = useState({ w: 0, h: 0 })
+  const minuteur = useRef<number | null>(null)
 
-  const etape = ETAPES[i]
-  const dernier = i === ETAPES.length - 1
+  const contexte: Contexte = { etat, aValider: aValider.length, aValiderAuDepart: repere, prenom: prenom ?? '' }
+  const etapes = etapesVisibles(contexte, id)
+  const i = Math.max(0, etapes.findIndex((e) => e.id === id))
+  const etape = etapes[i]
+  const dernier = i === etapes.length - 1
+  const faite = etape.accomplie ? etape.accomplie(contexte) : false
 
+  const suivant = () => {
+    if (dernier) { finirTour(); return }
+    const prochaine = etapes[i + 1]
+    setId(prochaine.id)
+    setRepere(aValider.length)
+  }
+
+  // Le geste est fait : on laisse l'animation se poser, puis on avance.
+  // Si l'état vacille un instant, on annule et on attend qu'il se stabilise.
+  useEffect(() => {
+    if (faite) {
+      if (minuteur.current == null) {
+        minuteur.current = window.setTimeout(() => { minuteur.current = null; suivant() }, 700)
+      }
+    } else if (minuteur.current != null) {
+      clearTimeout(minuteur.current)
+      minuteur.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [faite])
+  useEffect(() => () => { if (minuteur.current != null) clearTimeout(minuteur.current) }, [])
+
+  // La visite commence dehors : si l'on est dans un lieu, on en sort d'abord.
+  useEffect(() => {
+    const a = actionsIle()
+    if (etat.vue === 'interieur' && !etat.occupe && a) a.sortir()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Où est la cible ? On remesure souvent : l'île bouge (zoom, personnage, tiroir).
   const mesurer = () => {
     const conteneur = document.querySelector('.telephone') ?? document.body
     const cr = conteneur.getBoundingClientRect()
     setCadre({ w: cr.width, h: cr.height })
-    const cible = [...document.querySelectorAll(etape.selector)].find((el) => el.getBoundingClientRect().width > 0) ?? null
-    if (!cible) {
-      setRect(null)
-      return
-    }
+    const sel = typeof etape.cible === 'function' ? etape.cible(contexte) : etape.cible
+    const cible = sel
+      ? [...document.querySelectorAll(sel)].find((el) => {
+        const r = el.getBoundingClientRect()
+        return r.width > 0 && r.height > 0 && r.bottom > cr.top && r.top < cr.bottom
+      })
+      : null
+    if (!cible) { setRect(null); return }
     const r = cible.getBoundingClientRect()
-    if (r.width === 0 && r.height === 0) {
-      setRect(null)
-      return
-    }
-    setRect({ left: r.left - cr.left, top: r.top - cr.top, width: r.width, height: r.height })
+    const prochain = { left: r.left - cr.left, top: r.top - cr.top, width: r.width, height: r.height }
+    setRect((ancien) =>
+      ancien && Math.abs(ancien.left - prochain.left) < 1 && Math.abs(ancien.top - prochain.top) < 1
+        && Math.abs(ancien.width - prochain.width) < 1 && Math.abs(ancien.height - prochain.height) < 1 ? ancien : prochain)
   }
 
   useLayoutEffect(() => {
     mesurer()
-    const t = setTimeout(mesurer, 120) // laisse les animations se poser
-    return () => clearTimeout(t)
-  }, [i])
-
-  useEffect(() => {
+    const t = setInterval(mesurer, 160)
     window.addEventListener('resize', mesurer)
     window.addEventListener('scroll', mesurer, true)
     return () => {
+      clearInterval(t)
       window.removeEventListener('resize', mesurer)
       window.removeEventListener('scroll', mesurer, true)
     }
-  }, [i])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [etape.id, etat.lieuConseille])
 
-  const pad = 8
   const trou = rect
-    ? { left: rect.left - pad, top: rect.top - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 }
+    ? {
+      left: Math.max(0, rect.left - MARGE), top: Math.max(0, rect.top - MARGE),
+      width: Math.min(cadre.w, rect.width + MARGE * 2), height: Math.min(cadre.h, rect.height + MARGE * 2),
+    }
     : null
+  const interactif = !!etape.accomplie && !faite
 
-  // Bulle sous la cible si la place le permet, sinon au-dessus.
-  const bulleEnBas = !trou || trou.top + trou.height + 190 < cadre.h
-  const bulleTop = trou ? (bulleEnBas ? trou.top + trou.height + 12 : Math.max(12, trou.top - 196)) : cadre.h / 2 - 90
+  // La bulle sous la cible si la place le permet, sinon au-dessus ; au milieu sans cible.
+  const hauteurBulle = 210
+  const enBas = !trou || trou.top + trou.height + hauteurBulle + 12 < cadre.h
+  const top = trou
+    ? (enBas ? trou.top + trou.height + 12 : Math.max(12, trou.top - hauteurBulle - 12))
+    : Math.max(12, cadre.h / 2 - hauteurBulle / 2)
+
+  const aide = etape.aide
+  const actions = actionsIle()
 
   return (
-    <div className="tour">
-      {/* Spotlight : un trou clair, tout le reste assombri */}
+    <div className="tour" data-etape={etape.id}>
       {trou ? (
-        <div
-          className="tour-trou"
-          style={{ left: trou.left, top: trou.top, width: trou.width, height: trou.height }}
-        />
+        <>
+          {/* Quatre pans de voile autour de la cible : elle reste touchable. */}
+          <div className="tour-pan" style={{ left: 0, top: 0, right: 0, height: trou.top }} />
+          <div className="tour-pan" style={{ left: 0, top: trou.top + trou.height, right: 0, bottom: 0 }} />
+          <div className="tour-pan" style={{ left: 0, top: trou.top, width: trou.left, height: trou.height }} />
+          <div className="tour-pan" style={{ left: trou.left + trou.width, top: trou.top, right: 0, height: trou.height }} />
+          <div className={`tour-trou${interactif ? ' tour-trou-actif' : ''}`} style={{ left: trou.left, top: trou.top, width: trou.width, height: trou.height }} />
+          {!interactif && <div className="tour-bouchon" style={{ left: trou.left, top: trou.top, width: trou.width, height: trou.height }} />}
+        </>
       ) : (
         <div className="tour-voile-plein" />
       )}
 
-      <section
-        className="tour-bulle"
-        role="dialog"
-        aria-modal="true"
-        aria-label={etape.titre}
-        style={{ top: bulleTop }}
-      >
+      <section className="tour-bulle" role="dialog" aria-label={etape.titre} style={{ top }}>
         <div className="tour-tete">
           <BrinAvatar taille={40} />
           <h3>{etape.titre}</h3>
         </div>
-        <p>{etape.texte}</p>
+        <p>{etape.texte(contexte)}</p>
+        {interactif && <p className="tour-attente" aria-live="polite">{faite ? 'C’est fait !' : 'À toi : je t’attends.'}</p>}
         <div className="tour-pied">
           <div className="tour-points" aria-hidden>
-            {ETAPES.map((_, k) => (
-              <span key={k} className={`onb-pt${k === i ? ' onb-pt-on' : ''}`} />
+            {etapes.map((e, k) => (
+              <span key={e.id} className={`onb-pt${k === i ? ' onb-pt-on' : ''}`} />
             ))}
           </div>
           <div className="tour-boutons">
             <button className="tour-passer" onClick={finirTour}>Passer</button>
-            <button className="tour-suivant" onClick={() => (dernier ? finirTour() : setI(i + 1))}>
-              {dernier ? 'C’est parti' : 'Suivant'}
-            </button>
+            {interactif && aide && actions ? (
+              <button className="tour-aide" onClick={() => aide.faire(actions, contexte)} disabled={etat.occupe}>{aide.libelle}</button>
+            ) : (
+              <button className="tour-suivant" onClick={suivant}>{dernier ? 'C’est parti' : 'Suivant'}</button>
+            )}
           </div>
         </div>
       </section>

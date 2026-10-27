@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useJeu } from '../data/jeu'
 import { importerDepuisFichier, telechargerExport, toutEffacer } from '../data/exportImport'
@@ -10,7 +11,8 @@ import { useSession } from '../compte/useSession'
 import './reglages.css'
 
 export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () => void }) {
-  const { exemplesPresents, effacerExemples } = useJeu()
+  const { exemplesPresents, effacerExemples, lancerVisite } = useJeu()
+  const navigate = useNavigate()
   const fichier = useRef<HTMLInputElement>(null)
   const [msg, setMsg] = useState<{ ton: 'ok' | 'err'; texte: string } | null>(null)
   const [confirmer, setConfirmer] = useState(false)
@@ -70,6 +72,12 @@ export function Reglages({ ouvert, onFermer }: { ouvert: boolean; onFermer: () =
           <Bouton variante="contour" onClick={choisirFichier} style={{ flex: 1 }}>Importer…</Bouton>
         </div>
         <input ref={fichier} type="file" accept="application/json,.json" onChange={surFichier} hidden />
+      </section>
+
+      <section className="reg-bloc">
+        <h3>La visite guidée</h3>
+        <p className="reg-aide">Brin te refait le tour de l’île : entrer dans un lieu, valider, le tableau de bord.</p>
+        <Bouton variante="contour" onClick={() => { onFermer(); navigate('/'); lancerVisite() }} style={{ width: '100%' }}>Revoir la visite</Bouton>
       </section>
 
       {exemplesPresents && (

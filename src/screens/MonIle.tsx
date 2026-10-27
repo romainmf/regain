@@ -17,6 +17,9 @@ import { trouverChemin, useMarcheur } from '../island/ac/marcheur'
 import { STYLES_MUR, STYLES_SOL } from '../island/LieuxZones'
 import { nuance } from '../island/buildings/primitives'
 import { BrinChat } from '../ui/BrinChat'
+import { enregistrerActions, publierEtat } from '../ui/visite/pilote'
+import { getMeta } from '../data/db'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { CarteProposition } from '../ui/CarteProposition'
 import { EnTete, formatElan } from '../ui/EnTete'
 import { FileValidation } from '../ui/FileValidation'
@@ -272,12 +275,41 @@ export function MonIle() {
     marcherVers({ x: PLACE.x + 0.2, y: PLACE.y + 1.4 }, () => setBrinOuvert(true))
   }
 
+  const prenom = useLiveQuery(() => getMeta<string>('prenom', ''), [], '') ?? ''
   // Le conseil de Brin : le lieu où le plus de choses attendent.
   const conseil = ORDRE.filter((id) => LIEUX[id].domaine)
     .map((id) => ({ id, n: attenteLieu(id) }))
     .filter((c) => c.n > 0)
     .sort((a, b) => b.n - a.n)[0]
-  const texteBrin = salut ? 'Coucou !' : conseil ? `${LIEUX[conseil.id].nom} t’attend : ${conseil.n} à relire` : agents.length === 0 ? 'Recrute ton premier agent !' : 'Tout est à jour, bravo !'
+  const texteBrin = salut ? `Coucou${prenom ? ` ${prenom}` : ''} !` : conseil ? `${LIEUX[conseil.id].nom} t’attend : ${conseil.n} à relire` : agents.length === 0 ? 'Recrute ton premier agent !' : 'Tout est à jour, bravo !'
+
+  // Ce que la visite guidée a besoin de savoir et de faire.
+  useEffect(() => {
+    const ouvert = dialogue?.type === 'agent' ? dialogue.agent : null
+    const lieuConseille = conseil?.id ?? null
+    const dedans = lieuConseille ? agentsDe(lieuConseille) : []
+    const agentConseille = (dedans.find((a) => a.attente) ?? dedans[0])?.nom ?? null
+    publierEtat({
+      vue, lieu: lieuCourant, agentOuvert: ouvert?.id ?? null,
+      attenteAgentOuvert: ouvert ? aValider.filter((p) => p.agentId === ouvert.id).length : 0,
+      lieuConseille, agentConseille, tiroirOuvert: tiroir !== 'replie', occupe, large,
+    })
+  })
+  useEffect(() => {
+    enregistrerActions({
+      entrer: (id) => { if (!occupe) entrer(id) },
+      sortir,
+      voirAgent: () => {
+        const dedans = lieuCourant ? agentsDe(lieuCourant) : []
+        const slots = lieuCourant ? slotsPour(lieuCourant, dedans.length) : []
+        const i = Math.max(0, dedans.findIndex((a) => a.attente))
+        if (!occupe && dedans[i] && slots[i]) voirAgent(dedans[i], slots[i])
+      },
+      ouvrirTiroir: () => setTiroir('moitie'),
+    })
+  })
+  useEffect(() => () => enregistrerActions(null), [])
+
 
   const nomCourant = lieuCourant ? LIEUX[lieuCourant] : null
   const agentsCourants = lieuCourant ? agentsDe(lieuCourant) : []

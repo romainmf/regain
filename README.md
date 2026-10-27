@@ -23,7 +23,7 @@ produit une ressource qu'un autre consomme.
 - La création simplifiée d'un agent, en quatre étapes.
 - La file « À valider » et l'économie de jeu (graines, élan, récolte, repos).
 - Les connexions entre domaines (chaînes), avec flux doré et bandeau.
-- Un accueil et une visite guidée, menés par Brin, l'arbre au cœur de l'île.
+- Un accueil mené par Brin (il demande ton prénom), puis une visite guidée à faire soi-même : entrer dans le lieu où un agent attend, lui parler, valider une première proposition, ressortir, ouvrir le tableau de bord. Brin attend chaque geste, ou le fait à ta place ; la visite se rejoue depuis les réglages.
 
 ## Pile technique
 
