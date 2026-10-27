@@ -6,6 +6,7 @@ import { DOMAINE_LABEL, DOMAINES } from '../domain/types'
 import { Coeur } from '../island/Coeur'
 import { Meuble, type MeubleId } from '../island/Meubles'
 import { Poste } from '../island/Poste'
+import { Robot } from '../island/Robot'
 import { hache } from '../island/Paysage'
 import { Arbre, BOIS, CREME, Flore, Pave, Toit, VERRE, nuance } from '../island/buildings/primitives'
 import { TH, TW, iso, losange } from '../island/iso'
@@ -269,9 +270,12 @@ const P = (fx: number, fy: number, fz: number) => `${(fx - fy) * TW},${(fx + fy)
 /** Coin de tuile (demi-entiers) avec une hauteur, en coordonnées écran. */
 const C = (cx: number, cy: number, z = 0) => `${(cx - cy) * TW},${(cx + cy) * TH - z}`
 
-function MaisonIle({ id, porteOuverte, enMain }: { id: LieuId; porteOuverte: boolean; enMain: boolean }) {
+/** Une maison donne signe de vie quand un agent y attend : fumée, vapeur, fenêtres éclairées, drapeau levé. */
+function MaisonIle({ id, porteOuverte, enMain, attente }: { id: LieuId; porteOuverte: boolean; enMain: boolean; attente: number }) {
   const M = LIEUX[id]
   const w = 0.78, d = 0.78, h = 30
+  const vivante = attente > 0
+  const vitre = vivante ? '#F8E7B8' : VERRE
   const porte = `${P(-0.26, d, 0)} ${P(0.1, d, 0)} ${P(0.1, d, 19)} ${P(-0.26, d, 19)}`
   const fenetreG = `${P(0.3, d, 11)} ${P(0.62, d, 11)} ${P(0.62, d, 23)} ${P(0.3, d, 23)}`
   const fenetreD = `${P(w, -0.55, 11)} ${P(w, -0.15, 11)} ${P(w, -0.15, 24)} ${P(w, -0.55, 24)}`
@@ -288,9 +292,15 @@ function MaisonIle({ id, porteOuverte, enMain }: { id: LieuId; porteOuverte: boo
       <polygon points={porte} fill="#2E2520" />
       <polygon className={`porte${porteOuverte ? ' porte-ouverte' : ''}`} points={porte} fill={nuance(BOIS, -0.08)} stroke={nuance(BOIS, -0.3)} strokeWidth={0.8} />
       <circle cx={(0.03 - d) * TW} cy={(0.03 + d) * TH - 9.5} r={1.1} fill="#E7B04A" />
-      {/* Fenêtres */}
-      <polygon points={fenetreG} fill={VERRE} stroke={CREME} strokeWidth={1.4} />
-      <polygon points={fenetreD} fill={VERRE} stroke={CREME} strokeWidth={1.4} />
+      {/* Fenêtres : éclairées quand quelqu'un attend dedans */}
+      {vivante && (
+        <g className="fenetre-lueur" aria-hidden>
+          <polygon points={fenetreG} fill="#F6E6C2" stroke="#F6E6C2" strokeWidth={7} strokeLinejoin="round" opacity={0.45} />
+          <polygon points={fenetreD} fill="#F6E6C2" stroke="#F6E6C2" strokeWidth={7} strokeLinejoin="round" opacity={0.45} />
+        </g>
+      )}
+      <polygon points={fenetreG} fill={vitre} stroke={CREME} strokeWidth={1.4} />
+      <polygon points={fenetreD} fill={vitre} stroke={CREME} strokeWidth={1.4} />
       <path d={`M ${P(0.46, d, 11)} L ${P(0.46, d, 23)}`} stroke={CREME} strokeWidth={0.9} />
       <path d={`M ${P(w, -0.35, 11)} L ${P(w, -0.35, 24)}`} stroke={CREME} strokeWidth={0.9} />
       {/* Jardinière sous la fenêtre */}
@@ -306,21 +316,27 @@ function MaisonIle({ id, porteOuverte, enMain }: { id: LieuId; porteOuverte: boo
       {id === 'atelier' && (
         <g transform={`translate(${(0.5 + 0.35) * TW} ${(0.5 - 0.35) * TH - h - 14})`}>
           <Pave w={0.07} d={0.07} h={12} couleur="#B8A48A" />
-          <g className="fumee" fill="#F5F0E3" opacity={0.8}>
-            <circle cx={0} cy={-16} r={2.4} />
-            <circle cx={2} cy={-22} r={3} />
-            <circle cx={-1} cy={-29} r={3.6} />
-          </g>
+          {/* La cheminée fume quand on y travaille pour toi */}
+          {vivante && (
+            <g className="fumee" fill="#F5F0E3" opacity={0.85}>
+              <circle cx={0} cy={-16} r={2.6} />
+              <circle cx={2} cy={-22} r={3.4} />
+              <circle cx={-1} cy={-29} r={4} />
+            </g>
+          )}
         </g>
       )}
       {id === 'spa' && (
         <g transform={`translate(${(0.5 + 0.3) * TW} ${(0.5 - 0.3) * TH - h - 16})`}>
           <Pave w={0.09} d={0.09} h={8} couleur="#D9C4D0" />
-          <g className="vapeur" stroke="#FBF8F1" strokeWidth={1.6} fill="none" strokeLinecap="round" opacity={0.85}>
-            <path d="M -4 -12 q 2 -4 0 -8 q -2 -4 0 -8" />
-            <path d="M 0 -14 q 2 -4 0 -8 q -2 -4 0 -8" />
-            <path d="M 4 -12 q 2 -4 0 -8 q -2 -4 0 -8" />
-          </g>
+          {/* Le bain fume quand un soin t'attend */}
+          {vivante && (
+            <g className="vapeur" stroke="#FBF8F1" strokeWidth={1.8} fill="none" strokeLinecap="round" opacity={0.9}>
+              <path d="M -4 -12 q 2 -4 0 -8 q -2 -4 0 -8" />
+              <path d="M 0 -14 q 2 -4 0 -8 q -2 -4 0 -8" />
+              <path d="M 4 -12 q 2 -4 0 -8 q -2 -4 0 -8" />
+            </g>
+          )}
         </g>
       )}
       {id === 'maison' && (
@@ -328,6 +344,11 @@ function MaisonIle({ id, porteOuverte, enMain }: { id: LieuId; porteOuverte: boo
           <line x1={0} y1={0} x2={0} y2={-14} stroke={nuance(BOIS, -0.2)} strokeWidth={1.6} />
           <rect x={-4.5} y={-21} width={9} height={7} rx={2} fill="#E7B04A" />
           <rect x={-2} y={-19} width={4} height={1.4} fill="#FBF8F1" />
+          {/* Le drapeau de la boîte aux lettres se lève quand il y a du courrier à relire */}
+          <g className={vivante ? 'drapeau drapeau-leve' : 'drapeau'}>
+            <line x1={4.5} y1={-18} x2={4.5} y2={-10} stroke="#B0512A" strokeWidth={1.4} strokeLinecap="round" />
+            <path d="M 4.5 -18 l 4 1.5 l -4 1.5 Z" fill="#B0512A" />
+          </g>
         </g>
       )}
       {/* Paillasson devant la porte */}
@@ -426,10 +447,10 @@ function Enseigne({ id, attente }: { id: LieuId; attente: number }) {
       <circle cx={-l / 2 + 12} cy={0} r={4} fill={M.couleur} />
       <text x={5} y={4.5} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={12.5} fontWeight={700} fill="#22301F">{M.nom}</text>
       {attente > 0 && (
-        <g transform={`translate(${l / 2 - 2} -10)`}>
+        <g transform={`translate(${l / 2 - 2} -10)`}><g className="signe-point">
           <circle r={8} fill="#E7B04A" stroke="#FBF8F1" strokeWidth={1.5} />
           <text y={3.5} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={10} fontWeight={700} fill="#22301F">{attente}</text>
-        </g>
+        </g></g>
       )}
     </g>
   )
@@ -710,10 +731,10 @@ function Interieur({ id, agents, perso, enMarche, versGauche, attente, onAgent, 
                 </g>
                 {enAttente && (
                   <g className="signe-vie" aria-hidden>
-                    <g className="signe-point" transform="translate(0 -62)">
+                    <g transform="translate(0 -62)"><g className="signe-point">
                       <circle r={7} fill="#E7B04A" opacity={0.95} />
                       <text y={4} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={11} fontWeight={700} fill="#22301F">!</text>
-                    </g>
+                    </g></g>
                   </g>
                 )}
               </g>
@@ -740,6 +761,51 @@ type Dialogue =
 /** Élan de la semaine, par domaine (valeurs de maquette, sur 6). */
 const ELAN: Record<Domaine, number> = { boite: 4, peau: 3, planete: 5 }
 
+/** Le tiroir du tableau de bord : replié sur les chiffres, à mi-hauteur, ou déplié. */
+type Tiroir = 'replie' | 'moitie' | 'plein'
+const HAUTEUR_TIROIR: Record<Tiroir, string> = { replie: '118px', moitie: '50%', plein: '86%' }
+const TIROIR_SUIVANT: Record<Tiroir, Tiroir> = { replie: 'moitie', moitie: 'plein', plein: 'replie' }
+
+/** Poignée du tiroir : toucher pour passer à la position suivante, glisser pour l'amener où l'on veut. */
+function Poignee({ tiroir, onChanger, onGlisser, onLacher }: {
+  tiroir: Tiroir
+  onChanger: (t: Tiroir) => void
+  onGlisser: (hauteur: number | null) => void
+  onLacher: (hauteur: number) => void
+}) {
+  const geste = useRef<{ y0: number; h0: number; bouge: boolean } | null>(null)
+  return (
+    <button
+      className="mi-tiroir-poignee"
+      aria-label={tiroir === 'plein' ? 'Replier le tableau de bord' : 'Déplier le tableau de bord'}
+      onPointerDown={(e) => {
+        const tiroirEl = e.currentTarget.parentElement
+        if (!tiroirEl) return
+        geste.current = { y0: e.clientY, h0: tiroirEl.getBoundingClientRect().height, bouge: false }
+        e.currentTarget.setPointerCapture(e.pointerId)
+      }}
+      onPointerMove={(e) => {
+        const g = geste.current
+        if (!g) return
+        const dy = g.y0 - e.clientY
+        if (Math.abs(dy) > 6) g.bouge = true
+        if (g.bouge) onGlisser(Math.max(60, g.h0 + dy))
+      }}
+      onPointerUp={(e) => {
+        const g = geste.current
+        geste.current = null
+        if (!g) return
+        if (g.bouge) onLacher(Math.max(60, g.h0 + (g.y0 - e.clientY)))
+        else onChanger(TIROIR_SUIVANT[tiroir])
+        onGlisser(null)
+      }}
+      onPointerCancel={() => { geste.current = null; onGlisser(null) }}
+    >
+      <span className="mi-tiroir-barre" aria-hidden />
+    </button>
+  )
+}
+
 export function MaquetteIle() {
   const tuiles = useMemo(construireIle, [])
   const fonds = useMemo(hautsFonds, [])
@@ -756,7 +822,16 @@ export function MaquetteIle() {
   const [validees, setValidees] = useState<Set<string>>(() => new Set())
   const [bulleBrin, setBulleBrin] = useState(true)
   const { pos, enMarche, versGauche, aller, poser } = useMarcheur({ x: 5, y: 8 })
-  const defile = useRef<HTMLDivElement>(null)
+  const [tiroir, setTiroir] = useState<Tiroir>('replie')
+  /** Hauteur du tiroir pendant un glissement, en pixels ; sinon la position choisie. */
+  const [glisse, setGlisse] = useState<number | null>(null)
+  const cadre = useRef<HTMLDivElement>(null)
+  const lacherTiroir = (h: number) => {
+    const H = cadre.current?.clientHeight ?? 800
+    const cibles: [Tiroir, number][] = [['replie', 118], ['moitie', H * 0.5], ['plein', H * 0.86]]
+    cibles.sort((a, b) => Math.abs(a[1] - h) - Math.abs(b[1] - h))
+    setTiroir(cibles[0][0])
+  }
   /** Depuis le tableau de bord : une fois entré, aller voir cet agent. */
   const apresEntree = useRef<string | null>(null)
   /** Depuis le tableau de bord, quand on est déjà dans un lieu : une fois sorti, entrer dans celui-ci. */
@@ -904,7 +979,7 @@ export function MaquetteIle() {
   const rejoindre = (a: AgentTemplate) => {
     if (occupe) return
     const id = lieuDe(a)
-    defile.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    setTiroir('replie')
     setMode('visite')
     setEnMain(null)
     setBulleBrin(false)
@@ -959,7 +1034,8 @@ export function MaquetteIle() {
   const W = (etendue.maxX - etendue.minX) * 0.84 + marge * 2
   const minX = (etendue.minX + etendue.maxX) / 2 - W / 2
   const H = W * 2
-  const minY = (etendue.minY + etendue.maxY) / 2 - H * 0.47
+  // L'île un peu au-dessus du milieu : le tiroir replié reste sous elle.
+  const minY = (etendue.minY + etendue.maxY) / 2 - H * 0.4
   const sortedTuiles = [...tuiles].sort((a, b) => a.x + a.y - (b.x + b.y))
 
   type ObjetIle =
@@ -967,6 +1043,7 @@ export function MaquetteIle() {
     | { type: 'jardin-fond' | 'jardin-avant'; id: LieuId; x: number; y: number }
     | { type: 'jardin-meuble'; x: number; y: number; meuble: MeubleId; cle: string }
     | { type: 'jardin-agent'; x: number; y: number; agent: AgentTemplate }
+    | { type: 'jardin-robot'; x: number; y: number }
     | { type: 'brin'; x: number; y: number }
     | { type: 'flore'; x: number; y: number; variante: number; terrain: Terrain }
     | { type: 'perso'; x: number; y: number }
@@ -983,6 +1060,8 @@ export function MaquetteIle() {
         if (o.meuble) objets.push({ type: 'jardin-meuble', x: a.x + o.x, y: a.y + o.y, meuble: o.meuble, cle: `${id}-${o.x}-${o.y}` })
         else if (o.agent != null && agents[o.agent]) objets.push({ type: 'jardin-agent', x: a.x + o.x, y: a.y + o.y, agent: agents[o.agent] })
       })
+      // Quand un agent attend, un robot vient t'attendre au portillon.
+      if (attenteLieu(id) > 0) objets.push({ type: 'jardin-robot', x: a.x + Math.floor(n / 2) + 0.4, y: a.y + n - 1.15 })
       objets.push({ type: 'jardin-avant', id, x: a.x + n - 0.55, y: a.y + n - 0.55 })
     }
   })
@@ -1014,8 +1093,8 @@ export function MaquetteIle() {
 
   return (
     <div className="mi-page">
-      <div className="mi-cadre">
-        <div className="mi-defile" ref={defile}>
+      <div className="mi-cadre" ref={cadre} style={{ ['--tiroir' as string]: glisse != null ? `${glisse}px` : HAUTEUR_TIROIR[tiroir] }}>
+        <>
           <div className="mi-ecran">
             <div className="mi-scene" aria-live="polite">
               {vue === 'ile' ? (
@@ -1109,7 +1188,7 @@ export function MaquetteIle() {
                             const centre = iso(lieux[o.id].x + 0.5, lieux[o.id].y + 0.5)
                             return (
                               <g key={o.id} transform={`translate(${centre.sx} ${centre.sy})`} {...lieuProps(o.id)}>
-                                <MaisonIle id={o.id} porteOuverte={porteOuverteDe(o.id)} enMain={enMain === o.id} />
+                                <MaisonIle id={o.id} porteOuverte={porteOuverteDe(o.id)} enMain={enMain === o.id} attente={o.id === 'maison' ? pendantes.length : attenteLieu(o.id)} />
                               </g>
                             )
                           }
@@ -1140,11 +1219,21 @@ export function MaquetteIle() {
                               <g key={o.agent.id} transform={`translate(${sx} ${sy}) scale(0.8)`} className={enMain === 'jardin' ? 'maison maison-en-main' : undefined} aria-hidden>
                                 <Poste id={o.agent.poste} domaine={o.agent.domaine} couleur={COULEUR[o.agent.domaine]} niveau={2} phase={(hache(o.x, o.y) % 20) / 10} />
                                 {attente.has(o.agent.id) && (
-                                  <g className="signe-point" transform="translate(0 -52)">
+                                  <g transform="translate(0 -52)"><g className="signe-point">
                                     <circle r={6} fill="#E7B04A" opacity={0.95} />
                                     <text y={3.5} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={9.5} fontWeight={700} fill="#22301F">!</text>
-                                  </g>
+                                  </g></g>
                                 )}
+                              </g>
+                            )
+                          case 'jardin-robot':
+                            return (
+                              <g key="jardin-robot" transform={`translate(${sx} ${sy}) scale(0.85)`} aria-hidden>
+                                <Robot domaine="planete" couleur={COULEUR.planete} phase={0.4} />
+                                <g transform="translate(0 -44)"><g className="signe-point">
+                                  <circle r={5.5} fill="#E7B04A" opacity={0.95} />
+                                  <text y={3.2} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={9} fontWeight={700} fill="#22301F">!</text>
+                                </g></g>
                               </g>
                             )
                           case 'brin':
@@ -1314,14 +1403,16 @@ export function MaquetteIle() {
             </div>
           </div>
 
-          {/* Tableau de bord, sous l'île */}
-          <section className="mi-tableau" aria-label="Tableau de bord">
+          {/* Tableau de bord : un tiroir sous l'île */}
+          <section className={`mi-tiroir mi-tiroir-${tiroir}${glisse != null ? ' mi-tiroir-glisse' : ''}`} aria-label="Tableau de bord">
+            <Poignee tiroir={tiroir} onChanger={setTiroir} onGlisser={setGlisse} onLacher={lacherTiroir} />
             <div className="mi-tableau-chiffres">
               <div className="mi-chiffre"><strong>{pendantes.length}</strong><span>à valider</span></div>
               <div className="mi-chiffre"><strong>×1,4</strong><span>élan</span></div>
               <div className="mi-chiffre"><strong>120</strong><span>graines</span></div>
               <div className="mi-chiffre"><strong>7</strong><span>jours de suite</span></div>
             </div>
+            <div className="mi-tableau">
 
             <div className="mi-carte">
               <div className="mi-carte-ligne">
@@ -1373,7 +1464,7 @@ export function MaquetteIle() {
               </div>
               {ORDRE.filter((id) => LIEUX[id].domaine).map((id) => (
                 <div key={id} className="mi-equipe-lieu">
-                  <button className="mi-equipe-titre" onClick={() => { if (!occupe) { defile.current?.scrollTo({ top: 0, behavior: 'smooth' }); setMode('visite'); setEnMain(null); if (!(vue === 'interieur' && lieuCourant === id)) { if (vue === 'interieur') return; entrer(id) } } }}>
+                  <button className="mi-equipe-titre" onClick={() => { if (!occupe) { setTiroir('replie'); setMode('visite'); setEnMain(null); if (!(vue === 'interieur' && lieuCourant === id)) { if (vue === 'interieur') return; entrer(id) } } }}>
                     <span className="mi-point" style={{ background: LIEUX[id].couleur }} />
                     <strong>{LIEUX[id].nom}</strong>
                     <span>{LIEUX[id].sousTitre} · {attenteLieu(id)} à valider</span>
@@ -1388,8 +1479,9 @@ export function MaquetteIle() {
                 </div>
               ))}
             </div>
+            </div>
           </section>
-        </div>
+        </>
 
         {/* Iris de transition, façon jeu */}
         {(phase === 'iris-ferme' || phase === 'iris-ouvre') && (
@@ -1408,7 +1500,8 @@ export function MaquetteIle() {
           <li><strong>Le Jardin</strong> est en plein air : potager, ruche, arbre fruitier, et les agents qui travaillent dehors.</li>
           <li><strong>Zoom</strong> : pincement, molette, boutons + et −, double-tap pour recentrer.</li>
           <li><strong>À l’intérieur</strong>, touche un agent : il te parle et te propose quelque chose à valider.</li>
-          <li><strong>Tableau de bord</strong> : fais défiler sous l’île. « Y aller » envoie le personnage voir l’agent.</li>
+          <li><strong>Tableau de bord</strong> : tire le tiroir sous l’île (ou touche sa poignée). « Y aller » envoie le personnage voir l’agent.</li>
+          <li><strong>Signes de vie</strong> : fumée, vapeur, fenêtres éclairées, drapeau levé, robot au portillon quand un agent attend.</li>
           <li><strong>Disposer</strong> : prends un lieu, pose-le sur de l’herbe libre.</li>
         </ul>
         <h2>Les lieux</h2>

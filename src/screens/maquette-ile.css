@@ -25,16 +25,15 @@
   box-shadow: 0 24px 60px rgba(34, 48, 31, .25);
 }
 
-/* Le téléphone défile : l'île en haut, le tableau de bord dessous. */
-.mi-defile { height: 100%; overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; }
-.mi-ecran { position: relative; height: 64%; min-height: 440px; background: #7FBFC0; }
+/* L'île prend tout le téléphone ; le tableau de bord est un tiroir qui monte par-dessus. */
+.mi-ecran { position: absolute; inset: 0; background: #7FBFC0; }
 
 .mi-scene { position: absolute; inset: 0; }
 .mi-scene svg { display: block; width: 100%; height: 100%; user-select: none; touch-action: manipulation; }
 .mi-scene .zoompan, .mi-scene .zoompan-contenu { height: 100%; border-radius: 0; }
-.mi-scene .zoompan-commandes { bottom: 58px; }
-.mi-scene .zoompan-recentrer { bottom: 14px; }
-.mi-interieur { position: absolute; inset: 0; background: #1F2E25; padding: 60px 8px 120px; display: flex; align-items: center; justify-content: center; }
+.mi-scene .zoompan-commandes { bottom: calc(var(--tiroir) + 58px); transition: bottom .3s ease; }
+.mi-scene .zoompan-recentrer { bottom: calc(var(--tiroir) + 14px); transition: bottom .3s ease; }
+.mi-interieur { position: absolute; inset: 0; background: #1F2E25; padding: 60px 8px calc(var(--tiroir) + 24px); display: flex; align-items: center; justify-content: center; transition: padding .3s ease; }
 .mi-interieur-dehors { background: linear-gradient(#BFE0EE, #E4EFD8 70%, #CFE6C4); }
 .mi-interieur svg { height: auto; max-height: 100%; }
 
@@ -79,6 +78,11 @@
 @keyframes ronron { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.04) } }
 .paillasson { cursor: pointer; }
 .paillasson:hover polygon { fill: #D9B27C; }
+/* Signes de vie : fenêtres qui luisent, drapeau de la boîte aux lettres */
+.fenetre-lueur { animation: lueur-fenetre 2.6s ease-in-out infinite; }
+@keyframes lueur-fenetre { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }
+.drapeau { transform-box: fill-box; transform-origin: 50% 100%; transform: rotate(90deg); transition: transform .4s ease; }
+.drapeau-leve { transform: rotate(0); }
 
 /* ——— Habillage ——— */
 .mi-hud { position: absolute; inset: 0; pointer-events: none; }
@@ -110,7 +114,7 @@
 .mi-bouton-petit { padding: 5px 10px; min-height: 30px; font-size: 12px; box-shadow: none; }
 
 .mi-aide {
-  position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+  position: absolute; left: 50%; bottom: calc(var(--tiroir) + 16px); transform: translateX(-50%);
   margin: 0; padding: 10px 16px; max-width: 80%;
   background: var(--soleil-teinte); color: var(--soleil-fonce); border-radius: 999px;
   font-size: 14px; font-weight: 500; text-align: center; box-shadow: var(--ombre);
@@ -118,7 +122,8 @@
 
 /* Bulle de dialogue, en bas de la scène, comme dans un jeu */
 .mi-dialogue {
-  position: absolute; left: 14px; right: 14px; bottom: 16px;
+  position: absolute; left: 14px; right: 14px; bottom: calc(var(--tiroir) + 14px);
+  transition: bottom .3s ease;
   background: rgba(251, 248, 241, .97); border: 2px solid #E2DACA; border-radius: 22px;
   padding: 22px 18px 14px; box-shadow: 0 10px 30px rgba(34, 48, 31, .2);
   animation: dialogue-pop .25s ease;
@@ -149,14 +154,34 @@
 @keyframes iris-ferme { from { width: 1800px; height: 1800px } to { width: 0; height: 0 } }
 @keyframes iris-ouvre { from { width: 0; height: 0 } to { width: 1800px; height: 1800px } }
 
-/* ——— Tableau de bord, sous l'île ——— */
-.mi-tableau {
-  padding: 14px 14px 36px;
-  display: flex; flex-direction: column; gap: 12px;
+/* ——— Tableau de bord : un tiroir sous l'île ——— */
+.mi-tiroir {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: var(--tiroir);
+  display: flex; flex-direction: column;
   background: var(--fond);
-  border-top: 1px solid var(--ligne);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 30px rgba(34, 48, 31, .18);
+  transition: height .3s cubic-bezier(.2, .8, .2, 1);
+  z-index: 3;
+  touch-action: none;
 }
-.mi-tableau-chiffres { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mi-tiroir-glisse { transition: none; }
+.mi-tiroir-poignee {
+  flex: 0 0 auto; height: 26px; border: 0; background: transparent; cursor: grab;
+  display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 24px 24px 0 0;
+}
+.mi-tiroir-poignee:active { cursor: grabbing; }
+.mi-tiroir-barre { width: 44px; height: 5px; border-radius: 3px; background: #C9BEA6; }
+.mi-tiroir-poignee:hover .mi-tiroir-barre { background: #A89B80; }
+.mi-tableau {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 12px 14px 36px;
+  display: flex; flex-direction: column; gap: 12px;
+  touch-action: pan-y;
+}
+.mi-tiroir-replie .mi-tableau { overflow: hidden; }
+.mi-tableau-chiffres { flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 0 14px; }
 .mi-chiffre {
   background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m);
   padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -225,8 +250,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .perso-corps, .jambe, .bras, .perso-yeux, .fumee circle, .vapeur path, .mi-vagues path, .mi-nuages, .chat, .mi-emprises circle, .enseigne, .mi-dialogue { animation: none !important; }
-  .porte, .maison { transition: none; }
+  .perso-corps, .jambe, .bras, .perso-yeux, .fumee circle, .vapeur path, .mi-vagues path, .mi-nuages, .chat, .mi-emprises circle, .enseigne, .mi-dialogue, .fenetre-lueur { animation: none !important; }
+  .porte, .maison, .mi-tiroir, .mi-dialogue, .drapeau { transition: none; }
   .mi-iris-trou { animation-duration: .01s !important; }
-  .mi-defile { scroll-behavior: auto; }
 }
