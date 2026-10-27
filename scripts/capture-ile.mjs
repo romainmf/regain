@@ -10,7 +10,10 @@ await cadre.screenshot({ path: 'docs/maquette-ile-ac.png' })
 console.log('capture écrite : docs/maquette-ile-ac.png')
 
 await page.getByRole('button', { name: 'Entrer dans Le Jardin' }).first().click()
-await page.waitForTimeout(2800)
+// Le personnage marche, le portillon s'ouvre, l'iris se ferme puis s'ouvre : on attend la fin de la transition.
+await page.waitForTimeout(3500)
+await page.locator('.mi-iris').waitFor({ state: 'detached', timeout: 10000 })
+await page.waitForTimeout(300)
 // Le badge « ! » bouge en continu : on clique sans attendre que l'élément soit stable.
 await page.getByRole('button', { name: 'Aller voir Empreinte' }).click({ force: true })
 await page.waitForTimeout(1400)

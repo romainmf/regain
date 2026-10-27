@@ -78,6 +78,12 @@
 @keyframes ronron { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.04) } }
 .paillasson { cursor: pointer; }
 .paillasson:hover polygon { fill: #D9B27C; }
+/* Brin salue : il se balance plus vite, sa bulle sautille ; sa flèche dorée court vers le lieu conseillé */
+.brin-salue .coeur-couronne { animation-duration: .8s; }
+.brin-salue .coeur-halo { animation-duration: .8s; }
+.brin-bulle { transform-box: fill-box; }
+.brin-pointe { animation: flux-pop .4s ease; }
+.brin-bulle.cible:hover rect { stroke: #E7B04A; }
 /* Signes de vie : fenêtres qui luisent, drapeau de la boîte aux lettres */
 .fenetre-lueur { animation: lueur-fenetre 2.6s ease-in-out infinite; }
 @keyframes lueur-fenetre { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }

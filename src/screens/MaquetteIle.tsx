@@ -229,24 +229,44 @@ function useMarcheur(depart: Pos) {
     setEnMarche(false)
   }, [])
 
-  const aller = useCallback((vers: Pos, ensuite?: () => void) => {
+  /** Suit une suite d'étapes à vitesse constante, en se tournant à chaque segment. */
+  const suivre = useCallback((etapes: Pos[], ensuite?: () => void) => {
     arreter()
-    const de = ref.current
-    const dist = Math.hypot(vers.x - de.x, vers.y - de.y)
+    const segments: { de: Pos; a: Pos; d: number }[] = []
+    let prec = ref.current
+    for (const p of etapes) {
+      segments.push({ de: prec, a: p, d: Math.hypot(p.x - prec.x, p.y - prec.y) })
+      prec = p
+    }
+    const total = segments.reduce((s, g) => s + g.d, 0)
+    const arrivee = etapes[etapes.length - 1] ?? ref.current
     const reduit = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (dist < 0.05 || reduit) {
-      poser(vers)
+    if (total < 0.05 || reduit) {
+      poser(arrivee)
       ensuite?.()
       return
     }
-    setVersGauche(vers.x - vers.y < de.x - de.y)
     setEnMarche(true)
     apres.current = ensuite
-    const duree = Math.max(220, (dist / 3.4) * 1000)
+    const duree = Math.max(220, (total / 3.4) * 1000)
     const t0 = performance.now()
+    let courant = -1
     const pas = (t: number) => {
       const k = Math.min(1, (t - t0) / duree)
-      const p = { x: de.x + (vers.x - de.x) * k, y: de.y + (vers.y - de.y) * k }
+      const dist = k * total
+      let acc = 0
+      let i = 0
+      while (i < segments.length - 1 && dist > acc + segments[i].d) {
+        acc += segments[i].d
+        i++
+      }
+      const s = segments[i]
+      if (i !== courant) {
+        courant = i
+        setVersGauche(s.a.x - s.a.y < s.de.x - s.de.y)
+      }
+      const u = s.d > 0 ? Math.min(1, (dist - acc) / s.d) : 1
+      const p = { x: s.de.x + (s.a.x - s.de.x) * u, y: s.de.y + (s.a.y - s.de.y) * u }
       ref.current = p
       setPos(p)
       if (k < 1) anim.current = requestAnimationFrame(pas)
@@ -260,8 +280,57 @@ function useMarcheur(depart: Pos) {
     anim.current = requestAnimationFrame(pas)
   }, [poser])
 
+  /** Va tout droit vers un point. */
+  const aller = useCallback((vers: Pos, ensuite?: () => void) => suivre([vers], ensuite), [suivre])
+  const actuelle = useCallback(() => ref.current, [])
+
   useEffect(() => () => cancelAnimationFrame(anim.current), [])
-  return { pos, enMarche, versGauche, aller, poser }
+  return { pos, enMarche, versGauche, aller, suivre, actuelle, poser }
+}
+
+/**
+ * Chemin sur la grille, d'une tuile à l'autre, en contournant les obstacles
+ * (parcours en largeur, huit directions, sans couper les coins). La tuile
+ * d'arrivée est toujours permise. Sans chemin, on va tout droit.
+ */
+function trouverChemin(de: Pos, vers: Pos, praticable: (x: number, y: number) => boolean): Pos[] {
+  const sx = Math.round(de.x), sy = Math.round(de.y)
+  const gx = Math.round(vers.x), gy = Math.round(vers.y)
+  if (sx === gx && sy === gy) return [vers]
+  const ok = (x: number, y: number) => (x === gx && y === gy) || praticable(x, y)
+  const prec = new Map<string, string | null>([[cle(sx, sy), null]])
+  const file: [number, number][] = [[sx, sy]]
+  const DIRS = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]
+  let trouve = false
+  while (file.length && !trouve) {
+    const [x, y] = file.shift()!
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx, ny = y + dy
+      const k = cle(nx, ny)
+      if (prec.has(k) || !ok(nx, ny)) continue
+      // En diagonale, les deux tuiles adjacentes doivent être libres : on ne coupe pas les clôtures.
+      if (dx && dy && !(ok(x + dx, y) && ok(x, y + dy))) continue
+      prec.set(k, cle(x, y))
+      if (nx === gx && ny === gy) { trouve = true; break }
+      file.push([nx, ny])
+    }
+  }
+  if (!trouve) return [vers]
+  const tuiles: Pos[] = []
+  let k: string | null = cle(gx, gy)
+  while (k) {
+    const [x, y] = k.split(',').map(Number)
+    tuiles.unshift({ x, y })
+    k = prec.get(k) ?? null
+  }
+  // On enlève la tuile de départ, on garde les virages seulement, et l'arrivée exacte.
+  const etapes: Pos[] = []
+  for (let i = 1; i < tuiles.length - 1; i++) {
+    const a = tuiles[i - 1], b = tuiles[i], c = tuiles[i + 1]
+    if (b.x - a.x !== c.x - b.x || b.y - a.y !== c.y - b.y) etapes.push(b)
+  }
+  etapes.push(vers)
+  return etapes
 }
 
 // ——— Dessin d'une maison ——————————————————————————————————————————————————————
@@ -820,8 +889,10 @@ export function MaquetteIle() {
   const [phase, setPhase] = useState<Phase>(null)
   const [dialogue, setDialogue] = useState<Dialogue | null>(null)
   const [validees, setValidees] = useState<Set<string>>(() => new Set())
-  const [bulleBrin, setBulleBrin] = useState(true)
-  const { pos, enMarche, versGauche, aller, poser } = useMarcheur({ x: 5, y: 8 })
+  const { pos, enMarche, versGauche, aller, suivre, actuelle, poser } = useMarcheur({ x: 5, y: 8 })
+  /** Brin salue quand on passe près de lui. */
+  const [salut, setSalut] = useState(false)
+  const dernierSalut = useRef(0)
   const [tiroir, setTiroir] = useState<Tiroir>('replie')
   /** Hauteur du tiroir pendant un glissement, en pixels ; sinon la position choisie. */
   const [glisse, setGlisse] = useState<number | null>(null)
@@ -858,6 +929,17 @@ export function MaquetteIle() {
     )
     return s
   }, [occupees, lieux])
+
+  // Pour marcher : les emprises des lieux et l'arbre bloquent, la place et la plage se traversent.
+  const obstacles = useMemo(() => {
+    const s = new Set<string>([cle(PLACE.x, PLACE.y)])
+    ORDRE.forEach((id) => emprise(lieux[id], LIEUX[id].taille).forEach(([x, y]) => s.add(cle(x, y))))
+    return s
+  }, [lieux])
+  const marcherVers = useCallback((vers: Pos, ensuite?: () => void) => {
+    const chemin = trouverChemin(actuelle(), vers, (x, y) => index.has(cle(x, y)) && !obstacles.has(cle(x, y)))
+    suivre(chemin, ensuite)
+  }, [actuelle, index, obstacles, suivre])
 
   // Un lieu se pose sur de l'herbe, à une tuile au moins des autres et de la place.
   const peutPoser = useCallback((id: LieuId, a: Ancre) => {
@@ -936,17 +1018,39 @@ export function MaquetteIle() {
 
   const entrer = useCallback((id: LieuId) => {
     const a = lieux[id], n = LIEUX[id].taille
-    aller(devantPorte(a, n), () => {
+    marcherVers(devantPorte(a, n), () => {
       setTransition({ lieu: id, sens: 'entrer' })
       setPhase('porte')
       aller(dansPorte(a, n))
     })
-  }, [lieux, aller])
+  }, [lieux, aller, marcherVers])
+
+  // Brin salue quand on passe à côté de lui (pas plus d'une fois toutes les six secondes).
+  useEffect(() => {
+    if (vue !== 'ile' || !enMarche) return
+    const d = Math.hypot(pos.x - PLACE.x, pos.y - PLACE.y)
+    const maintenant = Date.now()
+    if (d < 2.1 && maintenant - dernierSalut.current > 6000) {
+      dernierSalut.current = maintenant
+      setSalut(true)
+    }
+  }, [pos, enMarche, vue])
+  useEffect(() => {
+    if (!salut) return
+    const t = setTimeout(() => setSalut(false), 1800)
+    return () => clearTimeout(t)
+  }, [salut])
+
+  // Le conseil de Brin : le lieu où le plus de choses attendent.
+  const conseil = ORDRE.filter((id) => LIEUX[id].domaine)
+    .map((id) => ({ id, n: attenteLieu(id) }))
+    .filter((c) => c.n > 0)
+    .sort((a, b) => b.n - a.n)[0]
+  const texteBrin = salut ? 'Coucou !' : conseil ? `${LIEUX[conseil.id].nom} t’attend : ${conseil.n} à relire` : 'Tout est à jour, bravo !'
 
   const toucherLieu = (id: LieuId) => {
     if (occupe) return
     setDialogue(null)
-    setBulleBrin(false)
     if (mode === 'disposer') {
       setEnMain(enMain === id ? null : id)
       return
@@ -982,7 +1086,6 @@ export function MaquetteIle() {
     setTiroir('replie')
     setMode('visite')
     setEnMain(null)
-    setBulleBrin(false)
     const i = agentsDe(id).findIndex((x) => x.id === a.id)
     if (vue === 'interieur' && lieuCourant === id) {
       voirAgent(a, SLOTS[id][i])
@@ -1010,9 +1113,8 @@ export function MaquetteIle() {
 
   const parlerBrin = () => {
     if (occupe || mode === 'disposer') return
-    setBulleBrin(false)
     setDialogue(null)
-    aller({ x: PLACE.x + 0.2, y: PLACE.y + 1.4 }, () => setDialogue({ type: 'brin' }))
+    marcherVers({ x: PLACE.x + 0.2, y: PLACE.y + 1.4 }, () => setDialogue({ type: 'brin' }))
   }
 
   const valider = (id: string) => {
@@ -1238,7 +1340,7 @@ export function MaquetteIle() {
                             )
                           case 'brin':
                             return (
-                              <g key="brin" transform={`translate(${sx} ${sy})`} className="coeur-brin cible" role="button" tabIndex={0} aria-label="Parler à Brin"
+                              <g key="brin" transform={`translate(${sx} ${sy})`} className={`coeur-brin cible${salut ? ' brin-salue' : ''}`} role="button" tabIndex={0} aria-label="Parler à Brin"
                                 onClick={parlerBrin} onKeyDown={(e) => { if (e.key === 'Enter') parlerBrin() }}>
                                 <g transform="scale(1.35)">
                                   <ellipse className="coeur-halo" cx={0} cy={2} rx={30} ry={15} fill="none" stroke="#E7B04A" strokeWidth={1.5} />
@@ -1274,14 +1376,50 @@ export function MaquetteIle() {
                           </g>
                         )
                       })}
-                      {bulleBrin && mode === 'visite' && (
-                        <g className="coeur-bulle" transform={`translate(${iso(PLACE.x, PLACE.y).sx} ${iso(PLACE.x, PLACE.y).sy})`} aria-hidden>
-                          <rect x={-92} y={-200} width={184} height={30} rx={15} fill="#FBF8F1" stroke="#E2DACA" />
-                          <path d="M -8 -171 L 0 -158 L 8 -171 Z" fill="#FBF8F1" />
-                          <text x={0} y={-180} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={13} fontWeight={500} fill="#22301F">Touche un lieu pour y entrer</text>
-                        </g>
-                      )}
                     </g>
+                    {/* Brin parle : il salue au passage, sinon il pointe le lieu où quelque chose attend */}
+                    {mode === 'visite' && dialogue?.type !== 'brin' && (() => {
+                      const b = iso(PLACE.x, PLACE.y)
+                      const l = texteBrin.length * 7.2 + 28
+                      const pointe = !salut && conseil ? conseil.id : null
+                      const cible = pointe ? iso(lieux[pointe].x + (LIEUX[pointe].taille - 1) / 2, lieux[pointe].y + LIEUX[pointe].taille) : null
+                      const allerVoir = () => { if (pointe && !occupe) { setDialogue(null); entrer(pointe) } }
+                      return (
+                        <g>
+                          {cible && (() => {
+                            // Un pointillé doré part du pied de l'arbre vers la porte du lieu conseillé.
+                            const dx = cible.sx - b.sx, dy = cible.sy - b.sy
+                            const d = Math.hypot(dx, dy) || 1
+                            const ax = b.sx + (dx / d) * 54, ay = b.sy + (dy / d) * 27 + 6
+                            const bx = cible.sx - (dx / d) * 22, by = cible.sy - (dy / d) * 11
+                            const ang = (Math.atan2(by - ay, bx - ax) * 180) / Math.PI
+                            return (
+                              <g className="brin-pointe" aria-hidden>
+                                <path className="flux-trait" d={`M ${ax} ${ay} L ${bx} ${by}`} fill="none" stroke="#E7B04A" strokeWidth={3} strokeLinecap="round" strokeDasharray="2 7" />
+                                <g transform={`translate(${bx} ${by}) rotate(${ang})`}>
+                                  <path d="M -7 -4 L 0 0 L -7 4" fill="none" stroke="#E7B04A" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+                                </g>
+                              </g>
+                            )
+                          })()}
+                          <g
+                            key={texteBrin}
+                            className={`coeur-bulle brin-bulle${pointe ? ' cible' : ''}`}
+                            transform={`translate(${b.sx} ${b.sy})`}
+                            pointerEvents={pointe ? 'auto' : 'none'}
+                            role={pointe ? 'button' : undefined}
+                            tabIndex={pointe ? 0 : undefined}
+                            aria-label={pointe ? `Brin : ${texteBrin}. Y aller` : undefined}
+                            onClick={allerVoir}
+                            onKeyDown={(e) => { if (e.key === 'Enter') allerVoir() }}
+                          >
+                            <rect x={-l / 2} y={-200} width={l} height={30} rx={15} fill="#FBF8F1" stroke={salut ? '#E7B04A' : '#E2DACA'} strokeWidth={salut ? 2 : 1} />
+                            <path d="M -8 -171 L 0 -158 L 8 -171 Z" fill="#FBF8F1" />
+                            <text x={0} y={-180} textAnchor="middle" fontFamily="DM Sans, sans-serif" fontSize={13} fontWeight={salut ? 700 : 500} fill="#22301F">{texteBrin}</text>
+                          </g>
+                        </g>
+                      )
+                    })()}
                   </svg>
                 </ZoomPan>
               ) : (
@@ -1313,7 +1451,7 @@ export function MaquetteIle() {
                       <span>{pendantes.length} à valider · ×1,4 élan</span>
                     </div>
                     {mode === 'visite' ? (
-                      <button className="mi-bouton" onClick={() => { setMode('disposer'); setDialogue(null); setBulleBrin(false) }}>⌂ Disposer</button>
+                      <button className="mi-bouton" onClick={() => { setMode('disposer'); setDialogue(null) }}>⌂ Disposer</button>
                     ) : (
                       <button className="mi-bouton mi-bouton-plein" onClick={() => { setMode('visite'); setEnMain(null); setDialogue(null) }}>Terminé</button>
                     )}
