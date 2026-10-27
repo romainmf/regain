@@ -5,7 +5,8 @@ import type { AgentLite } from '../domain/engine/AgentEngine'
 import { chainesDepuisValidation, type Chaine } from '../domain/chains'
 import { optionParLabel } from '../domain/missions'
 import type { AmbianceId, DecorId } from '../domain/boutique'
-import { PRIX_TUILE, EXPANSION } from '../domain/boutique'
+import { PRIX_TUILE } from '../domain/boutique'
+import { EXPANSION_ILE } from '../island/ac/lieux'
 import type { Domaine } from '../domain/types'
 import { MURS_DEFAUT, SOLS_DEFAUT, STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/LieuxZones'
 import type { Brouillon, Proposition, Saisie, SaisieData, SaisieKind } from '../domain/propositions'
@@ -156,7 +157,7 @@ export async function activerAmbiance(id: AmbianceId): Promise<void> {
 /** Achète une tuile d'agrandissement (ajoute la prochaine tuile disponible). */
 export async function acheterTuile(): Promise<boolean> {
   const n = await getMeta<number>('tuilesAchetees', 0)
-  if (n >= EXPANSION.length) return false
+  if (n >= EXPANSION_ILE.length) return false
   if (!(await depenser(PRIX_TUILE, 'depense'))) return false
   await setMeta('tuilesAchetees', n + 1)
   return true

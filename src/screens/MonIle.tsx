@@ -10,7 +10,7 @@ import { DOMAINE_LABEL } from '../domain/types'
 import { IleScene, type AgentVue } from '../island/ac/IleScene'
 import { InterieurScene } from '../island/ac/InterieurScene'
 import {
-  BUREAU_MAISON, ENTREE_INT, LIEUX, ORDRE, PLACE, cle, construireIle, dansPorte, devantPorte, emprise, hautsFonds, lieuDe, placeTuiles, slotsPour,
+  BUREAU_MAISON, ENTREE_INT, LIEUX, ORDRE, PLACE, cle, construireIle, dansPorte, devantPorte, emprise, lieuDe, placeTuiles, slotsPour,
   type Ancre, type LieuId, type Pos, type Slot,
 } from '../island/ac/lieux'
 import { trouverChemin, useMarcheur } from '../island/ac/marcheur'
@@ -43,11 +43,11 @@ export function MonIle() {
   const {
     pret, agents, aValider, agentsEnAttente, economie, decors, ambianceActive, murs, sols,
     positionsLieux, deplacerLieu, poseEnCours, poser, annulerPose, retirerDecor, ouvrirFiche,
-    visiteDemandee, effacerVisite,
+    visiteDemandee, effacerVisite, tuilesAchetees,
   } = useJeu()
 
-  const tuiles = useMemo(construireIle, [])
-  const fonds = useMemo(hautsFonds, [])
+  // L'île grandit avec les tuiles achetées dans la boutique.
+  const { tuiles, fonds, estTerre } = useMemo(() => construireIle(tuilesAchetees), [tuilesAchetees])
   const index = useMemo(() => new Map(tuiles.map((t) => [cle(t.x, t.y), t])), [tuiles])
   const ambiance = getAmbiance(ambianceActive)
 
@@ -331,6 +331,7 @@ export function MonIle() {
                   <IleScene
                     tuiles={tuiles}
                     fonds={fonds}
+                    estTerre={estTerre}
                     lieux={lieux}
                     agents={agentsVue}
                     perso={{ pos, enMarche, versGauche }}

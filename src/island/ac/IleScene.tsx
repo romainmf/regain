@@ -15,7 +15,7 @@ import { TH, TW, iso, losange } from '../iso'
 import { STYLES_MUR, type StyleMur } from '../LieuxZones'
 import { Perso } from './Perso'
 import {
-  DECALAGE_DECOR, JARDIN_LOCAL, LIEUX, ORDRE, PLACE, cle, emprise, placeTuiles, terre,
+  DECALAGE_DECOR, JARDIN_LOCAL, LIEUX, ORDRE, PLACE, cle, emprise, placeTuiles,
   type Ancre, type LieuId, type Pos, type Terrain, type TuileIle,
 } from './lieux'
 import './ac.css'
@@ -39,6 +39,8 @@ export interface EtatPerso { pos: Pos; enMarche: boolean; versGauche: boolean }
 interface Props {
   tuiles: TuileIle[]
   fonds: Pos[]
+  /** Vrai si la tuile est de la terre (pour dessiner la falaise sur le pourtour). */
+  estTerre: (x: number, y: number) => boolean
   lieux: Record<LieuId, Ancre>
   agents: AgentVue[]
   /** Le personnage, ou null quand il est à l'intérieur d'un lieu. */
@@ -280,7 +282,7 @@ const MER: Record<string, [string, string]> = {
 
 export function IleScene(p: Props) {
   const {
-    tuiles, fonds, lieux, agents, perso, mode, enMain, porteOuverte, peutPoser, decors, poseDecor, onPoserDecor, onRetirerDecor,
+    tuiles, fonds, estTerre, lieux, agents, perso, mode, enMain, porteOuverte, peutPoser, decors, poseDecor, onPoserDecor, onRetirerDecor,
     ambiance, meteo, repos, elan, murs, salut, texteBrin, conseil, onBrin, onBulleBrin, onLieu, onTuile, centreY = 0.4,
   } = p
   const nuit = ambiance.astre === 'lune'
@@ -386,8 +388,8 @@ export function IleScene(p: Props) {
 
   const bords = sortedTuiles.flatMap((t) => {
     const out: { t: TuileIle; cote: 'g' | 'd' }[] = []
-    if (!terre(t.x, t.y + 1)) out.push({ t, cote: 'g' })
-    if (!terre(t.x + 1, t.y)) out.push({ t, cote: 'd' })
+    if (!estTerre(t.x, t.y + 1)) out.push({ t, cote: 'g' })
+    if (!estTerre(t.x + 1, t.y)) out.push({ t, cote: 'd' })
     return out
   })
 

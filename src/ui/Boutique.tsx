@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useJeu } from '../data/jeu'
-import { AMBIANCES, DECORS, EXPANSION, PRIX_TUILE, type DecorItem } from '../domain/boutique'
+import { AMBIANCES, DECORS, PRIX_TUILE, type DecorItem } from '../domain/boutique'
+import { EXPANSION_ILE } from '../island/ac/lieux'
 import { Decor } from '../island/Decor'
 import { STYLES_MUR, STYLES_SOL, type StyleMur, type StyleSol } from '../island/LieuxZones'
 import { DOMAINE_LABEL, type Domaine } from '../domain/types'
@@ -34,7 +35,7 @@ export function BoutiqueContenu({ onPoser }: { onPoser: () => void }) {
     onPoser()
   }
 
-  const tuilesRestantes = EXPANSION.length - tuilesAchetees
+  const tuilesRestantes = EXPANSION_ILE.length - tuilesAchetees
 
   return (
     <div className="bq">
@@ -152,7 +153,7 @@ export function BoutiqueContenu({ onPoser }: { onPoser: () => void }) {
 
       {onglet === 'tuiles' && (
         <div className="bq-tuiles">
-          <p className="bq-aide">Agrandis ton lieu : chaque tuile coûte {PRIX_TUILE} graines et transforme un bout de jardin en pièce.</p>
+          <p className="bq-aide">Agrandis ton île : chaque tuile coûte {PRIX_TUILE} graines et ajoute un bout de terre sur le bord, la plage recule, l’herbe gagne.</p>
           <p className="bq-reste">{tuilesRestantes > 0 ? `${tuilesRestantes} tuile${tuilesRestantes > 1 ? 's' : ''} disponible${tuilesRestantes > 1 ? 's' : ''}` : 'Ton île est à sa taille maximale pour la bêta.'}</p>
           <Bouton
             disabled={solde < PRIX_TUILE || tuilesRestantes === 0}

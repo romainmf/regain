@@ -30,34 +30,51 @@ export interface TuileIle { x: number; y: number; terrain: Terrain }
 export interface Pos { x: number; y: number }
 export interface Ancre { x: number; y: number }
 
-export const terre = (x: number, y: number) => CARTE[y]?.[x] === 'G'
 export const cle = (x: number, y: number) => `${x},${y}`
+/** Terre de départ, avant tout agrandissement. */
+export const terreDeDepart = (x: number, y: number) => CARTE[y]?.[x] === 'G'
 
-/** Les tuiles de l'île : plage sur le pourtour, herbe au milieu. */
-export function construireIle(): TuileIle[] {
-  const out: TuileIle[] = []
-  CARTE.forEach((ligne, y) =>
-    [...ligne].forEach((c, x) => {
-      if (c !== 'G') return
-      const bord = !terre(x - 1, y) || !terre(x + 1, y) || !terre(x, y - 1) || !terre(x, y + 1)
-      out.push({ x, y, terrain: bord ? 'sable' : 'herbe' })
-    }),
-  )
-  return out
+/**
+ * Tuiles d'agrandissement, achetées une par une dans la boutique : de la mer
+ * qui devient terre, tout autour de l'île, en alternant les côtés. Chaque
+ * tuile ajoutée repousse la plage : la tuile de sable d'à côté devient de l'herbe.
+ */
+export const EXPANSION_ILE: Pos[] = [
+  { x: 0, y: 6 }, { x: 13, y: 6 }, { x: 6, y: 12 }, { x: 0, y: 5 }, { x: 13, y: 5 }, { x: 5, y: 12 },
+  { x: 0, y: 7 }, { x: 13, y: 7 }, { x: 7, y: 12 }, { x: 3, y: 11 }, { x: 9, y: 11 }, { x: 1, y: 4 },
+  { x: 13, y: 4 }, { x: 1, y: 8 }, { x: 13, y: 8 }, { x: 6, y: 0 },
+]
+
+export interface Ile {
+  tuiles: TuileIle[]
+  /** Vrai si la tuile est de la terre (départ ou achetée). */
+  estTerre: (x: number, y: number) => boolean
+  /** Eau peu profonde : les tuiles de mer qui touchent la plage. */
+  fonds: Pos[]
 }
 
-/** Eau peu profonde : les tuiles de mer qui touchent la plage. */
-export function hautsFonds(): Pos[] {
-  const out: Pos[] = []
-  for (let y = -1; y <= CARTE.length; y++) {
-    for (let x = -1; x <= CARTE[0].length; x++) {
-      if (terre(x, y)) continue
-      let voisin = false
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (terre(x + dx, y + dy)) voisin = true
-      if (voisin) out.push({ x, y })
+/** L'île avec ses n premières tuiles achetées : plage sur le pourtour, herbe au milieu. */
+export function construireIle(achetees = 0): Ile {
+  const terres = new Set<string>()
+  CARTE.forEach((ligne, y) => [...ligne].forEach((c, x) => { if (c === 'G') terres.add(cle(x, y)) }))
+  EXPANSION_ILE.slice(0, Math.max(0, achetees)).forEach((p) => terres.add(cle(p.x, p.y)))
+  const estTerre = (x: number, y: number) => terres.has(cle(x, y))
+
+  const tuiles: TuileIle[] = []
+  const fonds: Pos[] = []
+  for (let y = -2; y <= CARTE.length + 1; y++) {
+    for (let x = -2; x <= CARTE[0].length + 1; x++) {
+      if (estTerre(x, y)) {
+        const bord = !estTerre(x - 1, y) || !estTerre(x + 1, y) || !estTerre(x, y - 1) || !estTerre(x, y + 1)
+        tuiles.push({ x, y, terrain: bord ? 'sable' : 'herbe' })
+      } else {
+        let voisin = false
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (estTerre(x + dx, y + dy)) voisin = true
+        if (voisin) fonds.push({ x, y })
+      }
     }
   }
-  return out
+  return { tuiles, estTerre, fonds }
 }
 
 /** La place de Brin, au centre : trois tuiles sur trois, réservées. */
