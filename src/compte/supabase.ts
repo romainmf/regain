@@ -11,7 +11,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
  * - VITE_ACCES_LIBRE=1 au build désactive les comptes (démo publique).
  */
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
-const cleAnonyme = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined
+/** Clé « publishable » (ex-clé anon) : faite pour le navigateur. */
+const cleAnonyme = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY) as string | undefined
 
 export const supabase: SupabaseClient | null =
   url && cleAnonyme ? createClient(url, cleAnonyme, { auth: { flowType: 'implicit' } }) : null

@@ -58,9 +58,10 @@ Mise en place, une fois :
    laisser Email et **désactiver « Allow new users to sign up »**.
 2. Dans Authentication → URL Configuration : Site URL = l'adresse du site,
    et l'ajouter aux Redirect URLs.
-3. Copier l'URL du projet et la clé anonyme (Settings → API) dans les
-   variables d'environnement du site : `VITE_SUPABASE_URL`,
-   `VITE_SUPABASE_ANON_KEY` (voir `.env.example`), puis redéployer.
+3. Copier l'URL du projet et la clé « publishable » (Settings → API Keys ;
+   jamais la clé secrète) dans les variables d'environnement du site :
+   `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` (voir
+   `.env.example`), puis redéployer.
 4. Inviter chaque testeur depuis Authentication → Users → **Invite user** :
    la personne reçoit un e-mail et entre directement. Pour retirer quelqu'un,
    supprimer l'utilisateur.

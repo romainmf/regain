@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
  * envoyé par le client (en-tête Authorization: Bearer …). Partagé par la
  * fonction Netlify et la fonction Vercel.
  *
- * Variables : SUPABASE_URL et SUPABASE_ANON_KEY (à défaut, les VITE_… du
+ * Variables : SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY (à défaut, les VITE_… du
  * build, que Netlify expose aussi aux fonctions). Sans configuration, on
  * refuse tout appel, sauf si ACCES_LIBRE=1 (démo publique).
  */
@@ -17,7 +17,9 @@ export interface Appelant {
 export type Verification = { ok: true; appelant: Appelant | null } | { ok: false; statut: 401 | 503; message: string }
 
 const url = () => process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
-const cle = () => process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+const cle = () =>
+  process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY ||
+  process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
 
 /** Extrait le jeton d'un en-tête Authorization. */
 export function jetonDe(authorization: string | null | undefined): string | null {
