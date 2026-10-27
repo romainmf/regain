@@ -13,7 +13,20 @@ export interface Contexte {
   /** Propositions à valider, maintenant et au début de l'étape. */
   aValider: number
   aValiderAuDepart: number
+  /** L'écran où l'on est (chemin), et le nombre d'agents, maintenant et au début de l'étape. */
+  route: string
+  nbAgents: number
+  nbAgentsAuDepart: number
+  /** L'agent que l'on vient de créer pendant la visite. */
+  nouvelAgent: { nom: string; lieu: LieuId } | null
   prenom: string
+}
+
+/** Ce qu'une aide peut faire : les gestes de l'île (s'il est affiché) et changer d'écran. */
+export interface Outils {
+  ile: ActionsIle | null
+  naviguer: (vers: string) => void
+  c: Contexte
 }
 
 export interface Etape {
@@ -25,8 +38,10 @@ export interface Etape {
   /** Geste attendu : l'étape avance toute seule quand c'est fait. */
   accomplie?: (c: Contexte) => boolean
   /** Le faire à la place de la personne. */
-  aide?: { libelle: string; faire: (a: ActionsIle, c: Contexte) => void }
+  aide?: { libelle: string; faire: (o: Outils) => void }
   si?: (c: Contexte) => boolean
+  /** Pas de voile : tout l'écran reste libre (un formulaire à remplir), la bulle se range en bas. */
+  libre?: boolean
 }
 
 const salut = (c: Contexte) => (c.prenom ? ` ${c.prenom}` : '')
@@ -49,7 +64,7 @@ export const ETAPES: Etape[] = [
     titre: 'Entre dans un lieu',
     texte: (c) => `Touche ${LIEUX[lieuVisite(c)].nom} : ton personnage s’y rend et pousse la porte. C’est là que travaille ${agentVisite(c)}, ${ROLE[lieuVisite(c)]}.`,
     accomplie: (c) => c.etat.vue === 'interieur' && c.etat.lieu === lieuVisite(c),
-    aide: { libelle: 'Y aller pour moi', faire: (a, c) => a.entrer(lieuVisite(c)) },
+    aide: { libelle: 'Y aller pour moi', faire: ({ ile, c }) => ile?.entrer(lieuVisite(c)) },
   },
   {
     id: 'agent',
@@ -57,7 +72,7 @@ export const ETAPES: Etape[] = [
     titre: 'Va voir ton agent',
     texte: (c) => `${agentVisite(c)} est à son poste. Touche-le pour voir ce qu’il a pour toi.`,
     accomplie: (c) => c.etat.agentOuvert !== null,
-    aide: { libelle: 'Lui parler', faire: (a) => a.voirAgent() },
+    aide: { libelle: 'Lui parler', faire: ({ ile }) => ile?.voirAgent() },
     si: (c) => c.etat.vue === 'interieur',
   },
   {
@@ -80,7 +95,7 @@ export const ETAPES: Etape[] = [
     titre: 'On ressort ?',
     texte: () => 'Touche « Sortir », ou le paillasson en bas de la pièce.',
     accomplie: (c) => c.etat.vue === 'ile',
-    aide: { libelle: 'Sortir pour moi', faire: (a) => a.sortir() },
+    aide: { libelle: 'Sortir pour moi', faire: ({ ile }) => ile?.sortir() },
     si: (c) => c.etat.vue === 'interieur',
   },
   {
@@ -95,7 +110,7 @@ export const ETAPES: Etape[] = [
     titre: 'Ton tableau de bord',
     texte: () => 'Tire le tiroir sous l’île : tout ce qui attend, ton élan de la semaine, ton équipe.',
     accomplie: (c) => c.etat.tiroirOuvert,
-    aide: { libelle: 'L’ouvrir pour moi', faire: (a) => a.ouvrirTiroir() },
+    aide: { libelle: 'L’ouvrir pour moi', faire: ({ ile }) => ile?.ouvrirTiroir() },
     si: (c) => !c.etat.large,
   },
   {
@@ -115,7 +130,33 @@ export const ETAPES: Etape[] = [
     id: 'equipe',
     cible: '.nav-equipe, .equipe-bref-plus',
     titre: 'Ton équipe',
-    texte: (c) => `Recrute d’autres agents, ou crée le tien en moins d’une minute. Bonne visite${salut(c)} !`,
+    texte: () => 'Touche L’équipe : c’est là que tu recrutes des agents, et que tu crées le tien. On en fait un ensemble ?',
+    accomplie: (c) => c.route.startsWith('/equipe') || c.route === '/creer',
+    aide: { libelle: 'M’y emmener', faire: ({ naviguer }) => naviguer('/equipe') },
+  },
+  {
+    id: 'creer',
+    cible: '.agents-creer',
+    titre: 'Crée ton agent',
+    texte: () => 'Touche « Créer un agent ». En moins d’une minute, tu as un assistant à toi.',
+    accomplie: (c) => c.route === '/creer',
+    aide: { libelle: 'Ouvrir pour moi', faire: ({ naviguer }) => naviguer('/creer') },
+    si: (c) => c.route !== '/creer',
+  },
+  {
+    id: 'formulaire',
+    libre: true,
+    titre: 'À toi de jouer',
+    texte: () => 'Son domaine, son nom (ou celui que je te souffle), ses missions, puis « Créer ». Je t’attends.',
+    accomplie: (c) => c.nbAgents > c.nbAgentsAuDepart,
+  },
+  {
+    id: 'retour',
+    cible: '.ile-haut',
+    titre: 'Bienvenue à lui',
+    texte: (c) => c.nouvelAgent
+      ? `${c.nouvelAgent.nom} s’installe dans ${LIEUX[c.nouvelAgent.lieu].nom} : ton personnage va le saluer. Il prépare ses propositions avec des règles simples, ou avec Claude en mode IA. Bonne visite${salut(c)} !`
+      : `Tes agents t’attendent dans leurs lieux. Bonne visite${salut(c)} !`,
   },
 ]
 

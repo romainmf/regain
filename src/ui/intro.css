@@ -82,7 +82,9 @@
 .tour-tete { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 .tour-tete h3 { font-size: 18px; }
 .tour-bulle p { margin: 0; color: var(--texte-2); font-size: 15px; }
-.tour-attente { margin-top: 8px !important; color: var(--soleil-fonce) !important; font-weight: 700; font-size: 13px !important; }
+.tour-attente { margin-top: 8px !important; color: var(--soleil-fonce) !important; font-weight: 700; font-size: 13px !important; display: flex; justify-content: space-between; gap: 8px; }
+.tour-sauter { border: 0; background: none; padding: 0; color: var(--texte-2); font: inherit; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.tour-sauter:hover { color: var(--encre); }
 .tour-pied { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
 .tour-points { display: flex; gap: 5px; flex-wrap: wrap; }
 .tour-boutons { display: flex; align-items: center; gap: 6px; }
@@ -99,6 +101,13 @@
   background: var(--fond); font: inherit; font-size: 17px; color: var(--encre); text-align: center;
 }
 .onb-champ:focus-visible { outline: none; border-color: var(--planete); }
+
+/* Étape libre (formulaire) : un bandeau compact en haut, l'écran reste entièrement libre. */
+.tour-bulle-libre { top: 8px; padding: 10px 12px; }
+.tour-libre-ligne { display: flex; align-items: flex-start; gap: 10px; }
+.tour-libre-ligne p { margin: 0; font-size: 13px; line-height: 1.35; }
+.tour-libre-ligne strong { color: var(--encre); }
+.tour-libre-liens { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; font-size: 12px; color: var(--texte-2); }
 
 @media (min-width: 1024px) {
   .tour-bulle { left: 50%; right: auto; width: 420px; transform: translateX(-50%); }

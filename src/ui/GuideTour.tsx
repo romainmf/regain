@@ -1,10 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { lieuDe } from '../island/ac/lieux'
 import { useJeu } from '../data/jeu'
 import { getMeta } from '../data/db'
 import { BrinAvatar } from './BrinAvatar'
 import { actionsIle, useEtatIle } from './visite/pilote'
-import { etapesVisibles, type Contexte } from './visite/etapes'
+import { etapesVisibles, type Contexte, type Outils } from './visite/etapes'
 import './intro.css'
 
 interface Rect { left: number; top: number; width: number; height: number }
@@ -17,17 +19,28 @@ const MARGE = 8
  * fait à notre place. Le voile laisse la cible touchable.
  */
 export function GuideTour() {
-  const { finirTour, aValider } = useJeu()
+  const { finirTour, aValider, agents } = useJeu()
+  const location = useLocation()
+  const navigate = useNavigate()
   const etat = useEtatIle()
   const prenom = useLiveQuery(() => getMeta<string>('prenom', ''), [], '')
 
   const [id, setId] = useState<string>('brin')
   const [repere, setRepere] = useState(aValider.length)
+  const [repereAgents, setRepereAgents] = useState(agents.length)
   const [rect, setRect] = useState<Rect | null>(null)
   const [cadre, setCadre] = useState({ w: 0, h: 0 })
+  const bulleRef = useRef<HTMLElement>(null)
+  const [hauteurBulle, setHauteurBulle] = useState(210)
   const minuteur = useRef<number | null>(null)
 
-  const contexte: Contexte = { etat, aValider: aValider.length, aValiderAuDepart: repere, prenom: prenom ?? '' }
+  const dernierAgent = agents.length > repereAgents ? [...agents].sort((a, b) => b.createdAt - a.createdAt)[0] : null
+  const contexte: Contexte = {
+    etat, aValider: aValider.length, aValiderAuDepart: repere,
+    route: location.pathname, nbAgents: agents.length, nbAgentsAuDepart: repereAgents,
+    nouvelAgent: dernierAgent ? { nom: dernierAgent.nom, lieu: lieuDe(dernierAgent.domaine) } : null,
+    prenom: prenom ?? '',
+  }
   const etapes = etapesVisibles(contexte, id)
   const i = Math.max(0, etapes.findIndex((e) => e.id === id))
   const etape = etapes[i]
@@ -39,6 +52,8 @@ export function GuideTour() {
     const prochaine = etapes[i + 1]
     setId(prochaine.id)
     setRepere(aValider.length)
+    // Le repère d'agents se prend en entrant dans le formulaire et se garde jusqu'au retour, pour nommer le nouveau venu.
+    if (prochaine.id !== 'retour') setRepereAgents(agents.length)
   }
 
   // Le geste est fait : on laisse l'animation se poser, puis on avance.
@@ -68,6 +83,8 @@ export function GuideTour() {
     const conteneur = document.querySelector('.telephone') ?? document.body
     const cr = conteneur.getBoundingClientRect()
     setCadre({ w: cr.width, h: cr.height })
+    const hb = bulleRef.current?.offsetHeight
+    if (hb && Math.abs(hb - hauteurBulle) > 1) setHauteurBulle(hb)
     const sel = typeof etape.cible === 'function' ? etape.cible(contexte) : etape.cible
     const cible = sel
       ? [...document.querySelectorAll(sel)].find((el) => {
@@ -94,7 +111,7 @@ export function GuideTour() {
       window.removeEventListener('scroll', mesurer, true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [etape.id, etat.lieuConseille])
+  }, [etape.id, etat.lieuConseille, location.pathname])
 
   const trou = rect
     ? {
@@ -105,18 +122,18 @@ export function GuideTour() {
   const interactif = !!etape.accomplie && !faite
 
   // La bulle sous la cible si la place le permet, sinon au-dessus ; au milieu sans cible.
-  const hauteurBulle = 210
   const enBas = !trou || trou.top + trou.height + hauteurBulle + 12 < cadre.h
   const top = trou
     ? (enBas ? trou.top + trou.height + 12 : Math.max(12, trou.top - hauteurBulle - 12))
     : Math.max(12, cadre.h / 2 - hauteurBulle / 2)
 
   const aide = etape.aide
-  const actions = actionsIle()
+  // Les gestes de l'île se lisent au moment du clic : l'écran Mon île peut s'être monté après nous.
+  const outils = (): Outils => ({ ile: actionsIle(), naviguer: (vers) => navigate(vers), c: contexte })
 
   return (
     <div className="tour" data-etape={etape.id}>
-      {trou ? (
+      {etape.libre ? null : trou ? (
         <>
           {/* Quatre pans de voile autour de la cible : elle reste touchable. */}
           <div className="tour-pan" style={{ left: 0, top: 0, right: 0, height: trou.top }} />
@@ -130,13 +147,31 @@ export function GuideTour() {
         <div className="tour-voile-plein" />
       )}
 
-      <section className="tour-bulle" role="dialog" aria-label={etape.titre} style={{ top }}>
+      {etape.libre ? (
+        <section ref={bulleRef} className="tour-bulle tour-bulle-libre" role="dialog" aria-label={etape.titre}>
+          <div className="tour-libre-ligne">
+            <BrinAvatar taille={32} />
+            <p><strong>{etape.titre}.</strong> {etape.texte(contexte)}</p>
+          </div>
+          <div className="tour-libre-liens">
+            <button type="button" className="tour-sauter" onClick={finirTour}>Quitter la visite</button>
+            <span aria-hidden>·</span>
+            <button type="button" className="tour-sauter" onClick={suivant}>Passer cette étape</button>
+          </div>
+        </section>
+      ) : (
+      <section ref={bulleRef} className="tour-bulle" role="dialog" aria-label={etape.titre} style={{ top }}>
         <div className="tour-tete">
           <BrinAvatar taille={40} />
           <h3>{etape.titre}</h3>
         </div>
         <p>{etape.texte(contexte)}</p>
-        {interactif && <p className="tour-attente" aria-live="polite">{faite ? 'C’est fait !' : 'À toi : je t’attends.'}</p>}
+        {interactif && (
+          <p className="tour-attente" aria-live="polite">
+            {faite ? 'C’est fait !' : 'À toi : je t’attends.'}
+            {!faite && !dernier && <button type="button" className="tour-sauter" onClick={suivant}>Sauter cette étape</button>}
+          </p>
+        )}
         <div className="tour-pied">
           <div className="tour-points" aria-hidden>
             {etapes.map((e, k) => (
@@ -145,14 +180,15 @@ export function GuideTour() {
           </div>
           <div className="tour-boutons">
             <button className="tour-passer" onClick={finirTour}>Passer</button>
-            {interactif && aide && actions ? (
-              <button className="tour-aide" onClick={() => aide.faire(actions, contexte)} disabled={etat.occupe}>{aide.libelle}</button>
+            {interactif && aide ? (
+              <button className="tour-aide" onClick={() => aide.faire(outils())} disabled={etat.occupe}>{aide.libelle}</button>
             ) : (
               <button className="tour-suivant" onClick={suivant}>{dernier ? 'C’est parti' : 'Suivant'}</button>
             )}
           </div>
         </div>
       </section>
+      )}
     </div>
   )
 }

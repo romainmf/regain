@@ -7,14 +7,14 @@ const surIle: EtatIle = {
   tiroirOuvert: false, occupe: false, large: false,
 }
 const ctx = (etat: Partial<EtatIle> = {}, reste: Partial<Contexte> = {}): Contexte => ({
-  etat: { ...surIle, ...etat }, aValider: 3, aValiderAuDepart: 3, prenom: '', ...reste,
+  etat: { ...surIle, ...etat }, aValider: 3, aValiderAuDepart: 3, route: '/', nbAgents: 3, nbAgentsAuDepart: 3, nouvelAgent: null, prenom: '', ...reste,
 })
 
 describe('la visite guidée', () => {
-  it('commence par Brin et finit par l’équipe, sans jamais être vide', () => {
+  it('commence par Brin et finit par le retour sur l’île, sans jamais être vide', () => {
     const e = etapesVisibles(ctx())
     expect(e[0].id).toBe('brin')
-    expect(e[e.length - 1].id).toBe('equipe')
+    expect(e[e.length - 1].id).toBe('retour')
     expect(e.length).toBeGreaterThan(4)
   })
 
@@ -64,6 +64,23 @@ describe('la visite guidée', () => {
     const apres = ctx({ vue: 'interieur', lieu: 'spa', agentOuvert: 'a1', attenteAgentOuvert: 0 }, { aValider: 2 })
     expect(etapesVisibles(apres).map((e) => e.id)).not.toContain('valider')
     expect(etapesVisibles(apres, 'valider').map((e) => e.id)).toContain('valider')
+  })
+
+  it('emmène créer un agent : l’équipe, le bouton, le formulaire, puis le retour', () => {
+    const equipe = ETAPES.find((e) => e.id === 'equipe')!
+    expect(equipe.accomplie!(ctx())).toBe(false)
+    expect(equipe.accomplie!(ctx({}, { route: '/equipe' }))).toBe(true)
+    const creer = ETAPES.find((e) => e.id === 'creer')!
+    expect(creer.si!(ctx({}, { route: '/equipe' }))).toBe(true)
+    expect(creer.si!(ctx({}, { route: '/creer' }))).toBe(false)
+    expect(creer.accomplie!(ctx({}, { route: '/creer' }))).toBe(true)
+    const formulaire = ETAPES.find((e) => e.id === 'formulaire')!
+    expect(formulaire.libre).toBe(true)
+    expect(formulaire.accomplie!(ctx({}, { route: '/creer' }))).toBe(false)
+    expect(formulaire.accomplie!(ctx({}, { route: '/', nbAgents: 4 }))).toBe(true)
+    const retour = ETAPES.find((e) => e.id === 'retour')!
+    expect(retour.texte(ctx({}, { nouvelAgent: { nom: 'Relance', lieu: 'atelier' } }))).toMatch(/Relance s’installe dans L’Atelier/)
+    expect(retour.texte(ctx())).toMatch(/Tes agents t’attendent/)
   })
 
   it('salue par le prénom quand on l’a donné', () => {

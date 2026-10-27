@@ -36,13 +36,15 @@ const REPOS: EtatIle = {
 }
 
 let etat: EtatIle = REPOS
+let publie = false
 let actions: ActionsIle | null = null
 const abonnes = new Set<() => void>()
 
 const pareil = (a: EtatIle, b: EtatIle) => (Object.keys(a) as (keyof EtatIle)[]).every((k) => a[k] === b[k])
 
 export function publierEtat(nouveau: EtatIle) {
-  if (pareil(etat, nouveau)) return
+  if (publie && pareil(etat, nouveau)) return
+  publie = true
   etat = nouveau
   if (import.meta.env.DEV) (window as unknown as { __etatIle?: EtatIle }).__etatIle = etat
   abonnes.forEach((f) => f())
