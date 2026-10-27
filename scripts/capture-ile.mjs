@@ -1,6 +1,6 @@
 import { chromium } from '@playwright/test'
 
-/** Captures de la maquette « Mon île » façon Animal Crossing : l'île, puis l'intérieur de l'Atelier. */
+/** Captures de la maquette « Mon île » façon Animal Crossing : l'île, le jardin en plein air, le tableau de bord. */
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 900, height: 940 }, deviceScaleFactor: 2 })
 await page.goto('http://localhost:5173/maquette-ile', { waitUntil: 'networkidle' })
@@ -9,10 +9,16 @@ const cadre = page.locator('.mi-cadre')
 await cadre.screenshot({ path: 'docs/maquette-ile-ac.png' })
 console.log('capture écrite : docs/maquette-ile-ac.png')
 
-await page.getByRole('button', { name: 'Entrer dans L’Atelier' }).click()
-await page.waitForTimeout(2600)
-await page.getByRole('button', { name: 'Aller voir Factures' }).click()
+await page.getByRole('button', { name: 'Entrer dans Le Jardin' }).first().click()
+await page.waitForTimeout(2800)
+await page.getByRole('button', { name: 'Aller voir Empreinte' }).click()
 await page.waitForTimeout(1400)
-await cadre.screenshot({ path: 'docs/maquette-ile-ac-interieur.png' })
-console.log('capture écrite : docs/maquette-ile-ac-interieur.png')
+await cadre.screenshot({ path: 'docs/maquette-ile-ac-jardin.png' })
+console.log('capture écrite : docs/maquette-ile-ac-jardin.png')
+
+await page.getByRole('button', { name: 'Plus tard' }).click()
+await page.evaluate(() => document.querySelector('.mi-defile')?.scrollTo({ top: 9999 }))
+await page.waitForTimeout(600)
+await cadre.screenshot({ path: 'docs/maquette-ile-ac-tableau.png' })
+console.log('capture écrite : docs/maquette-ile-ac-tableau.png')
 await browser.close()

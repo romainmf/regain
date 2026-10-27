@@ -18,7 +18,7 @@ interface VueInitiale {
   cy: number
 }
 
-export function ZoomPan({ children, initiale }: { children: ReactNode; initiale?: VueInitiale }) {
+export function ZoomPan({ children, initiale, commandes = false }: { children: ReactNode; initiale?: VueInitiale; /** Boutons + et − (ordinateur, accessibilité). */ commandes?: boolean }) {
   const cadre = useRef<HTMLDivElement>(null)
   const [vue, setVue] = useState<Vue>({ s: 1, tx: 0, ty: 0 })
   const initialisee = useRef(false)
@@ -131,6 +131,13 @@ export function ZoomPan({ children, initiale }: { children: ReactNode; initiale?
     }
   }
 
+  // Boutons + et − : zoom autour du centre du cadre.
+  const zoomerCentre = (k: number) => {
+    const el = cadre.current
+    if (!el) return
+    setVue((v) => zoomer(v, k, el.clientWidth / 2, el.clientHeight / 2))
+  }
+
   // Molette (ordinateur) : zoom autour du curseur.
   useEffect(() => {
     const el = cadre.current
@@ -160,6 +167,12 @@ export function ZoomPan({ children, initiale }: { children: ReactNode; initiale?
         <button className="zoompan-recentrer" onClick={recentrer} aria-label="Recentrer l’île">
           ⤢
         </button>
+      )}
+      {commandes && (
+        <div className="zoompan-commandes">
+          <button onClick={() => zoomerCentre(1.4)} aria-label="Zoomer" disabled={vue.s >= MAX - 0.01}>+</button>
+          <button onClick={() => zoomerCentre(1 / 1.4)} aria-label="Dézoomer" disabled={vue.s <= MIN + 0.01}>−</button>
+        </div>
       )}
     </div>
   )

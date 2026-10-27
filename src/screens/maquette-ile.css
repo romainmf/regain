@@ -21,13 +21,21 @@
   border-radius: 40px;
   border: 10px solid #22301F;
   overflow: hidden;
-  background: #7FBFC0;
+  background: var(--fond);
   box-shadow: 0 24px 60px rgba(34, 48, 31, .25);
 }
 
+/* Le téléphone défile : l'île en haut, le tableau de bord dessous. */
+.mi-defile { height: 100%; overflow-y: auto; overscroll-behavior: contain; scroll-behavior: smooth; }
+.mi-ecran { position: relative; height: 64%; min-height: 440px; background: #7FBFC0; }
+
 .mi-scene { position: absolute; inset: 0; }
 .mi-scene svg { display: block; width: 100%; height: 100%; user-select: none; touch-action: manipulation; }
-.mi-interieur { position: absolute; inset: 0; background: #1F2E25; padding: 72px 8px 110px; display: flex; align-items: center; justify-content: center; }
+.mi-scene .zoompan, .mi-scene .zoompan-contenu { height: 100%; border-radius: 0; }
+.mi-scene .zoompan-commandes { bottom: 58px; }
+.mi-scene .zoompan-recentrer { bottom: 14px; }
+.mi-interieur { position: absolute; inset: 0; background: #1F2E25; padding: 60px 8px 120px; display: flex; align-items: center; justify-content: center; }
+.mi-interieur-dehors { background: linear-gradient(#BFE0EE, #E4EFD8 70%, #CFE6C4); }
 .mi-interieur svg { height: auto; max-height: 100%; }
 
 .cible { cursor: pointer; outline: none; }
@@ -46,7 +54,7 @@
 .perso-marche .bras-d { animation: jambe .34s ease-in-out infinite alternate; }
 .perso-yeux { transform-box: fill-box; transform-origin: center; animation: cligne 4.2s infinite; }
 
-/* ——— Maisons ——— */
+/* ——— Lieux ——— */
 .maison { transition: transform .25s ease, opacity .25s ease; }
 .maison-en-main { transform: translateY(-10px); opacity: .75; }
 .cible:hover .maison:not(.maison-en-main) { transform: translateY(-2px); }
@@ -63,6 +71,7 @@
 .enseigne { animation: flux-pop .4s ease; }
 .mi-vagues path { animation: vague 4s ease-in-out infinite; }
 @keyframes vague { 0%, 100% { transform: translateX(0); opacity: .25 } 50% { transform: translateX(8px); opacity: .7 } }
+.mi-nuages { animation: plane 40s ease-in-out infinite alternate; }
 .mi-tuile-posable { cursor: pointer; }
 .mi-tuile-posable:hover { fill: #FBF8F1; }
 .mi-emprises circle { animation: pose-pulse 1.6s ease-in-out infinite; }
@@ -101,21 +110,21 @@
 .mi-bouton-petit { padding: 5px 10px; min-height: 30px; font-size: 12px; box-shadow: none; }
 
 .mi-aide {
-  position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
-  margin: 0; padding: 10px 16px; max-width: 86%;
+  position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+  margin: 0; padding: 10px 16px; max-width: 80%;
   background: var(--soleil-teinte); color: var(--soleil-fonce); border-radius: 999px;
   font-size: 14px; font-weight: 500; text-align: center; box-shadow: var(--ombre);
 }
 
-/* Bulle de dialogue, en bas, comme dans un jeu */
+/* Bulle de dialogue, en bas de la scène, comme dans un jeu */
 .mi-dialogue {
-  position: absolute; left: 14px; right: 14px; bottom: 22px;
+  position: absolute; left: 14px; right: 14px; bottom: 16px;
   background: rgba(251, 248, 241, .97); border: 2px solid #E2DACA; border-radius: 22px;
   padding: 22px 18px 14px; box-shadow: 0 10px 30px rgba(34, 48, 31, .2);
   animation: dialogue-pop .25s ease;
 }
 @keyframes dialogue-pop { from { opacity: 0; transform: translateY(10px) } }
-.mi-dialogue p { margin: 0 0 12px; font-size: 15.5px; line-height: 1.45; }
+.mi-dialogue p { margin: 0 0 12px; font-size: 15px; line-height: 1.45; }
 .mi-nom {
   position: absolute; top: -14px; left: 16px;
   color: #FBF8F1; font-weight: 700; font-size: 13px; padding: 5px 12px; border-radius: 999px;
@@ -128,10 +137,10 @@
 .mi-liste li > span:nth-child(2) { flex: 1; }
 .mi-plus { color: var(--texte-2); font-size: 13px; }
 
-/* Iris : l'écran se ferme sur le personnage, puis s'ouvre dans la maison */
-.mi-iris { position: absolute; inset: 0; overflow: hidden; pointer-events: auto; }
+/* Iris : l'écran se ferme sur le personnage, puis s'ouvre dans le lieu */
+.mi-iris { position: absolute; inset: 0; overflow: hidden; pointer-events: auto; z-index: 5; }
 .mi-iris-trou {
-  position: absolute; left: 50%; top: 56%; width: 1800px; height: 1800px;
+  position: absolute; left: 50%; top: 36%; width: 1800px; height: 1800px;
   transform: translate(-50%, -50%); border-radius: 50%;
   box-shadow: 0 0 0 3000px #1F2E25;
 }
@@ -139,6 +148,64 @@
 .mi-iris-ouvre .mi-iris-trou { animation: iris-ouvre .52s ease-out forwards; }
 @keyframes iris-ferme { from { width: 1800px; height: 1800px } to { width: 0; height: 0 } }
 @keyframes iris-ouvre { from { width: 0; height: 0 } to { width: 1800px; height: 1800px } }
+
+/* ——— Tableau de bord, sous l'île ——— */
+.mi-tableau {
+  padding: 14px 14px 36px;
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--fond);
+  border-top: 1px solid var(--ligne);
+}
+.mi-tableau-chiffres { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mi-chiffre {
+  background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m);
+  padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.mi-chiffre strong { font-family: var(--titre); font-size: 20px; font-weight: 600; line-height: 1; }
+.mi-chiffre span { font-size: 11px; color: var(--texte-2); text-align: center; }
+.mi-carte {
+  background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m);
+  padding: 14px; display: flex; flex-direction: column; gap: 10px;
+}
+.mi-carte-ligne { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.mi-carte h2 { font-size: 18px; }
+.mi-carte-ligne > span { font-size: 12px; color: var(--texte-2); }
+.mi-vide { margin: 0; font-size: 13px; color: var(--texte-2); }
+
+.mi-propositions { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mi-propositions li {
+  display: flex; align-items: center; gap: 10px;
+  border-left: 4px solid var(--ligne); background: var(--fond); border-radius: var(--r-s);
+  padding: 8px 10px;
+}
+.mi-prop-txt { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.mi-prop-agent { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+.mi-prop-txt strong { font-size: 14px; font-weight: 500; }
+.mi-prop-actions { display: flex; flex-direction: column; gap: 4px; }
+.mi-prop-actions .mi-bouton { white-space: nowrap; }
+
+.mi-elan { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.mi-elan li { display: grid; grid-template-columns: 84px 1fr 22px; align-items: center; gap: 8px; font-size: 13px; }
+.mi-elan-nom { font-weight: 700; }
+.mi-elan-piste { height: 8px; border-radius: 4px; background: var(--fond); overflow: hidden; display: block; }
+.mi-elan-barre { display: block; height: 100%; border-radius: 4px; }
+.mi-elan-val { text-align: right; color: var(--texte-2); font-variant-numeric: tabular-nums; }
+
+.mi-equipe-lieu { display: flex; flex-direction: column; gap: 6px; }
+.mi-equipe-titre {
+  display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  border: 0; background: transparent; text-align: left; cursor: pointer; font-size: 14px;
+}
+.mi-equipe-titre > span:last-child { font-size: 12px; color: var(--texte-2); margin-left: auto; }
+.mi-puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.mi-puce {
+  border: 1px solid var(--ligne); background: var(--fond); color: var(--encre);
+  border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 500; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.mi-puce:disabled { opacity: .6; cursor: default; }
+.mi-puce-attente { background: var(--soleil-teinte); border-color: transparent; color: var(--soleil-fonce); font-weight: 700; }
+.mi-puce-point { width: 7px; height: 7px; border-radius: 50%; background: var(--soleil); }
 
 /* ——— Notes à côté du téléphone ——— */
 .mi-notes { max-width: 380px; padding-top: 8px; font-size: 15px; line-height: 1.5; }
@@ -158,7 +225,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .perso-corps, .jambe, .bras, .perso-yeux, .fumee circle, .vapeur path, .mi-vagues path, .chat, .mi-emprises circle, .enseigne, .mi-dialogue { animation: none !important; }
+  .perso-corps, .jambe, .bras, .perso-yeux, .fumee circle, .vapeur path, .mi-vagues path, .mi-nuages, .chat, .mi-emprises circle, .enseigne, .mi-dialogue { animation: none !important; }
   .porte, .maison { transition: none; }
   .mi-iris-trou { animation-duration: .01s !important; }
+  .mi-defile { scroll-behavior: auto; }
 }

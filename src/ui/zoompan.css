@@ -11,6 +11,16 @@
   transform-origin: 0 0;
   will-change: transform;
 }
+.zoompan-commandes {
+  position: absolute;
+  right: 10px;
+  bottom: 54px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.zoompan-commandes button:disabled { opacity: .45; cursor: default; }
+.zoompan-commandes button,
 .zoompan-recentrer {
   position: absolute;
   right: 10px;
@@ -26,3 +36,4 @@
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(34, 48, 31, 0.15);
 }
+.zoompan-commandes button { position: static; font-size: 20px; font-weight: 700; }
