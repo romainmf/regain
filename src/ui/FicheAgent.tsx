@@ -17,7 +17,7 @@ import './fiche.css'
 
 /** Fiche détaillée et paramétrable d'un agent (ouverte depuis l'île ou l'équipe). */
 export function FicheAgent() {
-  const { ficheId, agents, fermerFiche, definirAutonomie, basculerActif, definirMissions, demarrerDeplacement, nbParAgentSemaine } = useJeu()
+  const { ficheId, agents, fermerFiche, definirAutonomie, basculerActif, definirMissions, demanderVisite, nbParAgentSemaine } = useJeu()
   const navigate = useNavigate()
   const agent = ficheId ? agents.find((a) => a.id === ficheId) : undefined
   const t = agent?.templateId ? getTemplate(agent.templateId) : undefined
@@ -47,11 +47,11 @@ export function FicheAgent() {
           style={{ flex: 1 }}
           onClick={() => {
             fermerFiche()
-            demarrerDeplacement(agent.id)
+            demanderVisite(agent.id)
             navigate('/')
           }}
         >
-          Déplacer le poste
+          Aller le voir sur l’île
         </Bouton>
       }
     >

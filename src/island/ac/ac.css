@@ -1,0 +1,65 @@
+/* Mon île (façon jeu) : le dessin de l'île, des lieux, du personnage et des intérieurs. */
+
+.ile, .interieur { display: block; width: 100%; height: 100%; user-select: none; touch-action: manipulation; }
+.interieur { height: auto; max-height: 100%; }
+
+.cible { cursor: pointer; outline: none; }
+.cible:focus-visible { filter: drop-shadow(0 0 3px #E7B04A); }
+
+/* ——— Personnage ——— */
+.perso-corps { transform-box: fill-box; transform-origin: 50% 100%; }
+.perso-marche .perso-corps { animation: perso-bob .34s ease-in-out infinite; }
+@keyframes perso-bob { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-2px) } }
+.jambe { transform-box: fill-box; transform-origin: 50% 0; }
+.perso-marche .jambe-g { animation: jambe .34s ease-in-out infinite alternate; }
+.perso-marche .jambe-d { animation: jambe .34s ease-in-out infinite alternate-reverse; }
+@keyframes jambe { from { transform: rotate(-22deg) } to { transform: rotate(22deg) } }
+.bras { transform-box: fill-box; transform-origin: 50% 0; }
+.perso-marche .bras-g { animation: jambe .34s ease-in-out infinite alternate-reverse; }
+.perso-marche .bras-d { animation: jambe .34s ease-in-out infinite alternate; }
+.perso-yeux { transform-box: fill-box; transform-origin: center; animation: cligne 4.2s infinite; }
+
+/* ——— Lieux ——— */
+.maison { transition: transform .25s ease, opacity .25s ease, filter .4s ease; }
+.maison-en-main { transform: translateY(-10px); opacity: .75; }
+.maison-repos { filter: saturate(.45); }
+.cible:hover .maison:not(.maison-en-main) { transform: translateY(-2px); }
+.porte { transform-box: fill-box; transform-origin: 0% 50%; transition: transform .28s ease-in; }
+.porte-ouverte { transform: scaleX(.12); }
+.fumee circle { animation: fumee 3.2s ease-out infinite; }
+.fumee circle:nth-child(2) { animation-delay: 1s; }
+.fumee circle:nth-child(3) { animation-delay: 2s; }
+@keyframes fumee { 0% { transform: translate(0, 0); opacity: .9 } 100% { transform: translate(4px, -14px); opacity: 0 } }
+.vapeur path { animation: vapeur 2.6s ease-in-out infinite; }
+.vapeur path:nth-child(2) { animation-delay: .8s; }
+.vapeur path:nth-child(3) { animation-delay: 1.6s; }
+@keyframes vapeur { 0% { transform: translateY(0); opacity: .9 } 100% { transform: translateY(-8px); opacity: 0 } }
+.enseigne { animation: flux-pop .4s ease; }
+.ac-vagues path { animation: vague 4s ease-in-out infinite; }
+@keyframes vague { 0%, 100% { transform: translateX(0); opacity: .25 } 50% { transform: translateX(8px); opacity: .7 } }
+.ac-nuages { animation: plane 40s ease-in-out infinite alternate; }
+.ac-tuile-posable { cursor: pointer; }
+.ac-tuile-posable:hover { fill: #FBF8F1; }
+.ac-emprises circle { animation: pose-pulse 1.6s ease-in-out infinite; }
+.chat { animation: ronron 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes ronron { 0%, 100% { transform: scale(1) } 50% { transform: scale(1.04) } }
+.paillasson { cursor: pointer; }
+.paillasson:hover polygon { fill: #D9B27C; }
+
+/* Signes de vie : fenêtres qui luisent, drapeau de la boîte aux lettres */
+.fenetre-lueur { animation: lueur-fenetre 2.6s ease-in-out infinite; }
+@keyframes lueur-fenetre { 0%, 100% { opacity: .5 } 50% { opacity: 1 } }
+.drapeau { transform-box: fill-box; transform-origin: 50% 100%; transform: rotate(90deg); transition: transform .4s ease; }
+.drapeau-leve { transform: rotate(0); }
+
+/* Brin salue : il se balance plus vite ; sa flèche dorée court vers le lieu conseillé */
+.brin-salue .coeur-couronne { animation-duration: .8s; }
+.brin-salue .coeur-halo { animation-duration: .8s; }
+.brin-bulle { transform-box: fill-box; }
+.brin-pointe { animation: flux-pop .4s ease; }
+.brin-bulle.cible:hover rect { stroke: #E7B04A; }
+
+@media (prefers-reduced-motion: reduce) {
+  .perso-corps, .jambe, .bras, .perso-yeux, .fumee circle, .vapeur path, .ac-vagues path, .ac-nuages, .chat, .ac-emprises circle, .enseigne, .fenetre-lueur, .brin-pointe { animation: none !important; }
+  .porte, .maison, .drapeau { transition: none; }
+}

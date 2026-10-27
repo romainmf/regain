@@ -35,7 +35,7 @@ export function EnTete({ graines, meteo, onSaisie, onBrin, onReglages }: Props) 
       <div className="entete-ligne">
         <div className="entete-marque">
           <h1 className="entete-titre">Regain</h1>
-          <p className="entete-sous">Mon lieu · Appartement-atelier</p>
+          <p className="entete-sous">Mon île · Atelier, Spa, Jardin</p>
         </div>
         <div className="entete-droite">
           <span className={`pastille pastille-saison pastille-${meteo}`} aria-label={`Saison : ${SAISON[meteo]}`}>

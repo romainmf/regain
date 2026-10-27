@@ -8,12 +8,13 @@ import { EXPANSION } from '../domain/boutique'
 import { tuilesDeDepart } from '../island/iso'
 import type { PlacementVue } from '../island/Island'
 import { MURS_DEFAUT, SOLS_DEFAUT, type StyleMur, type StyleSol } from '../island/LieuxZones'
+import { POSITIONS_DEPART, type Ancre, type LieuId } from '../island/ac/lieux'
 import type { Proposition, Saisie, SaisieData, SaisieKind } from '../domain/propositions'
 import type { Chaine } from '../domain/chains'
 import { etatEconomie, type EtatEconomie } from './selectors'
 import * as actions from './actions'
 import { amorcerSiNecessaire } from './seed'
-import { db, getMeta, nouvelId, type AgentDB, type GraineDB } from './db'
+import { db, getMeta, nouvelId, setMeta, type AgentDB, type GraineDB } from './db'
 
 export interface DerniereChaine {
   chaines: Chaine[]
@@ -106,6 +107,14 @@ interface JeuCtx {
   stylesPossedes: string[]
   choisirMur: (lieu: Domaine, style: StyleMur) => Promise<boolean>
   choisirSol: (lieu: Domaine, style: StyleSol) => Promise<boolean>
+  // ——— Mon île : où sont les lieux, et qui aller voir ———
+  /** Ancre (tuile haut-gauche) de chaque lieu sur l'île. */
+  positionsLieux: Record<LieuId, Ancre>
+  deplacerLieu: (id: LieuId, ancre: Ancre) => Promise<void>
+  /** Un agent qu'il faut aller voir en arrivant sur l'île (après un recrutement, depuis sa fiche). */
+  visiteDemandee: string | null
+  demanderVisite: (agentId: string) => void
+  effacerVisite: () => void
 }
 
 const Ctx = createContext<JeuCtx | null>(null)
@@ -192,6 +201,14 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
   const murs = useLiveQuery(() => getMeta<Record<Domaine, StyleMur>>('murs', MURS_DEFAUT), [], MURS_DEFAUT)
   const sols = useLiveQuery(() => getMeta<Record<Domaine, StyleSol>>('sols', SOLS_DEFAUT), [], SOLS_DEFAUT)
   const stylesPossedes = useLiveQuery(() => getMeta<string[]>('styles', []), [], [] as string[])
+  const positionsLieux = useLiveQuery(() => getMeta<Record<LieuId, Ancre>>('lieux', POSITIONS_DEPART), [], POSITIONS_DEPART)
+  const deplacerLieu = useCallback(async (id: LieuId, ancre: Ancre) => {
+    const courant = await getMeta<Record<LieuId, Ancre>>('lieux', POSITIONS_DEPART)
+    await setMeta('lieux', { ...courant, [id]: ancre })
+  }, [])
+  const [visiteDemandee, setVisiteDemandee] = useState<string | null>(null)
+  const demanderVisite = useCallback((agentId: string) => setVisiteDemandee(agentId), [])
+  const effacerVisite = useCallback(() => setVisiteDemandee(null), [])
 
   const templatesRecrutes = useMemo(
     () => new Set(agents.map((a) => a.templateId).filter((x): x is string => !!x)),
@@ -257,14 +274,15 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
       validations: 0,
       createdAt: Date.now(),
     })
-    setPoseEnCours({ mode: 'pose', kind: 'batiment', agentId: id, domaine: t.domaine })
+    // L'agent rejoint le lieu de son domaine ; en arrivant sur l'île, on va le voir.
+    setVisiteDemandee(id)
     return id
   }, [])
 
   const creerAgent = useCallback(async (a: Omit<AgentDB, 'id' | 'createdAt'>) => {
     const id = nouvelId(a.templateId ?? 'perso')
     await db.agents.add({ ...a, id, createdAt: Date.now() })
-    setPoseEnCours({ mode: 'pose', kind: 'batiment', agentId: id, domaine: a.domaine })
+    setVisiteDemandee(id)
     return id
   }, [])
 
@@ -360,6 +378,11 @@ export function JeuProvider({ children }: { children: React.ReactNode }) {
     stylesPossedes,
     choisirMur: actions.choisirMur,
     choisirSol: actions.choisirSol,
+    positionsLieux,
+    deplacerLieu,
+    visiteDemandee,
+    demanderVisite,
+    effacerVisite,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

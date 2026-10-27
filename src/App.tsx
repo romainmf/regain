@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Agents } from './screens/Agents'
 import { CreerAgent } from './screens/CreerAgent'
 import { Galerie } from './screens/Galerie'
-import { MonLieu } from './screens/MonLieu'
+import { MonIle } from './screens/MonIle'
 import { Aujourdhui } from './screens/Aujourdhui'
 import { Construire } from './screens/Construire'
 import { BottomNav } from './ui/BottomNav'
@@ -31,7 +31,7 @@ export function App() {
         <div className="telephone">
           <main className="app">
             <Routes>
-              <Route path="/" element={<MonLieu />} />
+              <Route path="/" element={<MonIle />} />
               <Route path="/aujourdhui" element={<Aujourdhui />} />
               <Route path="/equipe" element={<Agents />} />
               <Route path="/construire" element={<Construire />} />

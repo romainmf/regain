@@ -4,14 +4,11 @@ import './design/tokens.css'
 import './design/app.css'
 import { App } from './App'
 import { Maquette } from './screens/Maquette'
-import { MaquetteIle } from './screens/MaquetteIle'
 
-const chemin = window.location.pathname
-const maquette = import.meta.env.DEV && chemin === '/maquette'
-const maquetteIle = import.meta.env.DEV && chemin === '/maquette-ile'
+const maquette = import.meta.env.DEV && window.location.pathname === '/maquette'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {maquetteIle ? <MaquetteIle /> : maquette ? <Maquette /> : <App />}
+    {maquette ? <Maquette /> : <App />}
   </StrictMode>,
 )

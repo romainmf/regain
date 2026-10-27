@@ -29,7 +29,7 @@ export function suiteDe(type: string): string | null {
 
 interface Props {
   p: Proposition
-  /** Carte compacte (aperçu sur Mon lieu). */
+  /** Carte compacte (aperçu sur Mon île). */
   compacte?: boolean
   onValide?: (gain: number, chaines: number) => void
 }

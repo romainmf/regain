@@ -9,7 +9,7 @@ export function BottomNav() {
     <nav className="nav-bas" aria-label="Navigation principale">
       <NavLink to="/" end className="nav-onglet nav-lieu">
         <IconeLieu />
-        <span>Mon lieu</span>
+        <span>Mon île</span>
       </NavLink>
       <NavLink to="/aujourdhui" className="nav-onglet nav-aujourdhui">
         <span className="nav-icone">

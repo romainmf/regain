@@ -65,12 +65,12 @@ export function Regenere() {
 /** L'équipe en bref : chaque agent, sa pièce, et s'il a quelque chose à faire valider. */
 export function EquipeBref() {
   const { agents, agentsEnAttente, ouvrirFiche } = useJeu()
-  const lieu: Record<Domaine, string> = { boite: 'Le Bureau', peau: 'Le Coin repos', planete: 'La Serre' }
+  const lieu: Record<Domaine, string> = { boite: 'L’Atelier', peau: 'Le Spa', planete: 'Le Jardin' }
   return (
     <section className="panneau">
       <div className="panneau-ligne">
         <h2 className="panneau-titre">L’équipe</h2>
-        <span className="panneau-compte">{agents.length} agent{agents.length > 1 ? 's' : ''} · Tout le lieu</span>
+        <span className="panneau-compte">{agents.length} agent{agents.length > 1 ? 's' : ''} · Toute l’île</span>
       </div>
       <ul className="equipe-bref">
         {agents.map((a) => {

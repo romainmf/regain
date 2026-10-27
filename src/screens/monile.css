@@ -1,0 +1,126 @@
+/* Mon île : l'île en plein écran sur téléphone, avec le tiroir ; trois colonnes sur ordinateur. */
+
+.mon-ile { display: flex; flex-direction: column; min-height: 100%; }
+.mon-ile .lieu-grille { flex: 1; display: flex; flex-direction: column; padding: 0; }
+.mon-ile .lieu-col-centre { flex: 1; gap: 0; }
+.mon-ile .ile-sous { display: none; }
+.mon-ile .pose-bandeau { margin: 0 12px 8px; }
+
+.ile-cadre {
+  position: relative; flex: 1; min-height: 460px;
+  overflow: hidden; background: #7FBFC0;
+}
+.ile-scene { position: absolute; inset: 0; }
+.ile-scene .zoompan, .ile-scene .zoompan-contenu { height: 100%; border-radius: 0; }
+.ile-scene .zoompan-commandes { bottom: calc(var(--tiroir) + 58px); transition: bottom .3s ease; }
+.ile-scene .zoompan-recentrer { bottom: calc(var(--tiroir) + 14px); transition: bottom .3s ease; }
+.ile-interieur {
+  position: absolute; inset: 0; background: #1F2E25;
+  padding: 60px 8px calc(var(--tiroir) + 24px);
+  display: flex; align-items: center; justify-content: center; transition: padding .3s ease;
+}
+.ile-interieur-dehors { background: linear-gradient(#BFE0EE, #E4EFD8 70%, #CFE6C4); }
+.ile-interieur-dehors.ile-interieur-nuit { background: linear-gradient(#1E2440, #2E3A52 70%, #2A3A2E); }
+
+/* ——— Habillage ——— */
+.ile-hud { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.ile-hud > * { pointer-events: auto; }
+.ile-haut {
+  position: absolute; top: 12px; left: 12px; right: 12px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+}
+.ile-titre {
+  background: rgba(251, 248, 241, .92); border: 1px solid var(--ligne);
+  border-radius: 999px; padding: 6px 14px; line-height: 1.2;
+  display: flex; flex-direction: column; box-shadow: var(--ombre);
+}
+.ile-titre strong { font-family: var(--titre); font-size: 17px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.ile-titre span { font-size: 12px; color: var(--texte-2); }
+.ile-titre-droite { align-items: flex-end; text-align: right; }
+.ile-point { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+
+.ile-bouton {
+  border: 1px solid var(--ligne); background: rgba(251, 248, 241, .95); color: var(--encre);
+  font-weight: 700; font-size: 14px; padding: 9px 16px; min-height: 40px;
+  border-radius: 999px; cursor: pointer; box-shadow: var(--ombre); transition: transform .12s ease;
+}
+.ile-bouton:hover { transform: translateY(-1px); }
+.ile-bouton:disabled { opacity: .5; cursor: default; transform: none; }
+.ile-bouton-plein { background: var(--planete); color: #FBF8F1; border-color: transparent; }
+
+.ile-aide {
+  position: absolute; left: 50%; bottom: calc(var(--tiroir) + 16px); transform: translateX(-50%);
+  margin: 0; padding: 10px 16px; max-width: 84%;
+  background: var(--soleil-teinte); color: var(--soleil-fonce); border-radius: 999px;
+  font-size: 14px; font-weight: 500; text-align: center; box-shadow: var(--ombre);
+}
+.ile-aide a { color: inherit; font-weight: 700; }
+
+/* Bulle de dialogue, en bas de la scène, comme dans un jeu */
+.ile-dialogue {
+  position: absolute; left: 12px; right: 12px; bottom: calc(var(--tiroir) + 14px);
+  max-height: calc(100% - var(--tiroir) - 80px); overflow-y: auto;
+  background: rgba(251, 248, 241, .97); border: 2px solid #E2DACA; border-radius: 22px;
+  padding: 14px 14px 12px; box-shadow: 0 10px 30px rgba(34, 48, 31, .2);
+  animation: dialogue-pop .25s ease; transition: bottom .3s ease;
+}
+@keyframes dialogue-pop { from { opacity: 0; transform: translateY(10px) } }
+.ile-dialogue > p { margin: 0 0 12px; font-size: 15px; line-height: 1.45; }
+.ile-dialogue .val-carte { margin-bottom: 10px; }
+.ile-nom {
+  display: inline-block; margin-bottom: 10px;
+  color: #FBF8F1; font-weight: 700; font-size: 13px; padding: 5px 12px; border-radius: 999px; box-shadow: var(--ombre);
+}
+.ile-nom small { font-weight: 500; opacity: .85; }
+.ile-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.ile-liste { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ile-plus { margin: 0 0 10px; color: var(--texte-2); font-size: 13px; }
+.ile-plus a { color: var(--encre); }
+
+/* Iris : l'écran se ferme sur le personnage, puis s'ouvre dans le lieu */
+.ile-iris { position: absolute; inset: 0; overflow: hidden; pointer-events: auto; z-index: 5; }
+.ile-iris-trou {
+  position: absolute; left: 50%; top: 36%; width: 1800px; height: 1800px;
+  transform: translate(-50%, -50%); border-radius: 50%; box-shadow: 0 0 0 3000px #1F2E25;
+}
+.ile-iris-ferme .ile-iris-trou { animation: iris-ferme .52s ease-in forwards; }
+.ile-iris-ouvre .ile-iris-trou { animation: iris-ouvre .52s ease-out forwards; }
+@keyframes iris-ferme { from { width: 1800px; height: 1800px } to { width: 0; height: 0 } }
+@keyframes iris-ouvre { from { width: 0; height: 0 } to { width: 1800px; height: 1800px } }
+
+/* ——— La bande de chiffres du tiroir ——— */
+.ile-chiffres { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ile-chiffre {
+  background: var(--surface); border: 1px solid var(--ligne); border-radius: var(--r-m);
+  padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.ile-chiffre strong { font-family: var(--titre); font-size: 20px; font-weight: 600; line-height: 1; }
+.ile-chiffre span { font-size: 11px; color: var(--texte-2); text-align: center; }
+.ile-y-aller {
+  display: block; width: 100%; margin-top: 4px; padding: 6px 10px;
+  border: 0; background: transparent; color: var(--texte-2); font-size: 13px; font-weight: 700; text-align: right; cursor: pointer;
+}
+.ile-y-aller:hover { color: var(--encre); }
+.ile-y-aller:disabled { opacity: .5; cursor: default; }
+
+/* ——— Ordinateur : trois colonnes, pas de tiroir ——— */
+@media (min-width: 1024px) {
+  .mon-ile .lieu-grille {
+    display: grid; grid-template-columns: 300px minmax(0, 1fr) 320px;
+    gap: 16px; padding: 16px 24px 24px; align-items: start; flex: initial;
+  }
+  .mon-ile .lieu-col-centre { gap: 12px; }
+  .mon-ile .ile-sous { display: flex; flex-direction: column; gap: 12px; }
+  .ile-cadre { flex: initial; height: 600px; min-height: 0; border-radius: var(--r-m); border: 1px solid var(--ligne); --tiroir: 0px !important; }
+  .ile-cadre .tiroir { display: none; }
+  .mon-ile .pose-bandeau { margin: 0; }
+}
+@media (min-width: 1400px) {
+  .mon-ile .lieu-grille { grid-template-columns: 340px minmax(0, 1fr) 360px; }
+  .ile-cadre { height: 680px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ile-dialogue, .ile-iris-trou { animation: none !important; }
+  .ile-dialogue, .ile-interieur, .ile-scene .zoompan-commandes, .ile-scene .zoompan-recentrer { transition: none; }
+}

@@ -18,7 +18,7 @@ produit une ressource qu'un autre consomme.
 
 ## Ce que fait la bêta
 
-- Une île 2.5D en SVG : trois lieux (Atelier, Spa, Jardin) aux murs et sols personnalisables, un poste de travail par agent où son robot travaille, état vivant.
+- Mon île, façon jeu : une île en SVG isométrique avec trois maisons (Atelier, Spa, Ma maison) et un jardin en plein air que l'on dispose où l'on veut. Un personnage y marche (chemins calculés sur la grille), entre dans les lieux ; dedans, les agents travaillent à leur poste et parlent : on valide ce qu'ils ont préparé sans quitter la scène. Les maisons donnent signe de vie quand un agent attend (fumée, vapeur, fenêtres éclairées, drapeau, robot au portillon), Brin salue au passage et pointe le lieu qui attend. Ambiances, météo, murs et sols de la boutique s'appliquent à l'île et aux intérieurs. Sur téléphone, le tableau de bord est un tiroir sous l'île ; sur ordinateur, trois colonnes.
 - Un catalogue d'agents par domaine, avec filtre par objectif, et le recrutement.
 - La création simplifiée d'un agent, en quatre étapes.
 - La file « À valider » et l'économie de jeu (graines, élan, récolte, repos).

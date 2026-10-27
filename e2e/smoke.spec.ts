@@ -16,8 +16,8 @@ test('premier parcours : accueil, île, validation, graines', async ({ page }) =
   await page.getByRole('link', { name: /Aujourd/ }).click()
   await page.getByRole('button', { name: 'Envoyer la facture' }).first().click()
 
-  // Les graines augmentent (10 × élan 1,0) : retour sur Mon lieu pour le voir.
+  // Les graines augmentent (10 × élan 1,0) : retour sur Mon île pour le voir.
   await expect(page.getByRole('status')).toContainText('+10 graines')
-  await page.getByRole('link', { name: 'Mon lieu' }).click()
+  await page.getByRole('link', { name: 'Mon île' }).click()
   await expect(page.getByLabel(/10 graines/)).toBeVisible({ timeout: 6000 })
 })

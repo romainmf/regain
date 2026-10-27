@@ -1,0 +1,32 @@
+/* Le tiroir du tableau de bord, qui monte par-dessus l'île. Sa hauteur vient de --tiroir, posée par l'écran. */
+.tiroir {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: var(--tiroir, 118px);
+  display: flex; flex-direction: column;
+  background: var(--fond);
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 30px rgba(34, 48, 31, .18);
+  transition: height .3s cubic-bezier(.2, .8, .2, 1);
+  z-index: 3;
+  touch-action: none;
+}
+.tiroir-glisse { transition: none; }
+.tiroir-poignee {
+  flex: 0 0 auto; height: 26px; border: 0; background: transparent; cursor: grab;
+  display: flex; align-items: center; justify-content: center; padding: 0; border-radius: 24px 24px 0 0;
+}
+.tiroir-poignee:active { cursor: grabbing; }
+.tiroir-barre { width: 44px; height: 5px; border-radius: 3px; background: #C9BEA6; }
+.tiroir-poignee:hover .tiroir-barre { background: #A89B80; }
+.tiroir-bande { flex: 0 0 auto; padding: 0 14px; }
+.tiroir-contenu {
+  flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: 12px 14px calc(36px + var(--safe-bas));
+  display: flex; flex-direction: column; gap: 12px;
+  touch-action: pan-y;
+}
+.tiroir-replie .tiroir-contenu { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tiroir { transition: none; }
+}
